@@ -1,11 +1,12 @@
 <!doctype html>
 <!-- Grid-v5.html -->
-<!-- NOT NEW: existing file, changed (every time it opens, the app checks that the FastDL extension is installed and covers everything with the install steps until it is; needs extension/grid-check.js and the new extension/manifest.json) -->
+<!-- NOT NEW: existing file, changed (the Instagram links window is replaced by a "Next link" box in the side panel: it shows the oldest link with a Done button beside it, Done asks for your personal code and removes the link; "All links" opens the whole list; a Mock list lets you try it without the real server) -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Grid Player</title>
 <style>
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; } /* "hidden" always wins, also on buttons (their display: inline-block would otherwise show them) */
   html, body { height: 100%; }
   body { margin: 0; overflow: hidden; font: 11px Tahoma, Verdana, sans-serif; color: #000; background: #0831d9; }
 
@@ -39,7 +40,7 @@
   button:disabled { color: #aca899; border-color: #c9c7ba; background: #f4f3ee; box-shadow: none; cursor: default; }
   kbd { font: 10px Tahoma; color: #555; }
   input[type=number] { width: 46px; border: 1px solid #7f9db9; padding: 2px; font: 11px Tahoma; }
-  input[type=text] { width: 100%; border: 1px solid #7f9db9; padding: 3px; font: 11px Tahoma; }
+  input[type=text], input[type=password] { width: 100%; border: 1px solid #7f9db9; padding: 3px; font: 11px Tahoma; }
   label { white-space: nowrap; }
   .lcd { display: inline-block; min-width: 90px; padding: 2px 6px; background: #fff; border: 1px solid #7f9db9;
          font: bold 18px "Lucida Console", Consolas, monospace; text-align: right; }
@@ -111,12 +112,11 @@
   #audioBtn { width: 100%; margin-top: 6px; font-weight: bold; background: linear-gradient(#e6f7d9, #b6e59c); border-color: #2a7d1e; }
   #exportBtn:disabled, #audioBtn:disabled { background: #f4f3ee; border-color: #c9c7ba; }
   #updBtn { width: 100%; font-weight: bold; }
-  #help, #links, #upd { position: fixed; inset: 0; z-index: 10; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; }
-  #help[hidden], #links[hidden], #upd[hidden] { display: none; }
-  #helpBox, #linksBox, #updBox { width: min(460px, 94vw); max-height: 90vh; display: flex; flex-direction: column; background: #ece9d8; border: 3px solid #0831d9; border-radius: 8px 8px 0 0; }
-  #helpTitle, #linksTitle, #updTitle, #extTitle { display: flex; align-items: center; padding: 4px 6px 4px 10px; color: #fff; font: bold 13px "Trebuchet MS", Tahoma, sans-serif;
+  #help, #upd, #doneDlg { position: fixed; inset: 0; z-index: 10; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; }
+  #helpBox, #updBox, #doneBox { width: min(460px, 94vw); max-height: 90vh; display: flex; flex-direction: column; background: #ece9d8; border: 3px solid #0831d9; border-radius: 8px 8px 0 0; }
+  #helpTitle, #doneTitle, #updTitle, #extTitle { display: flex; align-items: center; padding: 4px 6px 4px 10px; color: #fff; font: bold 13px "Trebuchet MS", Tahoma, sans-serif;
                background: linear-gradient(#0997ff, #0053ee 8%, #0050ee 40%, #06f 88%, #003dd7); }
-  #helpTitle span, #linksTitle span, #updTitle span, #extTitle span { flex: 1; }
+  #helpTitle span, #doneTitle span, #updTitle span, #extTitle span { flex: 1; }
   .tabs { display: flex; gap: 2px; padding: 6px 6px 0; }
   .tab { border-bottom: 0; border-radius: 3px 3px 0 0; }
   .tab.on { background: #fff; font-weight: bold; box-shadow: none; }
@@ -127,14 +127,27 @@
   .blk a { color: #0046d5; font-weight: bold; }
   .arrow { text-align: center; color: #0046d5; line-height: 1.3; font-size: 16px; }
 
-  /* ---------- Instagram links modal (reuses the help modal look) ---------- */
-  #linksBtn { width: 100%; font-weight: bold; background: linear-gradient(#e6f7d9, #b6e59c); border-color: #2a7d1e; }
-  #linksForm, #updForm { display: flex; gap: 6px; padding: 8px 6px 0; }
-  #serverToggle { display: flex; flex: 1; gap: 2px; } /* two buttons = a makeshift toggle; the pressed one has class "on" */
-  #serverToggle button { flex: 1; }
-  #linksMsg, #updMsg { padding: 6px 8px; color: #333; min-height: 14px; }
-  #linksList, #updList { overflow-y: auto; padding: 0 10px; background: #fff; margin: 0 6px 6px; border: 1px solid #919b9c; min-height: 40px; }
-  #linksBox { width: min(620px, 94vw); } /* wider than Help, so the link and the name fit side by side */
+  /* ---------- Update window (reuses the help modal look) ---------- */
+  #updForm { display: flex; gap: 6px; padding: 8px 6px 0; }
+  #updMsg { padding: 6px 8px; color: #333; min-height: 14px; }
+  #updList { overflow-y: auto; padding: 0 10px; background: #fff; margin: 0 6px 6px; border: 1px solid #919b9c; min-height: 40px; }
+
+  /* ---------- Next Instagram link (side panel): the oldest link with Done beside it; "All links" opens the whole list ---------- */
+  #nextItem .lk { border-bottom: 0; padding-top: 2px; }
+  #nextItem .lk > a { flex: 1; font-weight: bold; }
+  #doneBtn { flex: none; font-weight: bold; background: linear-gradient(#e6f7d9, #b6e59c); border-color: #2a7d1e; }
+  #next .ln { flex: 0 1 auto; flex-wrap: wrap; }
+  #linksMsg { color: #555; margin-top: 2px; }
+  #allBtn { flex: 1; text-align: left; }
+  #allBox { margin-top: 4px; }
+  #serverToggle { display: flex; gap: 2px; margin-bottom: 4px; } /* three buttons = a makeshift toggle; the pressed one has class "on" */
+  #serverToggle button { flex: 1; padding: 3px 2px; }
+  #mockReset { width: 100%; margin-bottom: 4px; }
+  #linksList { max-height: 40vh; overflow-y: auto; padding: 0 6px; background: #fff; border: 1px solid #919b9c; }
+  #linksList .lk.now { background: #fff7c8; } /* the one you are working on */
+  #doneForm { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+  #doneWhat { overflow-wrap: anywhere; color: #333; }
+  #doneMsg { color: #b00; min-height: 14px; }
   .lk { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 6px 0; border-bottom: 1px solid #d0d0bf; }
   .lk > a { min-width: 0; overflow-wrap: anywhere; color: #0046d5; }
   .ln { display: flex; align-items: center; gap: 6px; flex: none; padding: 1px 3px 1px 6px; border: 1px solid #b5c7ea; border-radius: 4px; background: #eaf1ff; } /* the name chip */
@@ -186,9 +199,28 @@
       <!-- Controls live around it -->
       <div id="side">
         <button id="helpBtn" title="Workflow help">❓ Help / Workflow</button>
-        <button id="linksBtn" title="Show the Instagram links and names">🔗 Instagram links</button>
         <button id="updBtn" title="When you are online: get the newest version of this app from GitHub">⟳ Update from GitHub</button>
         <button id="kbBtn" data-st="on" title="Turn keyboard shortcuts on/off. Green frame around the video = keys are live."></button>
+
+        <!-- The Instagram link to work on now (the oldest one), Done beside it. Filled by the script below. -->
+        <fieldset id="next">
+          <legend id="nextLegend">Next link</legend>
+          <div id="nextItem"></div>
+          <div id="linksMsg" role="status"></div>
+          <div class="row">
+            <button id="allBtn" title="Show / hide the whole list">▸ All links</button>
+            <button id="fetchBtn" title="Load the links again">↻</button>
+          </div>
+          <div id="allBox" hidden>
+            <div id="serverToggle" role="group" aria-label="Server">
+              <button data-server="main" title="The live site (studiomirrors.netlify.app)">Main</button>
+              <button data-server="dev" title="Your local dev server (npx netlify dev)">Dev</button>
+              <button data-server="mock" title="A pretend list inside this page, to try Done safely">Mock</button>
+            </div>
+            <button id="mockReset" hidden title="Put the pretend list back to its 4 links">↺ Reset mock list</button>
+            <div id="linksList"></div>
+          </div>
+        </fieldset>
 
         <fieldset>
           <legend>Video</legend>
@@ -277,19 +309,16 @@
   </div>
 </div>
 
-<!-- Instagram links: filled by the script below from the chosen server -->
-<div id="links" hidden>
-  <div id="linksBox">
-    <div id="linksTitle"><span>Instagram links</span><div class="wbtn x" id="linksClose" style="cursor:pointer">✕</div></div>
-    <div id="linksForm">
-      <div id="serverToggle" role="group" aria-label="Server">
-        <button id="srvMain" data-server="main" class="on" title="The live site (studiomirrors.netlify.app)">Main</button>
-        <button id="srvDev" data-server="dev" title="Your local dev server (npx netlify dev)">Dev</button>
-      </div>
-      <button id="fetchBtn" title="Load the links again">↻ Refresh</button>
-    </div>
-    <div id="linksMsg" role="status"></div>
-    <div id="linksList"></div>
+<!-- Done: asks for your personal code before the link is removed -->
+<div id="doneDlg" hidden>
+  <div id="doneBox">
+    <div id="doneTitle"><span>Done with this link?</span><div class="wbtn x" id="doneClose" style="cursor:pointer">✕</div></div>
+    <form id="doneForm">
+      <div id="doneWhat"></div>
+      <label>Personal code <input type="password" id="doneCode" autocomplete="off"></label>
+      <div id="doneMsg" role="status"></div>
+      <div class="row"><button type="submit" id="doneOk">✔ Done, remove it</button><button type="button" id="doneCancel">Cancel</button></div>
+    </form>
   </div>
 </div>
 
@@ -529,20 +558,49 @@
   $("help").onclick = (e) => { if (e.target === $("help")) helpToggle(false); };
   addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("help").hidden) helpToggle(false); });
 
-  // ---- Instagram links modal: asks the Video Vault API. This page holds no data: it only displays what the server sends. ----
-  // CHANGE HERE: the two servers the modal can ask. If your dev address is different (for example a Codespaces
-  // address like https://<name>-8888.app.github.dev), put it in "dev".
+  // ---- Instagram links: the side panel shows the NEXT link to work on (the oldest one) with Done beside it. ----
+  // "▸ All links" opens the whole list underneath (same rows as before: link, name, Copy name). This page holds no data:
+  // it only displays what the server sends. Done asks for your personal code, removes the link, and the next one moves up.
+  // CHANGE HERE: where the list comes from. If your dev address is different (for example a Codespaces
+  // address like https://<name>-8888.app.github.dev), put it in "dev". "mock" is a pretend list inside this page.
   const SERVERS = {
     main: "https://studiomirrors.netlify.app/.netlify/functions/links-api",
     dev: "http://localhost:8888/.netlify/functions/links-api",
+    mock: null,
   };
-  let linksServer = "main"; // which one the toggle currently points at
+  let linksServer = "mock"; // CHANGE HERE: used until you pick one with the toggle (set back to "main" once Done works on the real server)
+  const DONE_CODE = "LEGBANEJEAN"; // CHANGE HERE: your personal code for Done (capitals do not matter). Temporary: the real check belongs on the server.
+  let links = [], allOpen = false; // the list, oldest first (links[0] = the one to work on now); whether "All links" is open
 
-  const linksToggle = (on) => {
-    $("links").hidden = !on;
-    console.log(`[links] modal ${on ? "open" : "closed"}`);
-    if (on) fetchLinks(); // opening the window loads the list straight away
+  // ---- Mock server: a pretend list kept in this browser (localStorage), so Done can be tried without touching the real one ----
+  const MOCK_LINKS = [ // out of order on purpose: the app must still show MOCK-FIRST first
+    { id: "m3", link: "https://www.instagram.com/reel/MOCK-THIRD/", name: "Mock Carla", createdAt: "2026-10-03T09:00:00Z" },
+    { id: "m1", link: "https://www.instagram.com/reel/MOCK-FIRST/", name: "Mock Anna", createdAt: "2026-10-01T09:00:00Z" },
+    { id: "m4", link: "https://www.instagram.com/reel/MOCK-FOURTH/", name: "", createdAt: "2026-10-04T09:00:00Z" },
+    { id: "m2", link: "https://www.instagram.com/reel/MOCK-SECOND/", name: "Mock Ben", createdAt: "2026-10-02T09:00:00Z" },
+  ];
+  const mock = {
+    load() { try { return JSON.parse(localStorage.getItem("mockLinks")) ?? MOCK_LINKS; } catch { return MOCK_LINKS; } },
+    save(list) { try { localStorage.setItem("mockLinks", JSON.stringify(list)); } catch {} },
+    wait: () => new Promise((r) => setTimeout(r, 300)), // feels like a real request
   };
+
+  // Real servers: GET -> { links: [{ link, name, ... }] }
+  async function getLinks(server) {
+    if (server === "mock") { await mock.wait(); return mock.load(); }
+    const res = await netFetch(SERVERS[server], { cache: "no-store" });
+    const data = await res.json().catch(() => ({}));
+    console.log(`[links] status ${res.status}`);
+    if (!res.ok) throw new Error(data.error || "Request failed.");
+    return data.links || [];
+  }
+  // Only the mock can remove links for now: the real server's delete is added once the studiomirrors code is here.
+  async function removeLink(server, it) {
+    if (server === "mock") { await mock.wait(); mock.save(mock.load().filter((x) => x.id !== it.id)); return; }
+    throw new Error(`Removing links on the ${server} server is not set up yet. Open "All links" and pick Mock to try Done.`);
+  }
+  // Oldest first: by createdAt when the server sends it, otherwise the server's own order is kept (sort is stable)
+  const byAge = (list) => [...list].sort((a, b) => (Date.parse(a.createdAt) || 0) - (Date.parse(b.createdAt) || 0));
 
   /** Small round-trip button: copies text, shows ✓ (or ✗ if the browser refuses). */
   function copyBtn(text, label) {
@@ -561,62 +619,109 @@
   // CHANGE HERE: every link is shown (and opened) as ONE link = this prefix + the Instagram link.
   const LINK_PREFIX = "https://f-d.app/";
 
-  function renderLinks(list) {
-    const box = $("linksList");
-    box.innerHTML = "";
-    $("linksMsg").textContent = list.length ? `${list.length} link${list.length === 1 ? "" : "s"}` : "No links stored yet.";
-    list.forEach((it) => {
-      const row = document.createElement("div");
-      row.className = "lk";
-      const a = document.createElement("a");
-      const full = it.link.startsWith(LINK_PREFIX) ? it.link : LINK_PREFIX + it.link; // one link: prefix + Instagram link
-      a.href = full; a.target = "_blank"; a.rel = "noopener noreferrer"; a.textContent = full;
-      row.append(a); // the link has no copy button
-      if (it.name) {
-        const who = document.createElement("span");
-        who.className = "who";
-        who.textContent = "Name: " + it.name;
-        row.append(line(who, copyBtn(it.name, "Copy name"))); // after the link; the button says it copies the name
-      }
-      box.appendChild(row);
-    });
-    console.log(`[links] showing ${list.length}`);
+  const fullLink = (it) => (it.link.startsWith(LINK_PREFIX) ? it.link : LINK_PREFIX + it.link); // one link: prefix + Instagram link
+
+  function linkRow(it) {
+    const row = document.createElement("div");
+    row.className = "lk";
+    const a = document.createElement("a");
+    a.href = fullLink(it); a.target = "_blank"; a.rel = "noopener noreferrer"; a.textContent = fullLink(it);
+    row.append(a); // the link has no copy button
+    if (it.name) {
+      const who = document.createElement("span");
+      who.className = "who";
+      who.textContent = "Name: " + it.name;
+      row.append(line(who, copyBtn(it.name, "Copy name"))); // after the link; the button says it copies the name
+    }
+    return row;
+  }
+
+  function renderLinks() {
+    const now = links[0];
+    $("nextLegend").textContent = "Next link" + (linksServer === "mock" ? " (MOCK)" : "");
+    $("nextItem").innerHTML = "";
+    if (now) {
+      const row = linkRow(now);
+      const done = document.createElement("button");
+      done.id = "doneBtn"; done.textContent = "✔ Done"; done.title = "Finished with this link: remove it (asks for your code)";
+      done.onclick = () => doneOpen(now);
+      row.firstChild.after(done); // Done sits right beside the link
+      $("nextItem").append(row);
+    }
+    $("linksMsg").textContent = !links.length ? "No links waiting. 🎉" : links.length === 1 ? "Nothing else waiting." : `${links.length - 1} more waiting`;
+    $("allBtn").textContent = `${allOpen ? "▾" : "▸"} All links (${links.length})`;
+    $("linksList").innerHTML = "";
+    links.forEach((it, i) => { const r = linkRow(it); if (!i) r.classList.add("now"); $("linksList").append(r); });
+    console.log(`[links] showing ${links.length}, next: ${now ? now.link : "none"}`);
   }
 
   async function fetchLinks() {
     const server = linksServer;
     $("fetchBtn").disabled = true;
     $("linksMsg").textContent = "Fetching…";
-    console.log(`[links] requesting from the ${server} server: ${SERVERS[server]}`);
+    console.log(`[links] requesting from the ${server} server: ${SERVERS[server] ?? "(pretend list in this page)"}`);
     try {
-      const res = await netFetch(SERVERS[server], { cache: "no-store" });
-      const data = await res.json().catch(() => ({}));
-      console.log(`[links] status ${res.status}`);
-      if (!res.ok) throw new Error(data.error || "Request failed.");
-      renderLinks(data.links);
+      const list = await getLinks(server);
+      if (server !== linksServer) return; // the toggle was switched meanwhile: that answer is not wanted any more
+      links = byAge(list);
+      renderLinks();
     } catch (err) {
       console.error("[links] FAILED:", err);
-      $("linksList").innerHTML = "";
-      $("linksMsg").textContent = err instanceof TypeError ? `Cannot reach the ${server} server. Is it running?` : err.message;
+      links = []; renderLinks();
+      $("linksMsg").textContent = err instanceof TypeError ? `Cannot reach the ${server} server (offline?). The rest of the app works as usual.` : err.message;
     } finally {
       $("fetchBtn").disabled = false;
     }
   }
 
-  $("linksBtn").onclick = () => linksToggle(true);
-  $("linksClose").onclick = () => linksToggle(false);
   $("fetchBtn").onclick = fetchLinks;
+  $("allBtn").onclick = () => { allOpen = !allOpen; $("allBox").hidden = !allOpen; renderLinks(); };
+  $("mockReset").onclick = () => { try { localStorage.removeItem("mockLinks"); } catch {} console.log("[links] mock list reset"); fetchLinks(); };
   function setServer(s, reload) {
     linksServer = s;
     document.querySelectorAll("#serverToggle button").forEach((b) => b.classList.toggle("on", b.dataset.server === s));
-    try { localStorage.setItem("linksServer", s); } catch {} // remember the last choice
+    $("mockReset").hidden = s !== "mock";
     console.log(`[links] server set to ${s}`);
-    if (reload) fetchLinks();
+    if (reload) { try { localStorage.setItem("linksServer", s); } catch {} fetchLinks(); } // a click: remember it and load
   }
   document.querySelectorAll("#serverToggle button").forEach((b) => (b.onclick = () => setServer(b.dataset.server, true)));
-  try { const s = localStorage.getItem("linksServer"); if (s in SERVERS) setServer(s, false); } catch {}
-  $("links").onclick = (e) => { if (e.target === $("links")) linksToggle(false); };
-  addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("links").hidden) linksToggle(false); });
+  { let s = null; try { s = localStorage.getItem("linksServer"); } catch {} setServer(s in SERVERS ? s : linksServer, false); }
+
+  // ---- Done: asks for your personal code, then removes the link; the next one moves up ----
+  let doneItem = null;
+  function doneOpen(it) {
+    doneItem = it;
+    $("doneWhat").textContent = (it.name ? it.name + " · " : "") + fullLink(it);
+    $("doneCode").value = ""; $("doneMsg").textContent = "";
+    $("doneDlg").hidden = false;
+    $("doneCode").focus();
+    console.log(`[done] asking for the code: ${it.link}`);
+  }
+  function doneClose() { $("doneDlg").hidden = true; doneItem = null; reclaim(); }
+  $("doneForm").onsubmit = async (e) => {
+    e.preventDefault();
+    if ($("doneCode").value.trim().toUpperCase() !== DONE_CODE.toUpperCase()) {
+      console.warn("[done] wrong code");
+      $("doneMsg").textContent = "Wrong code. Try again.";
+      return $("doneCode").select();
+    }
+    $("doneOk").disabled = true; $("doneMsg").textContent = "Removing…";
+    try {
+      await removeLink(linksServer, doneItem);
+      console.log(`[done] removed ${doneItem.link}`);
+      doneClose();
+      fetchLinks(); // the next link moves up
+    } catch (err) {
+      console.error("[done] FAILED:", err);
+      $("doneMsg").textContent = err instanceof TypeError ? "Cannot reach the server (offline?). Nothing was removed." : err.message;
+    } finally {
+      $("doneOk").disabled = false;
+    }
+  };
+  $("doneCancel").onclick = doneClose;
+  $("doneClose").onclick = doneClose;
+  $("doneDlg").onclick = (e) => { if (e.target === $("doneDlg")) doneClose(); };
+  addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("doneDlg").hidden) doneClose(); });
 
   // ---- Internet light: every request this app makes goes through netFetch(), which turns the light green
   //      while it runs (and for at least 1 s after, so a quick request is still visible). Idle = red. ----
@@ -785,7 +890,7 @@
   const updToggle = (on) => {
     $("upd").hidden = !on;
     console.log(`[update] window ${on ? "open" : "closed"}`);
-    if (on) updCheck(false); // opening the window checks straight away (same as the links window)
+    if (on) updCheck(false); // opening the window checks straight away
   };
   $("updBtn").onclick = () => updToggle(true);
   $("updClose").onclick = () => updToggle(false);
@@ -926,12 +1031,12 @@
     h: () => document.body.classList.toggle("hide-side"), // video gets the full width; ResizeObserver refits
   };
   const GRID_ONLY = new Set(["r", "g", "n", "t", "q"]), TRIM_ONLY = new Set(["i", "o", "x", "enter"]);
-  const typing = (e) => e.target.matches("input[type=number], input[type=text], textarea");
+  const typing = (e) => e.target.matches("input[type=number], input[type=text], input[type=password], textarea");
 
   // Capture phase + stopPropagation: the video's own controls and focused buttons/checkboxes
   // never see these keys, so Space can't double-toggle or click whatever happens to be focused.
   addEventListener("keydown", (e) => {
-    if (!kbOn || !$("extGate").hidden || !$("help").hidden || !$("links").hidden || !$("upd").hidden || typing(e) || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (!kbOn || !$("extGate").hidden || !$("help").hidden || !$("doneDlg").hidden || !$("upd").hidden || typing(e) || e.ctrlKey || e.metaKey || e.altKey) return;
     const key = e.key.toLowerCase();
     if (e.repeat && !key.startsWith("arrow")) return; // only the arrows auto-repeat
     const fn = KEYS[key];
@@ -962,7 +1067,7 @@
     console.log(`[keys] ${st}`);
   }
   // Park keyboard focus on the stage (not on the video's own controls) so the keys keep working after clicks
-  const reclaim = () => { if (kbOn) $("stage").focus({ preventScroll: true }); };
+  const reclaim = () => { if (kbOn && $("doneDlg").hidden) $("stage").focus({ preventScroll: true }); }; // not while you type your code
 
   $("kbBtn").onclick = () => { kbOn = !kbOn; updateKb(); reclaim(); };
   addEventListener("focus", updateKb);
@@ -979,4 +1084,5 @@
   drawGrid();
   fit();
   extCheck();
+  fetchLinks(); // every time the app opens: show the next link straight away
 </script>
