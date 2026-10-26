@@ -1,0 +1,172 @@
+/* grid.css: all the styles of Grid Player (loaded by Grid-v5.html) */
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; } /* "hidden" always wins, also on buttons (their display: inline-block would otherwise show them) */
+html, body { height: 100%; }
+body { margin: 0; overflow: hidden; font: 11px Tahoma, Verdana, sans-serif; color: #000; background: #0831d9; }
+
+/* ---------- Window frame (fills the whole screen) ---------- */
+#win { height: 100%; display: flex; flex-direction: column; background: #0831d9; padding: 0 3px 3px; }
+#titlebar { flex: none; display: flex; align-items: center; height: 28px; padding: 0 3px 0 8px; border-radius: 6px 6px 0 0;
+            background: linear-gradient(#0997ff 0, #0053ee 8%, #0050ee 40%, #06f 88%, #06f 93%, #005bff 95%, #003dd7 100%); }
+#title { flex: 1; color: #fff; font: bold 13px "Trebuchet MS", Tahoma, sans-serif; text-shadow: 1px 1px #0f1089;
+         white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wbtn { width: 21px; height: 21px; margin-left: 2px; border: 1px solid #fff; border-radius: 3px; color: #fff;
+        font: bold 11px Tahoma; text-align: center; line-height: 18px;
+        background: radial-gradient(circle at 30% 25%, #6a9cff, #2457e6 70%); }
+.wbtn.x { background: radial-gradient(circle at 30% 25%, #f0987a, #d2401a 70%); }
+/* Internet light (like the iPhone's): red = not using the internet, green = using it right now */
+#net { display: flex; align-items: center; gap: 5px; margin-right: 8px; padding: 1px 8px 1px 5px; border-radius: 10px;
+       background: rgba(0,0,0,.25); color: #fff; font: bold 10px Tahoma, sans-serif; }
+#net i { width: 9px; height: 9px; border-radius: 50%; background: #e8281a; box-shadow: 0 0 0 1px rgba(255,255,255,.7); }
+#net.on i { background: #3fd13f; box-shadow: 0 0 6px #3fd13f, 0 0 0 1px rgba(255,255,255,.7); }
+#client { flex: 1; min-height: 0; display: flex; flex-direction: column; background: #ece9d8; }
+#main { flex: 1; min-height: 0; display: flex; }
+
+/* ---------- XP buttons / fields ---------- */
+button, .btn {
+  font: 11px Tahoma, Verdana, sans-serif; color: #000; padding: 3px 8px; min-height: 23px;
+  border: 1px solid #003c74; border-radius: 3px; cursor: pointer; display: inline-block; vertical-align: middle;
+  background: linear-gradient(#fff, #ecebe5 86%, #d8d0c4);
+}
+button:hover, .btn:hover { box-shadow: inset 0 0 0 2px #fcb83c; }
+button:active, .btn:active { background: #cdcac0; box-shadow: none; }
+button.on { background: #d9d6c8; box-shadow: inset 1px 1px 3px #8d8a7a; }
+button:disabled { color: #aca899; border-color: #c9c7ba; background: #f4f3ee; box-shadow: none; cursor: default; }
+kbd { font: 10px Tahoma; color: #555; }
+input[type=number] { width: 46px; border: 1px solid #7f9db9; padding: 2px; font: 11px Tahoma; }
+input[type=text], input[type=password] { width: 100%; border: 1px solid #7f9db9; padding: 3px; font: 11px Tahoma; }
+label { white-space: nowrap; }
+.lcd { display: inline-block; min-width: 90px; padding: 2px 6px; background: #fff; border: 1px solid #7f9db9;
+       font: bold 18px "Lucida Console", Consolas, monospace; text-align: right; }
+.lcd.sm { min-width: 64px; font-size: 14px; }
+
+/* ---------- Video stage: takes all remaining space ---------- */
+#stage { flex: 1; min-width: 0; min-height: 0; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+#wrap { position: relative; flex: none; width: 640px; height: 360px; } /* resized by fit() */
+video { display: block; width: 100%; height: 100%; }
+#grid { position: absolute; inset: 0; pointer-events: none; container-type: inline-size; display: grid; }
+.cell { position: relative; border: 0 solid; border-right-width: 1px; border-bottom-width: 1px; }
+.cell span { position: absolute; top: 2px; left: 3px; color: #fff; text-shadow: 0 0 3px #000, 0 0 3px #000;
+             font: bold calc(100cqw / var(--n) * 0.26) monospace; }
+
+/* Floating cue strip: sits over the top of the video, half transparent, never blocks clicks */
+#cue { position: absolute; top: 8px; left: 8px; right: 44px; z-index: 5; display: none; flex-wrap: wrap; gap: 4px 8px; align-items: center;
+       padding: 5px 8px; border-radius: 6px; background: rgba(0,0,0,.5); color: #fff; font: bold 13px Tahoma, sans-serif;
+       text-shadow: 0 0 3px #000; pointer-events: none; }
+#cue.on { display: flex; }
+#cue b { display: inline-block; width: 18px; height: 18px; margin-right: 4px; border-radius: 50%; background: #fcb83c; color: #000; text-align: center; line-height: 18px; }
+#cue i { font-style: normal; opacity: .75; }
+#infoBtn { position: absolute; top: 8px; right: 8px; z-index: 6; width: 28px; height: 28px; min-height: 0; padding: 0; border-radius: 50%; font-weight: bold; opacity: .8; }
+
+/* Shortcut focus mode: colored frame around the video shows whether keys are live */
+#stage { position: relative; }
+#stage:focus { outline: none; }
+#stage::after { content: ""; position: absolute; inset: 0; pointer-events: none; border: 3px solid transparent; }
+#stage.kb-on::after { border-color: #3fbf3f; }
+#stage.kb-wait::after { border-color: #f5a623; }
+#kbBtn { width: 100%; font-weight: bold; text-align: left; }
+#kbBtn[data-st=on] { background: #d8f5d0; border-color: #2a7d1e; }
+#kbBtn[data-st=wait] { background: #ffe9b8; border-color: #b8741a; }
+#kbBtn[data-st=off] { color: #555; }
+
+/* ---------- Side panel ---------- */
+#side { flex: none; width: 216px; overflow-y: auto; padding: 6px; border-left: 1px solid #aca899;
+        display: flex; flex-direction: column; gap: 6px; }
+body.hide-side #side { display: none; }
+fieldset { margin: 0; padding: 2px 8px 8px; border: 1px solid #d0d0bf; border-radius: 4px; }
+legend { color: #0046d5; padding: 0 4px; }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-top: 4px; }
+#file { display: none; }
+#trimInfo { font: 11px "Lucida Console", Consolas, monospace; color: #333; }
+
+/* Record: red circle */
+.recWrap { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 48px; }
+#recBtn { width: 38px; height: 38px; min-height: 0; padding: 0; border-radius: 50%; border: 2px solid #fff; color: #fff;
+          font: bold 13px Tahoma; letter-spacing: -2px;
+          background: radial-gradient(circle at 35% 28%, #ff9a8a, #e8281a 55%, #9c0d05);
+          box-shadow: 0 0 0 1px #6b0a04, 0 1px 3px rgba(0,0,0,.5); }
+#recBtn:hover { box-shadow: 0 0 0 1px #6b0a04, 0 0 0 3px #fcb83c; }
+#recBtn:active { background: radial-gradient(circle at 35% 28%, #e8786a, #c71e12 55%, #7c0a04); }
+#recBtn[data-st=recording]::before { content: "❚❚"; }
+#recBtn[data-st=recording] { animation: blink 1s steps(2, start) infinite; }
+#recBtn[data-st=paused] { filter: saturate(.45) brightness(1.05); }
+#recBtn[data-st=paused]::before { content: "●"; font-size: 11px; letter-spacing: 0; }
+@keyframes blink { 50% { filter: brightness(.7); } }
+#recLbl { font-size: 10px; }
+
+/* ---------- Two stages: trim first, then grid ---------- */
+body.trim-mode .grid-only, body.trim-mode #grid { display: none !important; }
+body:not(.trim-mode) .trim-only { display: none !important; }
+#goBtn { font-weight: bold; width: 100%; background: linear-gradient(#e6f7d9, #b6e59c); border-color: #2a7d1e; }
+#goBtn:disabled { background: #f4f3ee; border-color: #c9c7ba; }
+
+/* ---------- Help modal + flow diagram ---------- */
+#helpBtn { width: 100%; font-weight: bold; background: linear-gradient(#fff7c8, #ffe27a); border-color: #b8741a; }
+#exportBtn { width: 100%; margin-top: 6px; font-weight: bold; background: linear-gradient(#e6f7d9, #b6e59c); border-color: #2a7d1e; }
+#audioBtn { width: 100%; margin-top: 6px; font-weight: bold; background: linear-gradient(#e6f7d9, #b6e59c); border-color: #2a7d1e; }
+#exportBtn:disabled, #audioBtn:disabled { background: #f4f3ee; border-color: #c9c7ba; }
+#updBtn { width: 100%; font-weight: bold; }
+#help, #upd, #doneDlg { position: fixed; inset: 0; z-index: 10; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; }
+#helpBox, #updBox, #doneBox { width: min(460px, 94vw); max-height: 90vh; display: flex; flex-direction: column; background: #ece9d8; border: 3px solid #0831d9; border-radius: 8px 8px 0 0; }
+#helpTitle, #doneTitle, #updTitle, #extTitle { display: flex; align-items: center; padding: 4px 6px 4px 10px; color: #fff; font: bold 13px "Trebuchet MS", Tahoma, sans-serif;
+             background: linear-gradient(#0997ff, #0053ee 8%, #0050ee 40%, #06f 88%, #003dd7); }
+#helpTitle span, #doneTitle span, #updTitle span, #extTitle span { flex: 1; }
+.tabs { display: flex; gap: 2px; padding: 6px 6px 0; }
+.tab { border-bottom: 0; border-radius: 3px 3px 0 0; }
+.tab.on { background: #fff; font-weight: bold; box-shadow: none; }
+#flow { overflow-y: auto; padding: 12px; background: #fff; margin: 0 6px 6px; border: 1px solid #919b9c; }
+.blk { padding: 8px 10px; border: 1px solid #003c74; border-radius: 4px; background: #eaf1ff; text-align: center; }
+.blk.app { background: #d8f5d0; border-color: #2a7d1e; }
+.blk small { display: block; color: #555; }
+.blk a { color: #0046d5; font-weight: bold; }
+.arrow { text-align: center; color: #0046d5; line-height: 1.3; font-size: 16px; }
+
+/* ---------- Update window (reuses the help modal look) ---------- */
+#updForm { display: flex; gap: 6px; padding: 8px 6px 0; }
+#updMsg { padding: 6px 8px; color: #333; min-height: 14px; }
+#updList { overflow-y: auto; padding: 0 10px; background: #fff; margin: 0 6px 6px; border: 1px solid #919b9c; min-height: 40px; }
+
+/* ---------- Next Instagram link (side panel): the oldest link with Done beside it; "All links" opens the whole list ---------- */
+#nextItem .lk { border-bottom: 0; padding-top: 2px; }
+#nextItem .lk > a { flex: 1; font-weight: bold; }
+#doneBtn { flex: none; font-weight: bold; background: linear-gradient(#e6f7d9, #b6e59c); border-color: #2a7d1e; }
+#next .ln { flex: 0 1 auto; flex-wrap: wrap; }
+#linksMsg { color: #555; margin-top: 2px; }
+#allBtn { flex: 1; text-align: left; }
+#allBox { margin-top: 4px; }
+#serverToggle { display: flex; gap: 2px; margin-bottom: 4px; } /* three buttons = a makeshift toggle; the pressed one has class "on" */
+#serverToggle button { flex: 1; padding: 3px 2px; }
+#mockReset { width: 100%; margin-bottom: 4px; }
+#linksList { max-height: 40vh; overflow-y: auto; padding: 0 6px; background: #fff; border: 1px solid #919b9c; }
+#linksList .lk.now { background: #fff7c8; } /* the one you are working on */
+#doneForm { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+#doneWhat { overflow-wrap: anywhere; color: #333; }
+#doneMsg { color: #b00; min-height: 14px; }
+.lk { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 6px 0; border-bottom: 1px solid #d0d0bf; }
+.lk > a { min-width: 0; overflow-wrap: anywhere; color: #0046d5; }
+.ln { display: flex; align-items: center; gap: 6px; flex: none; padding: 1px 3px 1px 6px; border: 1px solid #b5c7ea; border-radius: 4px; background: #eaf1ff; } /* the name chip */
+.who { color: #333; font-weight: bold; }
+.ln button { flex: none; padding: 1px 6px; min-height: 22px; }
+
+/* ---------- Extension check: covers the whole app until the extension answers ---------- */
+#extGate { position: fixed; inset: 0; z-index: 20; background: #0831d9; display: flex; align-items: center; justify-content: center; }
+#extGate[hidden] { display: none; }
+#extBox { width: min(500px, 94vw); max-height: 90vh; overflow-y: auto; background: #ece9d8; border: 3px solid #0831d9; border-radius: 8px 8px 0 0;
+          box-shadow: 0 4px 20px rgba(0,0,0,.5); }
+#extBody { padding: 10px 12px; line-height: 1.6; }
+#extBody ol { margin: 6px 0; padding-left: 20px; }
+#extBody code { background: #fff; border: 1px solid #919b9c; padding: 0 3px; font: 11px "Lucida Console", Consolas, monospace; overflow-wrap: anywhere; }
+#extBody button { padding: 1px 6px; min-height: 20px; }
+#extBtns { display: flex; justify-content: flex-end; padding: 0 12px 12px; }
+#extRetry { font-weight: bold; background: linear-gradient(#e6f7d9, #b6e59c); border-color: #2a7d1e; }
+
+/* ---------- Status bar ---------- */
+#status { flex: none; display: flex; padding: 2px; border-top: 1px solid #fff; background: #ece9d8; }
+#status span { flex: 1; padding: 1px 8px; border: 1px solid; border-color: #aca899 #fff #fff #aca899;
+               white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+@media (max-width: 700px) {
+  #main { flex-direction: column; }
+  #side { width: auto; max-height: 38vh; border-left: 0; border-top: 1px solid #aca899; }
+}
