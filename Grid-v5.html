@@ -1,0 +1,746 @@
+<!doctype html>
+<!-- Grid-v5.html -->
+<!-- NOT NEW: existing file, changed (Export audio opens TurboScribe; "Export trim video" now cuts the loaded file between In and Out inside this page, WITHOUT re-encoding, with grid-trim.js that must sit next to this file: no server, no internet, identical quality; mp4 and mov only) -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grid Player</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; overflow: hidden; font: 11px Tahoma, Verdana, sans-serif; color: #000; background: #0831d9; }
+
+  /* ---------- Window frame (fills the whole screen) ---------- */
+  #win { height: 100%; display: flex; flex-direction: column; background: #0831d9; padding: 0 3px 3px; }
+  #titlebar { flex: none; display: flex; align-items: center; height: 28px; padding: 0 3px 0 8px; border-radius: 6px 6px 0 0;
+              background: linear-gradient(#0997ff 0, #0053ee 8%, #0050ee 40%, #06f 88%, #06f 93%, #005bff 95%, #003dd7 100%); }
+  #title { flex: 1; color: #fff; font: bold 13px "Trebuchet MS", Tahoma, sans-serif; text-shadow: 1px 1px #0f1089;
+           white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .wbtn { width: 21px; height: 21px; margin-left: 2px; border: 1px solid #fff; border-radius: 3px; color: #fff;
+          font: bold 11px Tahoma; text-align: center; line-height: 18px;
+          background: radial-gradient(circle at 30% 25%, #6a9cff, #2457e6 70%); }
+  .wbtn.x { background: radial-gradient(circle at 30% 25%, #f0987a, #d2401a 70%); }
+  /* Internet light (like the iPhone's): red = not using the internet, green = using it right now */
+  #net { display: flex; align-items: center; gap: 5px; margin-right: 8px; padding: 1px 8px 1px 5px; border-radius: 10px;
+         background: rgba(0,0,0,.25); color: #fff; font: bold 10px Tahoma, sans-serif; }
+  #net i { width: 9px; height: 9px; border-radius: 50%; background: #e8281a; box-shadow: 0 0 0 1px rgba(255,255,255,.7); }
+  #net.on i { background: #3fd13f; box-shadow: 0 0 6px #3fd13f, 0 0 0 1px rgba(255,255,255,.7); }
+  #client { flex: 1; min-height: 0; display: flex; flex-direction: column; background: #ece9d8; }
+  #main { flex: 1; min-height: 0; display: flex; }
+
+  /* ---------- XP buttons / fields ---------- */
+  button, .btn {
+    font: 11px Tahoma, Verdana, sans-serif; color: #000; padding: 3px 8px; min-height: 23px;
+    border: 1px solid #003c74; border-radius: 3px; cursor: pointer; display: inline-block; vertical-align: middle;
+    background: linear-gradient(#fff, #ecebe5 86%, #d8d0c4);
+  }
+  button:hover, .btn:hover { box-shadow: inset 0 0 0 2px #fcb83c; }
+  button:active, .btn:active { background: #cdcac0; box-shadow: none; }
+  button.on { background: #d9d6c8; box-shadow: inset 1px 1px 3px #8d8a7a; }
+  button:disabled { color: #aca899; border-color: #c9c7ba; background: #f4f3ee; box-shadow: none; cursor: default; }
+  kbd { font: 10px Tahoma; color: #555; }
+  input[type=number] { width: 46px; border: 1px solid #7f9db9; padding: 2px; font: 11px Tahoma; }
+  input[type=text] { width: 100%; border: 1px solid #7f9db9; padding: 3px; font: 11px Tahoma; }
+  label { white-space: nowrap; }
+  .lcd { display: inline-block; min-width: 90px; padding: 2px 6px; background: #fff; border: 1px solid #7f9db9;
+         font: bold 18px "Lucida Console", Consolas, monospace; text-align: right; }
+  .lcd.sm { min-width: 64px; font-size: 14px; }
+
+  /* ---------- Video stage: takes all remaining space ---------- */
+  #stage { flex: 1; min-width: 0; min-height: 0; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  #wrap { position: relative; flex: none; width: 640px; height: 360px; } /* resized by fit() */
+  video { display: block; width: 100%; height: 100%; }
+  #grid { position: absolute; inset: 0; pointer-events: none; container-type: inline-size; display: grid; }
+  .cell { position: relative; border: 0 solid; border-right-width: 1px; border-bottom-width: 1px; }
+  .cell span { position: absolute; top: 2px; left: 3px; color: #fff; text-shadow: 0 0 3px #000, 0 0 3px #000;
+               font: bold calc(100cqw / var(--n) * 0.26) monospace; }
+
+  /* Floating cue strip: sits over the top of the video, half transparent, never blocks clicks */
+  #cue { position: absolute; top: 8px; left: 8px; right: 44px; z-index: 5; display: none; flex-wrap: wrap; gap: 4px 8px; align-items: center;
+         padding: 5px 8px; border-radius: 6px; background: rgba(0,0,0,.5); color: #fff; font: bold 13px Tahoma, sans-serif;
+         text-shadow: 0 0 3px #000; pointer-events: none; }
+  #cue.on { display: flex; }
+  #cue b { display: inline-block; width: 18px; height: 18px; margin-right: 4px; border-radius: 50%; background: #fcb83c; color: #000; text-align: center; line-height: 18px; }
+  #cue i { font-style: normal; opacity: .75; }
+  #infoBtn { position: absolute; top: 8px; right: 8px; z-index: 6; width: 28px; height: 28px; min-height: 0; padding: 0; border-radius: 50%; font-weight: bold; opacity: .8; }
+
+  /* Shortcut focus mode: colored frame around the video shows whether keys are live */
+  #stage { position: relative; }
+  #stage:focus { outline: none; }
+  #stage::after { content: ""; position: absolute; inset: 0; pointer-events: none; border: 3px solid transparent; }
+  #stage.kb-on::after { border-color: #3fbf3f; }
+  #stage.kb-wait::after { border-color: #f5a623; }
+  #kbBtn { width: 100%; font-weight: bold; text-align: left; }
+  #kbBtn[data-st=on] { background: #d8f5d0; border-color: #2a7d1e; }
+  #kbBtn[data-st=wait] { background: #ffe9b8; border-color: #b8741a; }
+  #kbBtn[data-st=off] { color: #555; }
+
+  /* ---------- Side panel ---------- */
+  #side { flex: none; width: 216px; overflow-y: auto; padding: 6px; border-left: 1px solid #aca899;
+          display: flex; flex-direction: column; gap: 6px; }
+  body.hide-side #side { display: none; }
+  fieldset { margin: 0; padding: 2px 8px 8px; border: 1px solid #d0d0bf; border-radius: 4px; }
+  legend { color: #0046d5; padding: 0 4px; }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-top: 4px; }
+  #file { display: none; }
+  #trimInfo { font: 11px "Lucida Console", Consolas, monospace; color: #333; }
+
+  /* Record: red circle */
+  .recWrap { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 48px; }
+  #recBtn { width: 38px; height: 38px; min-height: 0; padding: 0; border-radius: 50%; border: 2px solid #fff; color: #fff;
+            font: bold 13px Tahoma; letter-spacing: -2px;
+            background: radial-gradient(circle at 35% 28%, #ff9a8a, #e8281a 55%, #9c0d05);
+            box-shadow: 0 0 0 1px #6b0a04, 0 1px 3px rgba(0,0,0,.5); }
+  #recBtn:hover { box-shadow: 0 0 0 1px #6b0a04, 0 0 0 3px #fcb83c; }
+  #recBtn:active { background: radial-gradient(circle at 35% 28%, #e8786a, #c71e12 55%, #7c0a04); }
+  #recBtn[data-st=recording]::before { content: "❚❚"; }
+  #recBtn[data-st=recording] { animation: blink 1s steps(2, start) infinite; }
+  #recBtn[data-st=paused] { filter: saturate(.45) brightness(1.05); }
+  #recBtn[data-st=paused]::before { content: "●"; font-size: 11px; letter-spacing: 0; }
+  @keyframes blink { 50% { filter: brightness(.7); } }
+  #recLbl { font-size: 10px; }
+
+  /* ---------- Two stages: trim first, then grid ---------- */
+  body.trim-mode .grid-only, body.trim-mode #grid { display: none !important; }
+  body:not(.trim-mode) .trim-only { display: none !important; }
+  #goBtn { font-weight: bold; width: 100%; background: linear-gradient(#e6f7d9, #b6e59c); border-color: #2a7d1e; }
+  #goBtn:disabled { background: #f4f3ee; border-color: #c9c7ba; }
+
+  /* ---------- Help modal + flow diagram ---------- */
+  #helpBtn { width: 100%; font-weight: bold; background: linear-gradient(#fff7c8, #ffe27a); border-color: #b8741a; }
+  #exportBtn { width: 100%; margin-top: 6px; font-weight: bold; background: linear-gradient(#e6f7d9, #b6e59c); border-color: #2a7d1e; }
+  #audioBtn { width: 100%; margin-top: 6px; font-weight: bold; background: linear-gradient(#e6f7d9, #b6e59c); border-color: #2a7d1e; }
+  #exportBtn:disabled, #audioBtn:disabled { background: #f4f3ee; border-color: #c9c7ba; }
+  #help, #links { position: fixed; inset: 0; z-index: 10; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; }
+  #help[hidden], #links[hidden] { display: none; }
+  #helpBox, #linksBox { width: min(460px, 94vw); max-height: 90vh; display: flex; flex-direction: column; background: #ece9d8; border: 3px solid #0831d9; border-radius: 8px 8px 0 0; }
+  #helpTitle, #linksTitle { display: flex; align-items: center; padding: 4px 6px 4px 10px; color: #fff; font: bold 13px "Trebuchet MS", Tahoma, sans-serif;
+               background: linear-gradient(#0997ff, #0053ee 8%, #0050ee 40%, #06f 88%, #003dd7); }
+  #helpTitle span, #linksTitle span { flex: 1; }
+  .tabs { display: flex; gap: 2px; padding: 6px 6px 0; }
+  .tab { border-bottom: 0; border-radius: 3px 3px 0 0; }
+  .tab.on { background: #fff; font-weight: bold; box-shadow: none; }
+  #flow { overflow-y: auto; padding: 12px; background: #fff; margin: 0 6px 6px; border: 1px solid #919b9c; }
+  .blk { padding: 8px 10px; border: 1px solid #003c74; border-radius: 4px; background: #eaf1ff; text-align: center; }
+  .blk.app { background: #d8f5d0; border-color: #2a7d1e; }
+  .blk small { display: block; color: #555; }
+  .blk a { color: #0046d5; font-weight: bold; }
+  .arrow { text-align: center; color: #0046d5; line-height: 1.3; font-size: 16px; }
+
+  /* ---------- Instagram links modal (reuses the help modal look) ---------- */
+  #linksBtn { width: 100%; font-weight: bold; background: linear-gradient(#e6f7d9, #b6e59c); border-color: #2a7d1e; }
+  #linksForm { display: flex; gap: 6px; padding: 8px 6px 0; }
+  #serverToggle { display: flex; flex: 1; gap: 2px; } /* two buttons = a makeshift toggle; the pressed one has class "on" */
+  #serverToggle button { flex: 1; }
+  #linksMsg { padding: 6px 8px; color: #333; min-height: 14px; }
+  #linksList { overflow-y: auto; padding: 0 10px; background: #fff; margin: 0 6px 6px; border: 1px solid #919b9c; min-height: 40px; }
+  #linksBox { width: min(620px, 94vw); } /* wider than Help, so the link and the name fit side by side */
+  .lk { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 6px 0; border-bottom: 1px solid #d0d0bf; }
+  .lk > a { min-width: 0; overflow-wrap: anywhere; color: #0046d5; }
+  .ln { display: flex; align-items: center; gap: 6px; flex: none; padding: 1px 3px 1px 6px; border: 1px solid #b5c7ea; border-radius: 4px; background: #eaf1ff; } /* the name chip */
+  .who { color: #333; font-weight: bold; }
+  .ln button { flex: none; padding: 1px 6px; min-height: 22px; }
+
+  /* ---------- Status bar ---------- */
+  #status { flex: none; display: flex; padding: 2px; border-top: 1px solid #fff; background: #ece9d8; }
+  #status span { flex: 1; padding: 1px 8px; border: 1px solid; border-color: #aca899 #fff #fff #aca899;
+                 white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  @media (max-width: 700px) {
+    #main { flex-direction: column; }
+    #side { width: auto; max-height: 38vh; border-left: 0; border-top: 1px solid #aca899; }
+  }
+</style>
+
+<div id="win">
+  <div id="titlebar">
+    <div id="title">Grid Player</div>
+    <div id="net" title="Internet light: red = this app is not using the internet, green = it is using it right now"><i></i>Internet</div>
+    <div class="wbtn" aria-hidden="true">_</div><div class="wbtn" aria-hidden="true">□</div><div class="wbtn x" aria-hidden="true">✕</div>
+  </div>
+
+  <div id="client">
+    <div id="main">
+      <!-- The video is the main thing -->
+      <div id="stage" tabindex="-1">
+        <div id="wrap">
+          <video id="v" controls playsinline></video>
+          <div id="grid"></div>
+          <div id="cue" class="grid-only"></div>
+          <button id="infoBtn" class="grid-only" title="Recording steps (Q)">ℹ</button>
+        </div>
+      </div>
+
+      <!-- Controls live around it -->
+      <div id="side">
+        <button id="helpBtn" title="Workflow help">❓ Help / Workflow</button>
+        <button id="linksBtn" title="Show the Instagram links and names">🔗 Instagram links</button>
+        <button id="kbBtn" data-st="on" title="Turn keyboard shortcuts on/off. Green frame around the video = keys are live."></button>
+
+        <fieldset>
+          <legend>Video</legend>
+          <div class="row">
+            <label class="btn" for="file">📂 Open file…</label>
+            <input type="file" id="file" accept="video/*">
+          </div>
+          <div class="row" style="color:#555">…or drop a video file anywhere</div>
+        </fieldset>
+
+        <fieldset class="grid-only">
+          <legend>Grid</legend>
+          <div class="row">
+            <label>Size <input type="number" id="n" value="15" min="1" max="26"></label>
+            <label>Opacity <input type="range" id="op" min="0.1" max="1" step="0.1" value="0.6" style="width:70px;vertical-align:middle"></label>
+          </div>
+          <div class="row">
+            <label><input type="checkbox" id="show" checked> Grid <kbd>(G)</kbd></label>
+            <label><input type="checkbox" id="lbl" checked> Names <kbd>(N)</kbd></label>
+          </div>
+          <div class="row"><button id="backBtn" title="Back to trimming">✂ Back to trim <kbd>(T)</kbd></button></div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Playback</legend>
+          <div class="row"><span class="lcd" id="time" title="Time from the In point">0.000 s</span></div>
+          <div class="row" id="speeds"></div>
+          <div class="row"><label><input type="checkbox" id="loop"> Loop <kbd>(L)</kbd></label></div>
+          <div class="row"><label title="Time moved per ←/→ press (Shift = 1 s)">Step <input type="number" id="step" value="40" min="1" max="5000" step="10"> ms</label></div>
+        </fieldset>
+
+        <fieldset class="trim-only">
+          <legend>Trim</legend>
+          <div class="row">
+            <button id="inBtn" title="Set In point at current time">[ In <kbd>(I)</kbd></button>
+            <button id="outBtn" title="Set Out point at current time">Out ] <kbd>(O)</kbd></button>
+          </div>
+          <div class="row">
+            <button id="clrBtn" title="Clear trim">Clear <kbd>(X)</kbd></button>
+          </div>
+          <div class="row"><span id="trimInfo"></span></div>
+          <div class="row"><button id="goBtn" disabled title="Use this range and continue (Enter)">✂ Trim &amp; continue <kbd>(Enter)</kbd></button></div>
+        </fieldset>
+
+        <fieldset class="grid-only">
+          <legend>Audio recording</legend>
+          <div class="row" style="align-items:flex-start">
+            <div class="recWrap">
+              <button id="recBtn" data-st="idle" title="Record / Pause / Resume (R)"></button>
+              <span id="recLbl">Rec</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <span class="lcd sm" id="recTime">0:00.0</span>
+              <button id="saveBtn" disabled title="Stop and save as one file">💾 Save</button>
+            </div>
+          </div>
+          <button id="audioBtn" disabled title="Download the recording, then open TurboScribe">⬇ Export audio</button>
+          <button id="exportBtn" disabled title="Cut the video at In/Out without re-encoding: same quality, works offline (mp4 / mov)">⬇ Export trim video</button>
+        </fieldset>
+
+        <fieldset>
+          <legend>Keys</legend>
+          <div style="line-height:1.7;color:#333">
+            <span class="grid-only"><kbd>R</kbd> record / pause rec<br></span>
+            <kbd>Space</kbd> play / pause video<br>
+            <span class="trim-only"><kbd>I</kbd> / <kbd>O</kbd> in / out · <kbd>X</kbd> clear · <kbd>Enter</kbd> trim &amp; continue<br></span>
+            <kbd>A</kbd> slower · <kbd>D</kbd> faster<br>
+            <kbd>←</kbd> / <kbd>→</kbd> fine step · <kbd>Shift</kbd> 1 s<br>
+            <span class="grid-only"><kbd>G</kbd> grid · <kbd>N</kbd> names · <kbd>Q</kbd> steps · <kbd>T</kbd> back to trim<br></span>
+            <kbd>L</kbd> loop<br>
+            <kbd>H</kbd> hide this panel
+          </div>
+        </fieldset>
+      </div>
+    </div>
+
+    <div id="status"><span id="stText">Ready</span></div>
+  </div>
+</div>
+
+<div id="help" hidden>
+  <div id="helpBox">
+    <div id="helpTitle"><span>Help</span><div class="wbtn x" id="helpClose" style="cursor:pointer">✕</div></div>
+    <div class="tabs"><button class="tab on" data-tab="flow">Flow diagram</button></div>
+    <div id="flow"></div>
+  </div>
+</div>
+
+<!-- Instagram links: filled by the script below from the chosen server -->
+<div id="links" hidden>
+  <div id="linksBox">
+    <div id="linksTitle"><span>Instagram links</span><div class="wbtn x" id="linksClose" style="cursor:pointer">✕</div></div>
+    <div id="linksForm">
+      <div id="serverToggle" role="group" aria-label="Server">
+        <button id="srvMain" data-server="main" class="on" title="The live site (studiomirrors.netlify.app)">Main</button>
+        <button id="srvDev" data-server="dev" title="Your local dev server (npx netlify dev)">Dev</button>
+      </div>
+      <button id="fetchBtn" title="Load the links again">↻ Refresh</button>
+    </div>
+    <div id="linksMsg" role="status"></div>
+    <div id="linksList"></div>
+  </div>
+</div>
+
+<script src="grid-trim.js"></script> <!-- the offline video cutter: keep it in the same folder as this file -->
+<script>
+  const $ = (id) => document.getElementById(id);
+  const v = $("v");
+
+  // Cell name = column letter + row number, top-left origin: A1 (top-left) ... O15 (bottom-right)
+  const cellName = (col, row) => String.fromCharCode(65 + col) + (row + 1);
+
+  // ---- Make the video as big as possible: fit its aspect ratio into the stage ----
+  function fit() {
+    const r = $("stage").getBoundingClientRect();
+    const ar = v.videoWidth ? v.videoWidth / v.videoHeight : 16 / 9;
+    let w = r.width, h = w / ar;
+    if (h > r.height) { h = r.height; w = h * ar; }
+    $("wrap").style.width = Math.floor(w) + "px";
+    $("wrap").style.height = Math.floor(h) + "px";
+  }
+  new ResizeObserver(fit).observe($("stage"));
+
+  function setStatus(msg) { $("stText").textContent = msg; }
+  function updateStatus() {
+    const n = +$("n").value;
+    setStatus(
+      (v.videoWidth ? `${v.videoWidth}×${v.videoHeight} · ${v.duration.toFixed(3)} s` : "No video loaded") +
+      ` · Grid ${n}×${n} (A1–${cellName(n - 1, n - 1)})`
+    );
+  }
+
+  function drawGrid() {
+    const n = +$("n").value, g = $("grid"), c = `rgba(255,255,255,${$("op").value})`;
+    g.style.display = $("show").checked ? "grid" : "none";
+    g.style.setProperty("--n", n);
+    g.style.gridTemplate = `repeat(${n}, 1fr) / repeat(${n}, 1fr)`;
+    g.innerHTML = "";
+    for (let row = 0; row < n; row++)
+      for (let col = 0; col < n; col++) {
+        const d = document.createElement("div");
+        d.className = "cell";
+        d.style.borderColor = c;
+        if ($("lbl").checked) d.innerHTML = `<span>${cellName(col, row)}</span>`;
+        g.appendChild(d);
+      }
+    updateStatus();
+    console.log(`[grid] ${n}x${n} names=${$("lbl").checked} -> ${cellName(0, 0)}..${cellName(n - 1, n - 1)}`);
+  }
+
+  // Speed buttons. A steps down (3 -> 1 -> 0.75 -> 0.5 -> 0.3), D steps back up.
+  const SPEEDS = [0.3, 0.5, 0.75, 1, 3];
+  const stepSpeed = (d) => setSpeed(SPEEDS[Math.min(SPEEDS.length - 1, Math.max(0, SPEEDS.indexOf(v.playbackRate) + d))]);
+  SPEEDS.forEach((s) => {
+    const b = document.createElement("button");
+    b.textContent = s + "x";
+    b.onclick = () => setSpeed(s);
+    b.dataset.s = s;
+    $("speeds").appendChild(b);
+  });
+  function setSpeed(s) {
+    v.defaultPlaybackRate = v.playbackRate = s; // default survives loading a new file
+    document.querySelectorAll("#speeds button").forEach((b) => b.classList.toggle("on", +b.dataset.s === s));
+    console.log(`[speed] ${s}x`);
+  }
+
+  // ---- Audio recording: one MediaRecorder, pause()/resume() => a single file ----
+  // States: idle -> recording <-> paused -> (Save) -> idle. Paused time is not recorded.
+  let mr = null, stream = null, chunks = [], acc = 0, t0 = 0;
+
+  const recElapsed = () => (acc + (mr && mr.state === "recording" ? performance.now() - t0 : 0)) / 1000;
+
+  function updateRec() {
+    const st = mr ? mr.state : "idle";
+    $("recBtn").dataset.st = st;
+    $("recLbl").textContent = st === "recording" ? "Pause" : st === "paused" ? "Resume" : "Rec";
+    $("saveBtn").disabled = !mr;
+    $("audioBtn").disabled = !mr;
+    console.log(`[rec] ${st} ${recElapsed().toFixed(1)}s`);
+  }
+
+  async function recToggle() {
+    if (!mr) {
+      try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+      catch (err) { alert("Microphone not available: " + err.message); return; }
+      const mime = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"].find((t) => MediaRecorder.isTypeSupported(t));
+      mr = new MediaRecorder(stream, mime ? { mimeType: mime } : {});
+      chunks = [];
+      mr.ondataavailable = (e) => e.data.size && chunks.push(e.data);
+      mr.start(1000); // flush a chunk every second
+      acc = 0; t0 = performance.now();
+    } else if (mr.state === "recording") {
+      mr.pause(); acc += performance.now() - t0;
+    } else {
+      mr.resume(); t0 = performance.now();
+    }
+    updateRec();
+  }
+
+  function recSave(after) {
+    if (!mr) return;
+    const rec = mr;
+    rec.onstop = () => {
+      const type = rec.mimeType || "audio/webm";
+      const blob = new Blob(chunks, { type });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `recording-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.${type.includes("mp4") ? "m4a" : "webm"}`;
+      a.click();
+      console.log(`[rec] saved ${a.download} (${(blob.size / 1e6).toFixed(2)} MB)`);
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+      stream.getTracks().forEach((t) => t.stop()); // release the mic
+      mr = stream = null; chunks = []; acc = 0;
+      updateRec();
+      after?.(); // e.g. open TurboScribe once the file is downloaded
+    };
+    if (rec.state === "recording") acc += performance.now() - t0;
+    rec.stop();
+  }
+
+  $("recBtn").onclick = recToggle;
+  $("saveBtn").onclick = recSave;
+
+  // ---- Export trim video: cuts the loaded file between In and Out WITHOUT re-encoding (like a native trimmer): the picture and sound data are copied as they are. ----
+  // Runs inside this page with grid-trim.js (keep it in the same folder as this file): no server, no internet.
+  // mp4 / mov / m4v only; the container of the original is kept. The cut starts at the key frame before In and the extra frames are hidden, so playback starts at In.
+  let exporting = false;
+  let currentFile = null; // the File that was loaded: this exact file is what gets cut
+  function download(blob, name) {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = name; a.click();
+    console.log(`[export] saved ${name} (${(blob.size / 1e6).toFixed(2)} MB)`);
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  }
+  async function exportVideo() {
+    if (exporting || !v.duration) return;
+    if (!currentFile) { setStatus("Load the video with the file picker or by dragging it in, so it can be cut."); return; }
+    if (!window.GridTrim) { setStatus("grid-trim.js was not found. Put it in the same folder as this page and reload."); console.error("[export] window.GridTrim is missing"); return; }
+    exporting = true; $("exportBtn").disabled = true;
+    const start = tIn, end = rangeEnd();
+    console.log(`[export] cutting ${currentFile.name} ${start.toFixed(3)}..${end.toFixed(3)} without re-encoding`);
+    try {
+      setStatus("Cutting…");
+      const { blob, ext } = await window.GridTrim.trim(currentFile, start, end, (p) => setStatus(`Cutting… ${Math.round(p * 100)}%`));
+      download(blob, `${currentFile.name.replace(/\.[^.]+$/, "")}-trimmed.${ext}`);
+      setStatus(`Export done: ${start.toFixed(3)} → ${end.toFixed(3)} s, ${(blob.size / 1e6).toFixed(1)} MB, not re-encoded`);
+    } catch (err) {
+      console.error("[export] cut failed:", err);
+      setStatus("Cut failed: " + (err && err.message ? err.message : err));
+    } finally {
+      exporting = false; $("exportBtn").disabled = false;
+    }
+  }
+  $("exportBtn").onclick = exportVideo;
+
+  // ---- Export audio: stop + download the recording, then open TurboScribe to transcribe it ----
+  const SCRIBE_URL = "https://turboscribe.ai/"; // CHANGE HERE: the transcribing website
+  function exportAudio() {
+    if (!mr) return;
+    recSave(() => {
+      const w = window.open(SCRIBE_URL, "_blank");
+      console.log(`[export] opened ${SCRIBE_URL} -> ${w ? "ok" : "blocked"}`);
+      if (!w) setStatus("Popup blocked: allow popups for this page, or open " + SCRIBE_URL);
+    });
+  }
+  $("audioBtn").onclick = exportAudio;
+
+  // ---- Floating cue: the steps for recording one action. Edit CUE to change them. ----
+  const CUE = ["Action", "Time", "Target cell"];
+  $("cue").innerHTML = CUE.map((t, i) => `<span><b>${i + 1}</b>${t}</span>`).join("<i>›</i>") + "<i>8 steps 2 then look for next action</i>";
+  function toggleCue() {
+    const on = $("cue").classList.toggle("on");
+    $("infoBtn").classList.toggle("on", on);
+    console.log(`[cue] ${on ? "shown" : "hidden"}`);
+  }
+  $("infoBtn").onclick = toggleCue;
+
+  // ---- Help modal with flow diagram. Fill in the links below (null = "link coming"). ----x
+  const LINKS = {
+    fetch: "https://studiomirrors.netlify.app/",
+    download: "https://fastdl.app/en5IW#google_vignette",
+    send: "https://fileflap.net/",
+    del: "https://studiomirrors.netlify.app/",
+  };
+  const FLOW = [
+    ["Fetch Instagram links", "fetch"],
+    ["Download Instagram video", "download"],
+    ["Open video and trim", "(do it in this app)"],
+    ["Talk and describe action, and record", "(do it in this app)"],
+    ["Export recording and trim video", "(do it in this app)"],
+    ["Send videos and copy link", "send"],
+    ["Delete videos from the link list", "del"],
+  ];
+  $("flow").innerHTML = FLOW.map(([t, k], i) => {
+    const app = k.startsWith("(");
+    const sub = app ? `<small>${k}</small>` : LINKS[k] ? `<small><a href="${LINKS[k]}" target="_blank">Open link</a></small>` : `<small>link coming</small>`;
+    return (i ? `<div class="arrow">│<br>▼</div>` : "") + `<div class="blk ${app ? "app" : ""}">${i + 1}. ${t}${sub}</div>`;
+  }).join("");
+  const helpToggle = (on) => { $("help").hidden = !on; console.log(`[help] ${on ? "open" : "closed"}`); };
+  $("helpBtn").onclick = () => helpToggle(true);
+  $("helpClose").onclick = () => helpToggle(false);
+  $("help").onclick = (e) => { if (e.target === $("help")) helpToggle(false); };
+  addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("help").hidden) helpToggle(false); });
+
+  // ---- Instagram links modal: asks the Video Vault API. This page holds no data: it only displays what the server sends. ----
+  // CHANGE HERE: the two servers the modal can ask. If your dev address is different (for example a Codespaces
+  // address like https://<name>-8888.app.github.dev), put it in "dev".
+  const SERVERS = {
+    main: "https://studiomirrors.netlify.app/.netlify/functions/links-api",
+    dev: "http://localhost:8888/.netlify/functions/links-api",
+  };
+  let linksServer = "main"; // which one the toggle currently points at
+
+  const linksToggle = (on) => {
+    $("links").hidden = !on;
+    console.log(`[links] modal ${on ? "open" : "closed"}`);
+    if (on) fetchLinks(); // opening the window loads the list straight away
+  };
+
+  /** Small round-trip button: copies text, shows ✓ (or ✗ if the browser refuses). */
+  function copyBtn(text, label) {
+    const b = document.createElement("button");
+    const idle = "📋 " + label; // e.g. "📋 Copy name": the button says what it copies
+    b.textContent = idle; b.title = label;
+    b.onclick = async () => {
+      try { await navigator.clipboard.writeText(text); b.textContent = "✓ Copied"; console.log(`[links] ${label}: ${text}`); }
+      catch (err) { console.error("[links] copy failed:", err); b.textContent = "✗ Failed"; }
+      setTimeout(() => (b.textContent = idle), 1500);
+    };
+    return b;
+  }
+  const line = (...kids) => { const d = document.createElement("div"); d.className = "ln"; d.append(...kids); return d; };
+
+  // CHANGE HERE: every link is shown (and opened) as ONE link = this prefix + the Instagram link.
+  const LINK_PREFIX = "https://f-d.app/";
+
+  function renderLinks(list) {
+    const box = $("linksList");
+    box.innerHTML = "";
+    $("linksMsg").textContent = list.length ? `${list.length} link${list.length === 1 ? "" : "s"}` : "No links stored yet.";
+    list.forEach((it) => {
+      const row = document.createElement("div");
+      row.className = "lk";
+      const a = document.createElement("a");
+      const full = it.link.startsWith(LINK_PREFIX) ? it.link : LINK_PREFIX + it.link; // one link: prefix + Instagram link
+      a.href = full; a.target = "_blank"; a.rel = "noopener noreferrer"; a.textContent = full;
+      row.append(a); // the link has no copy button
+      if (it.name) {
+        const who = document.createElement("span");
+        who.className = "who";
+        who.textContent = "Name: " + it.name;
+        row.append(line(who, copyBtn(it.name, "Copy name"))); // after the link; the button says it copies the name
+      }
+      box.appendChild(row);
+    });
+    console.log(`[links] showing ${list.length}`);
+  }
+
+  async function fetchLinks() {
+    const server = linksServer;
+    $("fetchBtn").disabled = true;
+    $("linksMsg").textContent = "Fetching…";
+    console.log(`[links] requesting from the ${server} server: ${SERVERS[server]}`);
+    try {
+      const res = await netFetch(SERVERS[server], { cache: "no-store" });
+      const data = await res.json().catch(() => ({}));
+      console.log(`[links] status ${res.status}`);
+      if (!res.ok) throw new Error(data.error || "Request failed.");
+      renderLinks(data.links);
+    } catch (err) {
+      console.error("[links] FAILED:", err);
+      $("linksList").innerHTML = "";
+      $("linksMsg").textContent = err instanceof TypeError ? `Cannot reach the ${server} server. Is it running?` : err.message;
+    } finally {
+      $("fetchBtn").disabled = false;
+    }
+  }
+
+  $("linksBtn").onclick = () => linksToggle(true);
+  $("linksClose").onclick = () => linksToggle(false);
+  $("fetchBtn").onclick = fetchLinks;
+  function setServer(s, reload) {
+    linksServer = s;
+    document.querySelectorAll("#serverToggle button").forEach((b) => b.classList.toggle("on", b.dataset.server === s));
+    try { localStorage.setItem("linksServer", s); } catch {} // remember the last choice
+    console.log(`[links] server set to ${s}`);
+    if (reload) fetchLinks();
+  }
+  document.querySelectorAll("#serverToggle button").forEach((b) => (b.onclick = () => setServer(b.dataset.server, true)));
+  try { const s = localStorage.getItem("linksServer"); if (s in SERVERS) setServer(s, false); } catch {}
+  $("links").onclick = (e) => { if (e.target === $("links")) linksToggle(false); };
+  addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("links").hidden) linksToggle(false); });
+
+  // ---- Internet light: every request this app makes goes through netFetch(), which turns the light green
+  //      while it runs (and for at least 1 s after, so a quick request is still visible). Idle = red. ----
+  let netBusy = 0, netTimer = null;
+  function netFetch(url, opts) {
+    netBusy++;
+    clearTimeout(netTimer);
+    $("net").classList.add("on");
+    console.log(`[net] request started (${netBusy} running): ${url}`);
+    return fetch(url, opts).finally(() => {
+      netBusy--;
+      console.log(`[net] request finished (${netBusy} running)`);
+      if (!netBusy) netTimer = setTimeout(() => $("net").classList.remove("on"), 1000);
+    });
+  }
+
+  // ---- Trim: non-destructive. No re-encoding, no export: playback is simply confined to [In, Out]. ----
+  // The clock shows time relative to In, so the clip behaves like a shorter video starting at 0.
+  let tIn = 0, tOut = null; // tOut = null -> end of video
+  // Stage 1 (trimMode): whole video is playable so you can pick In/Out freely.
+  // Stage 2: playback is confined to [In, Out]. Nothing is encoded or downloaded.
+  let trimMode = true;
+  const lo = () => (trimMode ? 0 : tIn);
+  const hi = () => ((trimMode ? v.duration : tOut ?? v.duration)) || 0;
+  const rangeEnd = () => (tOut ?? v.duration) || 0;
+
+  function updateTrim() {
+    const trimmed = tIn > 0 || tOut !== null;
+    $("trimInfo").textContent = trimmed ? `${tIn.toFixed(3)} → ${rangeEnd().toFixed(3)} (${(rangeEnd() - tIn).toFixed(3)} s)` : "";
+    $("inBtn").classList.toggle("on", tIn > 0);
+    $("outBtn").classList.toggle("on", tOut !== null);
+    console.log(`[trim] in=${tIn.toFixed(3)} out=${tOut === null ? "end" : tOut.toFixed(3)}`);
+  }
+  function setIn() {
+    tIn = v.currentTime;
+    if (tOut !== null && tOut <= tIn) tOut = null;
+    updateTrim();
+  }
+  function setOut() {
+    tOut = v.currentTime;
+    if (tOut <= tIn) tIn = 0;
+    updateTrim();
+  }
+  function clearTrim() { tIn = 0; tOut = null; updateTrim(); }
+
+  function setMode(trim) {
+    trimMode = trim;
+    document.body.classList.toggle("trim-mode", trim);
+    v.pause();
+    if (!trim) v.currentTime = tIn; // start the trimmed clip at its In point
+    fit(); updateStatus(); reclaim();
+    console.log(`[mode] ${trim ? "trim" : "grid"} range=${tIn.toFixed(3)}..${rangeEnd().toFixed(3)}`);
+  }
+  const goGrid = () => { if (v.duration) setMode(false); };
+  const goTrim = () => setMode(true);
+  $("goBtn").onclick = goGrid;
+  $("backBtn").onclick = goTrim;
+
+  $("inBtn").onclick = setIn;
+  $("outBtn").onclick = setOut;
+  $("clrBtn").onclick = clearTrim;
+  // Starting playback from the end of the clip restarts it at In
+  v.onplay = () => { if (v.currentTime >= hi() - 0.05) v.currentTime = lo(); };
+
+  function clampToTrim() {
+    if (v.seeking || !v.duration) return;
+    const t = v.currentTime;
+    if (t < lo() - 0.001) v.currentTime = lo();
+    else if (!v.paused && t >= hi()) {
+      if ($("loop").checked) v.currentTime = lo();
+      else { v.pause(); v.currentTime = hi(); }
+    } else if (v.paused && t > hi() + 0.05) v.currentTime = hi();
+  }
+
+  // Time with millisecond precision (0.124 s), refreshed every screen frame
+  (function tick() {
+    clampToTrim();
+    $("time").textContent = Math.max(0, v.currentTime - (trimMode ? 0 : tIn)).toFixed(3) + " s";
+    const s = recElapsed();
+    $("recTime").textContent = Math.floor(s / 60) + ":" + (s % 60).toFixed(1).padStart(4, "0");
+    requestAnimationFrame(tick);
+  })();
+
+  // ---- Loading videos: file picker, drag & drop, or a link ----
+  function loadFile(f) {
+    if (!f || !f.type.startsWith("video/")) return;
+    currentFile = f; // kept so the trim export can send this exact file
+    v.src = URL.createObjectURL(f);
+    $("title").textContent = f.name + " - Grid Player";
+    console.log(`[file] loaded ${f.name} (${(f.size / 1e6).toFixed(1)} MB)`);
+  }
+  $("file").onchange = (e) => loadFile(e.target.files[0]);
+  addEventListener("dragover", (e) => e.preventDefault());
+  addEventListener("drop", (e) => { e.preventDefault(); loadFile(e.dataTransfer.files[0]); });
+
+  v.addEventListener("loadedmetadata", () => {
+    clearTrim(); // new video -> reset trim
+    $("goBtn").disabled = false;
+    $("exportBtn").disabled = false;
+    setMode(true); // every new video starts at the trim stage
+    fit();
+    updateStatus();
+    console.log(`[video] ${v.videoWidth}x${v.videoHeight}, ${v.duration.toFixed(3)}s`);
+  });
+
+  ["n", "op", "show", "lbl"].forEach((id) => ($(id).oninput = drawGrid));
+  // Space = play/pause the VIDEO only. The recording is controlled with R (or the red button).
+  function spaceToggle() {
+    if (v.paused) v.play().catch(() => {});
+    else v.pause();
+  }
+
+  const KEYS = {
+    " ": spaceToggle,
+    q: toggleCue, r: recToggle,                                // R: start / pause / resume the recording
+    i: setIn, o: setOut, x: clearTrim,
+    arrowleft: (e) => nudge(e.shiftKey ? -1000 : -stepMs()),   // fine steps back/forward, Shift = 1 s
+    arrowright: (e) => nudge(e.shiftKey ? 1000 : stepMs()),
+    a: () => stepSpeed(-1), d: () => stepSpeed(1),
+    g: () => $("show").click(), n: () => $("lbl").click(), l: () => $("loop").click(),
+    enter: goGrid, t: goTrim,
+    h: () => document.body.classList.toggle("hide-side"), // video gets the full width; ResizeObserver refits
+  };
+  const GRID_ONLY = new Set(["r", "g", "n", "t", "q"]), TRIM_ONLY = new Set(["i", "o", "x", "enter"]);
+  const typing = (e) => e.target.matches("input[type=number], input[type=text], textarea");
+
+  // Capture phase + stopPropagation: the video's own controls and focused buttons/checkboxes
+  // never see these keys, so Space can't double-toggle or click whatever happens to be focused.
+  addEventListener("keydown", (e) => {
+    if (!kbOn || !$("help").hidden || !$("links").hidden || typing(e) || e.ctrlKey || e.metaKey || e.altKey) return;
+    const key = e.key.toLowerCase();
+    if (e.repeat && !key.startsWith("arrow")) return; // only the arrows auto-repeat
+    const fn = KEYS[key];
+    if (!fn || (trimMode ? GRID_ONLY : TRIM_ONLY).has(key)) return;
+    e.preventDefault(); e.stopPropagation();
+    fn(e);
+  }, true);
+  // Buttons/checkboxes activate on Space at key-UP, so block that too
+  addEventListener("keyup", (e) => { if (kbOn && e.key === " " && !typing(e)) { e.preventDefault(); e.stopPropagation(); } }, true);
+
+  // ---- Fine stepping: move by a fixed time step (not frame-exact), always inside the trim range ----
+  const stepMs = () => Math.max(1, +$("step").value || 40);
+  function nudge(ms) {
+    v.pause();
+    v.currentTime = Math.min(hi(), Math.max(lo(), v.currentTime + ms / 1000));
+  }
+
+  // ---- Shortcut focus mode: a visible switch so you always know whether the keys are live ----
+  // ON (green frame)  = shortcuts on and this page has keyboard focus
+  // WAIT (orange)     = shortcuts on, but the page lost focus (click anywhere on it)
+  // OFF               = keys behave normally (native video arrows, Space scrolls, etc.)
+  let kbOn = true;
+  function updateKb() {
+    const st = !kbOn ? "off" : document.hasFocus() ? "on" : "wait";
+    $("kbBtn").dataset.st = st;
+    $("kbBtn").textContent = st === "on" ? "⌨ Shortcuts: ON" : st === "off" ? "⌨ Shortcuts: OFF" : "⌨ Click the page to activate";
+    $("stage").className = st === "on" ? "kb-on" : st === "wait" ? "kb-wait" : "";
+    console.log(`[keys] ${st}`);
+  }
+  // Park keyboard focus on the stage (not on the video's own controls) so the keys keep working after clicks
+  const reclaim = () => { if (kbOn) $("stage").focus({ preventScroll: true }); };
+
+  $("kbBtn").onclick = () => { kbOn = !kbOn; updateKb(); reclaim(); };
+  addEventListener("focus", updateKb);
+  addEventListener("blur", updateKb);
+  addEventListener("pointerup", (e) => { if (kbOn && !typing(e)) setTimeout(reclaim, 0); }, true);
+  // Number boxes keep focus (and swallow the keys) until you leave them, so Enter/Escape lets go
+  document.querySelectorAll("input[type=number]").forEach((i) =>
+    i.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === "Escape") { i.blur(); reclaim(); } }));
+  updateKb();
+  reclaim();
+
+  document.body.classList.add("trim-mode");
+  setSpeed(1);
+  drawGrid();
+  fit();
+</script>

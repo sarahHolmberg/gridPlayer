@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "Grid FastDL auto-download",
+  "version": "1.0",
+  "description": "On fastdl.app: wait for the download button, click it, close the tab once the file is saved.",
+  "permissions": ["downloads", "storage"],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": ["https://fastdl.app/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": { "default_title": "Click to turn the FastDL auto-download ON / OFF" }
+}
