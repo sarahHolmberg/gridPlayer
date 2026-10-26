@@ -1,6 +1,6 @@
 <!doctype html>
 <!-- Grid-v5.html -->
-<!-- NOT NEW: existing file, changed (Export audio opens TurboScribe; "Export trim video" now cuts the loaded file between In and Out inside this page, WITHOUT re-encoding, with grid-trim.js that must sit next to this file: no server, no internet, identical quality; mp4 and mov only) -->
+<!-- NOT NEW: existing file, changed (every time it opens, the app checks that the FastDL extension is installed and covers everything with the install steps until it is; needs extension/grid-check.js and the new extension/manifest.json) -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Grid Player</title>
@@ -110,12 +110,13 @@
   #exportBtn { width: 100%; margin-top: 6px; font-weight: bold; background: linear-gradient(#e6f7d9, #b6e59c); border-color: #2a7d1e; }
   #audioBtn { width: 100%; margin-top: 6px; font-weight: bold; background: linear-gradient(#e6f7d9, #b6e59c); border-color: #2a7d1e; }
   #exportBtn:disabled, #audioBtn:disabled { background: #f4f3ee; border-color: #c9c7ba; }
-  #help, #links { position: fixed; inset: 0; z-index: 10; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; }
-  #help[hidden], #links[hidden] { display: none; }
-  #helpBox, #linksBox { width: min(460px, 94vw); max-height: 90vh; display: flex; flex-direction: column; background: #ece9d8; border: 3px solid #0831d9; border-radius: 8px 8px 0 0; }
-  #helpTitle, #linksTitle { display: flex; align-items: center; padding: 4px 6px 4px 10px; color: #fff; font: bold 13px "Trebuchet MS", Tahoma, sans-serif;
+  #updBtn { width: 100%; font-weight: bold; }
+  #help, #links, #upd { position: fixed; inset: 0; z-index: 10; background: rgba(0,0,0,.5); display: flex; align-items: center; justify-content: center; }
+  #help[hidden], #links[hidden], #upd[hidden] { display: none; }
+  #helpBox, #linksBox, #updBox { width: min(460px, 94vw); max-height: 90vh; display: flex; flex-direction: column; background: #ece9d8; border: 3px solid #0831d9; border-radius: 8px 8px 0 0; }
+  #helpTitle, #linksTitle, #updTitle, #extTitle { display: flex; align-items: center; padding: 4px 6px 4px 10px; color: #fff; font: bold 13px "Trebuchet MS", Tahoma, sans-serif;
                background: linear-gradient(#0997ff, #0053ee 8%, #0050ee 40%, #06f 88%, #003dd7); }
-  #helpTitle span, #linksTitle span { flex: 1; }
+  #helpTitle span, #linksTitle span, #updTitle span, #extTitle span { flex: 1; }
   .tabs { display: flex; gap: 2px; padding: 6px 6px 0; }
   .tab { border-bottom: 0; border-radius: 3px 3px 0 0; }
   .tab.on { background: #fff; font-weight: bold; box-shadow: none; }
@@ -128,17 +129,29 @@
 
   /* ---------- Instagram links modal (reuses the help modal look) ---------- */
   #linksBtn { width: 100%; font-weight: bold; background: linear-gradient(#e6f7d9, #b6e59c); border-color: #2a7d1e; }
-  #linksForm { display: flex; gap: 6px; padding: 8px 6px 0; }
+  #linksForm, #updForm { display: flex; gap: 6px; padding: 8px 6px 0; }
   #serverToggle { display: flex; flex: 1; gap: 2px; } /* two buttons = a makeshift toggle; the pressed one has class "on" */
   #serverToggle button { flex: 1; }
-  #linksMsg { padding: 6px 8px; color: #333; min-height: 14px; }
-  #linksList { overflow-y: auto; padding: 0 10px; background: #fff; margin: 0 6px 6px; border: 1px solid #919b9c; min-height: 40px; }
+  #linksMsg, #updMsg { padding: 6px 8px; color: #333; min-height: 14px; }
+  #linksList, #updList { overflow-y: auto; padding: 0 10px; background: #fff; margin: 0 6px 6px; border: 1px solid #919b9c; min-height: 40px; }
   #linksBox { width: min(620px, 94vw); } /* wider than Help, so the link and the name fit side by side */
   .lk { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 6px 0; border-bottom: 1px solid #d0d0bf; }
   .lk > a { min-width: 0; overflow-wrap: anywhere; color: #0046d5; }
   .ln { display: flex; align-items: center; gap: 6px; flex: none; padding: 1px 3px 1px 6px; border: 1px solid #b5c7ea; border-radius: 4px; background: #eaf1ff; } /* the name chip */
   .who { color: #333; font-weight: bold; }
   .ln button { flex: none; padding: 1px 6px; min-height: 22px; }
+
+  /* ---------- Extension check: covers the whole app until the extension answers ---------- */
+  #extGate { position: fixed; inset: 0; z-index: 20; background: #0831d9; display: flex; align-items: center; justify-content: center; }
+  #extGate[hidden] { display: none; }
+  #extBox { width: min(500px, 94vw); max-height: 90vh; overflow-y: auto; background: #ece9d8; border: 3px solid #0831d9; border-radius: 8px 8px 0 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,.5); }
+  #extBody { padding: 10px 12px; line-height: 1.6; }
+  #extBody ol { margin: 6px 0; padding-left: 20px; }
+  #extBody code { background: #fff; border: 1px solid #919b9c; padding: 0 3px; font: 11px "Lucida Console", Consolas, monospace; overflow-wrap: anywhere; }
+  #extBody button { padding: 1px 6px; min-height: 20px; }
+  #extBtns { display: flex; justify-content: flex-end; padding: 0 12px 12px; }
+  #extRetry { font-weight: bold; background: linear-gradient(#e6f7d9, #b6e59c); border-color: #2a7d1e; }
 
   /* ---------- Status bar ---------- */
   #status { flex: none; display: flex; padding: 2px; border-top: 1px solid #fff; background: #ece9d8; }
@@ -174,6 +187,7 @@
       <div id="side">
         <button id="helpBtn" title="Workflow help">❓ Help / Workflow</button>
         <button id="linksBtn" title="Show the Instagram links and names">🔗 Instagram links</button>
+        <button id="updBtn" title="When you are online: get the newest version of this app from GitHub">⟳ Update from GitHub</button>
         <button id="kbBtn" data-st="on" title="Turn keyboard shortcuts on/off. Green frame around the video = keys are live."></button>
 
         <fieldset>
@@ -276,6 +290,42 @@
     </div>
     <div id="linksMsg" role="status"></div>
     <div id="linksList"></div>
+  </div>
+</div>
+
+<!-- Update from GitHub: filled by the script below. Only goes online when you open it or click Check. -->
+<div id="upd" hidden>
+  <div id="updBox">
+    <div id="updTitle"><span>Update from GitHub</span><div class="wbtn x" id="updClose" style="cursor:pointer">✕</div></div>
+    <div id="updForm">
+      <button id="updCheck" title="Compare this folder with the repo">↻ Check</button>
+      <button id="updFolder" title="Pick the Grid Player folder again">📂 Change folder</button>
+      <button id="updGo" disabled title="Download the files below and replace them in this folder">⬇ Install update</button>
+    </div>
+    <div id="updMsg" role="status"></div>
+    <div id="updList"></div>
+  </div>
+</div>
+
+<!-- Extension check: shown from the start, hidden once the FastDL extension says it is installed (extension/grid-check.js) -->
+<div id="extGate">
+  <div id="extBox">
+    <div id="extTitle"><span>Grid Player needs its extension</span></div>
+    <div id="extBody">
+      <div id="extWait">Checking for the FastDL extension…</div>
+      <div id="extHelp" hidden>
+        <b>The FastDL extension was not found.</b> Install it once:
+        <ol>
+          <li>Open a new tab and paste <code>chrome://extensions</code> <span id="extCopy"></span><br>(a page is not allowed to open it for you)</li>
+          <li>Turn on <b>Developer mode</b> (top right).</li>
+          <li>Click <b>Load unpacked</b> and pick the <b>extension</b> folder:<br><code id="extPath"></code></li>
+          <li>On its card click <b>Details</b> and turn on <b>Allow access to file URLs</b>. Without this the app cannot see the extension.</li>
+          <li>Come back here and click <b>Check again</b>.</li>
+        </ol>
+        Already installed? Click its reload arrow ⟳ on chrome://extensions (older copies cannot talk to the app), and check step 4.
+      </div>
+    </div>
+    <div id="extBtns"><button id="extRetry" hidden title="Reload the app and look for the extension again">↻ Check again</button></div>
   </div>
 </div>
 
@@ -583,6 +633,191 @@
     });
   }
 
+  // ---- Update from GitHub: when online, compares this folder with the repo and copies in the files that changed. ----
+  // Offline the app works exactly as before: nothing is checked or downloaded until you open this window.
+  // Needs Chrome or Edge: a web page can only write into a folder you pick yourself (File System Access API).
+  // Files that only exist on this computer are never touched or deleted. Every file that gets replaced is first
+  // copied to _backup/<date>/ inside the folder, so you can put the old one back by hand.
+  const REPO = { owner: "sarahHolmberg", name: "gridPlayer", branch: "main" }; // CHANGE HERE: where updates come from
+  const API = `https://api.github.com/repos/${REPO.owner}/${REPO.name}`;
+  const SKIP = (path) => path.split("/").some((p) => p.startsWith(".")); // .DS_Store, .github, ... are never copied
+  let updDir = null, updFiles = [], updCommit = null, updDone = false; // the picked folder, the files that differ, the repo version they come from
+
+  const updLog = (msg) => { $("updMsg").textContent = msg; console.log(`[update] ${msg}`); };
+  const updBusy = (on) => ["updCheck", "updFolder", "updGo"].forEach((id) => ($(id).disabled = on || (id === "updGo" && !updFiles.length && !updDone)));
+
+  // git's own id for a file: sha1("blob <size>\0" + bytes). Same bytes as in the repo -> same id, so comparing needs no download.
+  async function blobSha(bytes) {
+    const head = new TextEncoder().encode(`blob ${bytes.byteLength}\0`);
+    const all = new Uint8Array(head.length + bytes.byteLength);
+    all.set(head); all.set(new Uint8Array(bytes), head.length);
+    return [...new Uint8Array(await crypto.subtle.digest("SHA-1", all))].map((b) => b.toString(16).padStart(2, "0")).join("");
+  }
+
+  // "extension/content.js" -> the bytes of that file in the folder, or null if it is not there
+  async function readLocal(dir, path) {
+    const parts = path.split("/"), name = parts.pop();
+    try {
+      for (const p of parts) dir = await dir.getDirectoryHandle(p);
+      return await (await (await dir.getFileHandle(name)).getFile()).arrayBuffer();
+    } catch (err) {
+      if (err.name === "NotFoundError" || err.name === "TypeMismatchError") return null;
+      throw err;
+    }
+  }
+  // Writes go to a temporary file that only replaces the real one when complete, so a file is never half written.
+  async function writeLocal(dir, path, bytes) {
+    const parts = path.split("/"), name = parts.pop();
+    for (const p of parts) dir = await dir.getDirectoryHandle(p, { create: true });
+    const w = await (await dir.getFileHandle(name, { create: true })).createWritable();
+    await w.write(bytes);
+    await w.close();
+  }
+
+  // The picked folder is remembered (IndexedDB), so you choose it once; the browser still asks to allow editing.
+  function idb(mode, fn) {
+    return new Promise((ok, fail) => {
+      const req = indexedDB.open("grid-update", 1);
+      req.onupgradeneeded = () => req.result.createObjectStore("kv");
+      req.onerror = () => fail(req.error);
+      req.onsuccess = () => {
+        const tx = req.result.transaction("kv", mode), r = fn(tx.objectStore("kv"));
+        tx.oncomplete = () => ok(r.result);
+        tx.onerror = () => fail(tx.error);
+      };
+    });
+  }
+  async function getFolder(pickAgain) {
+    if (!window.showDirectoryPicker) throw new Error("This browser cannot write files. Open Grid Player in Chrome or Edge to update it.");
+    let dir = pickAgain ? null : await idb("readonly", (s) => s.get("dir")).catch(() => null);
+    if (dir && (await dir.requestPermission({ mode: "readwrite" })) !== "granted") dir = null;
+    if (!dir) {
+      updLog("Choose the folder this Grid Player is in…");
+      dir = await showDirectoryPicker({ id: "grid-player", mode: "readwrite" });
+    }
+    // Guard against picking the wrong folder: it must contain the page that is open right now.
+    const page = decodeURIComponent(location.pathname.split("/").pop());
+    if (page.endsWith(".html") && !(await readLocal(dir, page)))
+      throw new Error(`"${dir.name}" does not contain ${page}. Click "Change folder" and pick the folder this page is in.`);
+    idb("readwrite", (s) => s.put(dir, "dir")).catch((err) => console.warn("[update] could not remember the folder:", err));
+    return dir;
+  }
+
+  function updError(err) {
+    console.error("[update] FAILED:", err);
+    if (err.name === "AbortError") updLog("No folder chosen. Nothing was changed.");
+    else if (err instanceof TypeError) updLog("Cannot reach GitHub: you seem to be offline. Nothing was changed; the app keeps working as it is.");
+    else updLog(err.message);
+  }
+  async function github(url) {
+    const res = await netFetch(url, { cache: "no-store" });
+    if (res.status === 403 || res.status === 429) throw new Error("GitHub allows about 30 checks an hour without an account. Try again later.");
+    if (!res.ok) throw new Error(`GitHub answered ${res.status} for ${url}. Is the repo public and the branch "${REPO.branch}"?`);
+    return res.json();
+  }
+
+  function renderUpd() {
+    const box = $("updList");
+    box.innerHTML = "";
+    updFiles.forEach((f) => {
+      const row = document.createElement("div");
+      row.className = "lk";
+      row.textContent = `${f.kind === "new" ? "🆕 new" : "✏ changed"} · ${f.path} (${(f.size / 1024).toFixed(1)} KB)`;
+      box.appendChild(row);
+    });
+  }
+
+  // Step 1: which files in the folder are not the same as in the repo?
+  async function updCheck(pickAgain) {
+    updBusy(true); updDone = false; updFiles = []; renderUpd();
+    $("updGo").textContent = "⬇ Install update";
+    try {
+      updDir = await getFolder(pickAgain); // first, while the click still counts: the browser only shows the folder prompt right after a click
+      updLog("Asking GitHub what is in the repo…");
+      const { commit } = await github(`${API}/branches/${REPO.branch}`); // the newest version (commit) on the branch
+      updCommit = commit.sha;
+      const { tree, truncated } = await github(`${API}/git/trees/${commit.commit.tree.sha}?recursive=1`);
+      if (truncated) console.warn("[update] the repo list was cut short by GitHub, some files may be missing");
+      for (const f of tree.filter((t) => t.type === "blob" && !SKIP(t.path))) {
+        const local = await readLocal(updDir, f.path);
+        if (!local) updFiles.push({ ...f, kind: "new" });
+        else if ((await blobSha(local)) !== f.sha) updFiles.push({ ...f, kind: "changed" });
+      }
+      renderUpd();
+      updLog(updFiles.length
+        ? `${updFiles.length} file${updFiles.length === 1 ? "" : "s"} in "${updDir.name}" differ from GitHub. Click Install update.`
+        : `Up to date: "${updDir.name}" matches GitHub.`);
+    } catch (err) { updError(err); }
+    finally { updBusy(false); }
+  }
+
+  // Step 2: download everything first (and check each file is exactly the repo's), only then back up and write.
+  // A connection that drops halfway therefore changes nothing.
+  async function updInstall() {
+    updBusy(true);
+    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+    try {
+      const got = [];
+      for (const [i, f] of updFiles.entries()) {
+        updLog(`Downloading ${i + 1}/${updFiles.length}: ${f.path}`);
+        // From the exact commit that was checked (not "main"), so it is never an older cached copy. Not counted in GitHub's hourly limit.
+        const res = await netFetch(`https://raw.githubusercontent.com/${REPO.owner}/${REPO.name}/${updCommit}/${f.path.split("/").map(encodeURIComponent).join("/")}`, { cache: "no-store" });
+        if (!res.ok) throw new Error(`Downloading ${f.path} failed (${res.status}). Nothing was changed; try again.`);
+        const bytes = await res.arrayBuffer();
+        if ((await blobSha(bytes)) !== f.sha) throw new Error(`${f.path} did not arrive intact. Nothing was changed; try again.`);
+        got.push({ ...f, bytes });
+      }
+      for (const f of got) {
+        updLog(`Writing ${f.path}`);
+        const old = await readLocal(updDir, f.path);
+        if (old) await writeLocal(updDir, `_backup/${stamp}/${f.path}`, old);
+        await writeLocal(updDir, f.path, f.bytes);
+      }
+      const ext = got.some((f) => f.path.startsWith("extension/"));
+      updFiles = []; updDone = true; renderUpd();
+      $("updGo").textContent = "↻ Reload Grid Player";
+      updLog(`Updated ${got.length} file${got.length === 1 ? "" : "s"} (old versions in _backup/${stamp}). Reload to use the new version.` +
+        (ext ? " The extension changed too: click its reload arrow in chrome://extensions." : ""));
+    } catch (err) { updError(err); }
+    finally { updBusy(false); }
+  }
+
+  const updToggle = (on) => {
+    $("upd").hidden = !on;
+    console.log(`[update] window ${on ? "open" : "closed"}`);
+    if (on) updCheck(false); // opening the window checks straight away (same as the links window)
+  };
+  $("updBtn").onclick = () => updToggle(true);
+  $("updClose").onclick = () => updToggle(false);
+  $("updCheck").onclick = () => updCheck(false);
+  $("updFolder").onclick = () => updCheck(true);
+  $("updGo").onclick = () => (updDone ? location.reload() : updInstall());
+  $("upd").onclick = (e) => { if (e.target === $("upd")) updToggle(false); };
+  addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("upd").hidden) updToggle(false); });
+
+  // ---- Extension check: nothing starts until the FastDL extension is installed. Runs every time the page opens. ----
+  // extension/grid-check.js runs on this page and leaves its version in <html data-grid-ext="…">. No answer = not installed,
+  // or "Allow access to file URLs" is off (from here the two look the same).
+  const EXT_WAIT_MS = 1500; // CHANGE HERE: how long to wait for the extension's answer
+  const extFound = () => document.documentElement.dataset.gridExt;
+  function extCheck() {
+    const t0 = performance.now();
+    (function look() {
+      if (extFound()) {
+        $("extGate").hidden = true;
+        console.log(`[ext] FastDL extension v${extFound()} found after ${Math.round(performance.now() - t0)} ms`);
+        return reclaim();
+      }
+      if (performance.now() - t0 < EXT_WAIT_MS) return setTimeout(look, 100);
+      $("extWait").hidden = true; $("extHelp").hidden = false; $("extRetry").hidden = false;
+      console.warn("[ext] FastDL extension not found: showing the install steps");
+    })();
+  }
+  // The extension folder next to this file, written the way the folder picker shows it (no leading "/" before C: on Windows)
+  $("extPath").textContent = decodeURIComponent(location.pathname.replace(/[^/]*$/, "")).replace(/^\/([A-Za-z]:)/, "$1") + "extension";
+  $("extCopy").append(copyBtn("chrome://extensions", "Copy"));
+  $("extRetry").onclick = () => location.reload(); // the extension only reaches a page when it loads, so check again = reload
+
   // ---- Trim: non-destructive. No re-encoding, no export: playback is simply confined to [In, Out]. ----
   // The clock shows time relative to In, so the clip behaves like a shorter video starting at 0.
   let tIn = 0, tOut = null; // tOut = null -> end of video
@@ -660,7 +895,7 @@
   }
   $("file").onchange = (e) => loadFile(e.target.files[0]);
   addEventListener("dragover", (e) => e.preventDefault());
-  addEventListener("drop", (e) => { e.preventDefault(); loadFile(e.dataTransfer.files[0]); });
+  addEventListener("drop", (e) => { e.preventDefault(); if ($("extGate").hidden) loadFile(e.dataTransfer.files[0]); }); // no video while the extension check covers the app
 
   v.addEventListener("loadedmetadata", () => {
     clearTrim(); // new video -> reset trim
@@ -696,7 +931,7 @@
   // Capture phase + stopPropagation: the video's own controls and focused buttons/checkboxes
   // never see these keys, so Space can't double-toggle or click whatever happens to be focused.
   addEventListener("keydown", (e) => {
-    if (!kbOn || !$("help").hidden || !$("links").hidden || typing(e) || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (!kbOn || !$("extGate").hidden || !$("help").hidden || !$("links").hidden || !$("upd").hidden || typing(e) || e.ctrlKey || e.metaKey || e.altKey) return;
     const key = e.key.toLowerCase();
     if (e.repeat && !key.startsWith("arrow")) return; // only the arrows auto-repeat
     const fn = KEYS[key];
@@ -743,4 +978,5 @@
   setSpeed(1);
   drawGrid();
   fit();
+  extCheck();
 </script>
