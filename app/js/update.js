@@ -1,4 +1,4 @@
-// js/update.js: Update from GitHub: compares this folder with the repo and copies in the files that changed (Chrome / Edge).
+// app/js/update.js: Update from GitHub: compares this folder with the repo and copies in the files that changed (Chrome / Edge).
 // Part of Grid Player, loaded by Grid-v5.html with a plain <script> (no modules, so it also works opened from disk).
 
 // ---- Update from GitHub: when online, compares this folder with the repo and copies in the files that changed. ----
@@ -22,7 +22,7 @@ async function blobSha(bytes) {
   return [...new Uint8Array(await crypto.subtle.digest("SHA-1", all))].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-// "extension/content.js" -> the bytes of that file in the folder, or null if it is not there
+// "app/extension/content.js" -> the bytes of that file in the folder, or null if it is not there
 async function readLocal(dir, path) {
   const parts = path.split("/"), name = parts.pop();
   try {
@@ -141,7 +141,7 @@ async function updInstall() {
       if (old) await writeLocal(updDir, `_backup/${stamp}/${f.path}`, old);
       await writeLocal(updDir, f.path, f.bytes);
     }
-    const ext = got.some((f) => f.path.startsWith("extension/"));
+    const ext = got.some((f) => f.path.startsWith("app/extension/"));
     updFiles = []; updDone = true; renderUpd();
     $("updGo").textContent = "↻ Reload Grid Player";
     updLog(`Updated ${got.length} file${got.length === 1 ? "" : "s"} (old versions in _backup/${stamp}). Reload to use the new version.` +

@@ -1,4 +1,4 @@
-// js/recording.js: Audio recording (Rec / Pause / Resume / Save) and Export audio (then opens TurboScribe).
+// app/js/recording.js: Audio recording (Rec / Pause / Resume / Save) and Export audio (then opens TurboScribe).
 // Part of Grid Player, loaded by Grid-v5.html with a plain <script> (no modules, so it also works opened from disk).
 
 // ---- Audio recording: one MediaRecorder, pause()/resume() => a single file ----

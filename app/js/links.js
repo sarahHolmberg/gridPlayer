@@ -1,4 +1,4 @@
-// js/links.js: Instagram links: the Next link box with Done (asks for the personal code), All links, Main / Dev / Mock.
+// app/js/links.js: Instagram links: the Next link box with Done (asks for the personal code), All links, Main / Dev / Mock.
 // Part of Grid Player, loaded by Grid-v5.html with a plain <script> (no modules, so it also works opened from disk).
 
 // ---- Instagram links: the side panel shows the NEXT link to work on (the oldest one) with Done beside it. ----

@@ -1,4 +1,4 @@
-// js/help.js: Floating cue strip and the Help window with the flow diagram.
+// app/js/help.js: Floating cue strip and the Help window with the flow diagram.
 // Part of Grid Player, loaded by Grid-v5.html with a plain <script> (no modules, so it also works opened from disk).
 
 // ---- Floating cue: the steps for recording one action. Edit CUE to change them. ----

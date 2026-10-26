@@ -1,4 +1,4 @@
-// js/keys.js: Keyboard shortcuts and the shortcut focus mode (green / orange frame).
+// app/js/keys.js: Keyboard shortcuts and the shortcut focus mode (green / orange frame).
 // Part of Grid Player, loaded by Grid-v5.html with a plain <script> (no modules, so it also works opened from disk).
 
 // Space = play/pause the VIDEO only. The recording is controlled with R (or the red button).

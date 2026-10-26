@@ -1,4 +1,4 @@
-// js/trim.js: Trim stage: In / Out, trim & continue, playback kept inside [In, Out], fine stepping, Export trim video (needs grid-trim.js).
+// app/js/trim.js: Trim stage: In / Out, trim & continue, playback kept inside [In, Out], fine stepping, Export trim video (needs grid-trim.js).
 // Part of Grid Player, loaded by Grid-v5.html with a plain <script> (no modules, so it also works opened from disk).
 
 // ---- Trim: non-destructive. No re-encoding, no export: playback is simply confined to [In, Out]. ----
@@ -67,7 +67,7 @@ function nudge(ms) {
 }
 
 // ---- Export trim video: cuts the loaded file between In and Out WITHOUT re-encoding (like a native trimmer): the picture and sound data are copied as they are. ----
-// Runs inside this page with grid-trim.js (keep it in the same folder as this file): no server, no internet.
+// Runs inside this page with grid-trim.js (app/grid-trim.js): no server, no internet.
 // mp4 / mov / m4v only; the container of the original is kept. The cut starts at the key frame before In and the extra frames are hidden, so playback starts at In.
 let exporting = false;
 let currentFile = null; // the File that was loaded: this exact file is what gets cut
@@ -80,7 +80,7 @@ function download(blob, name) {
 async function exportVideo() {
   if (exporting || !v.duration) return;
   if (!currentFile) { setStatus("Load the video with the file picker or by dragging it in, so it can be cut."); return; }
-  if (!window.GridTrim) { setStatus("grid-trim.js was not found. Put it in the same folder as this page and reload."); console.error("[export] window.GridTrim is missing"); return; }
+  if (!window.GridTrim) { setStatus("app/grid-trim.js was not found. Put the app folder back next to this page and reload."); console.error("[export] window.GridTrim is missing"); return; }
   exporting = true; $("exportBtn").disabled = true;
   const start = tIn, end = rangeEnd();
   console.log(`[export] cutting ${currentFile.name} ${start.toFixed(3)}..${end.toFixed(3)} without re-encoding`);

@@ -1,4 +1,4 @@
-// js/main.js: Start-up: loading videos, the clock, and what runs once when the app opens. Loaded last.
+// app/js/main.js: Start-up: loading videos, the clock, and what runs once when the app opens. Loaded last.
 // Part of Grid Player, loaded by Grid-v5.html with a plain <script> (no modules, so it also works opened from disk).
 
 // Time with millisecond precision (0.124 s), refreshed every screen frame

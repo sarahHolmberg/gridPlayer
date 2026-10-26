@@ -1,10 +1,10 @@
 <!doctype html>
 <!-- Grid-v5.html -->
-<!-- NOT NEW: existing file, changed (split up: the styles are now in grid.css and the code in the js/ folder, one file per feature; this file only holds the page layout. Keep grid.css, js/ and grid-trim.js next to it) -->
+<!-- NOT NEW: existing file, changed (everything except this page now lives in the app/ folder: styles, code, the video cutter and the extension. Double-click this file to start; keep the app folder next to it) -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Grid Player</title>
-<link rel="stylesheet" href="grid.css"> <!-- all the styles -->
+<link rel="stylesheet" href="app/grid.css"> <!-- all the styles -->
 
 <div id="win">
   <div id="titlebar">
@@ -165,7 +165,7 @@
   </div>
 </div>
 
-<!-- Extension check: shown from the start, hidden once the FastDL extension says it is installed (extension/grid-check.js) -->
+<!-- Extension check: shown from the start, hidden once the FastDL extension says it is installed (app/extension/grid-check.js) -->
 <div id="extGate">
   <div id="extBox">
     <div id="extTitle"><span>Grid Player needs its extension</span></div>
@@ -176,7 +176,7 @@
         <ol>
           <li>Open a new tab and paste <code>chrome://extensions</code> <span id="extCopy"></span><br>(a page is not allowed to open it for you)</li>
           <li>Turn on <b>Developer mode</b> (top right).</li>
-          <li>Click <b>Load unpacked</b> and pick the <b>extension</b> folder:<br><code id="extPath"></code></li>
+          <li>Click <b>Load unpacked</b> and pick the <b>extension</b> folder inside <b>app</b>:<br><code id="extPath"></code></li>
           <li>On its card click <b>Details</b> and turn on <b>Allow access to file URLs</b>. Without this the app cannot see the extension.</li>
           <li>Come back here and click <b>Check again</b>.</li>
         </ol>
@@ -187,14 +187,14 @@
   </div>
 </div>
 
-<script src="grid-trim.js"></script> <!-- the offline video cutter: keep it in the same folder as this file -->
-<!-- The app itself, split by feature. Plain scripts (not modules) so it also runs opened from disk; the ORDER matters: main.js last. -->
-<script src="js/core.js"></script>
-<script src="js/recording.js"></script>
-<script src="js/trim.js"></script>
-<script src="js/help.js"></script>
-<script src="js/links.js"></script>
-<script src="js/update.js"></script>
-<script src="js/extension-check.js"></script>
-<script src="js/keys.js"></script>
-<script src="js/main.js"></script>
+<script src="app/grid-trim.js"></script> <!-- the offline video cutter -->
+<!-- The app itself (app/js), split by feature. Plain scripts (not modules) so it also runs opened from disk; the ORDER matters: main.js last. -->
+<script src="app/js/core.js"></script>
+<script src="app/js/recording.js"></script>
+<script src="app/js/trim.js"></script>
+<script src="app/js/help.js"></script>
+<script src="app/js/links.js"></script>
+<script src="app/js/update.js"></script>
+<script src="app/js/extension-check.js"></script>
+<script src="app/js/keys.js"></script>
+<script src="app/js/main.js"></script>

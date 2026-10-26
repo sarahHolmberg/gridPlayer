@@ -1,4 +1,4 @@
-/* grid.css: all the styles of Grid Player (loaded by Grid-v5.html) */
+/* app/grid.css: all the styles of Grid Player (loaded by Grid-v5.html) */
 
 * { box-sizing: border-box; }
 [hidden] { display: none !important; } /* "hidden" always wins, also on buttons (their display: inline-block would otherwise show them) */

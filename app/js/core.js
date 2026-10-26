@@ -1,4 +1,4 @@
-// js/core.js: Shared helpers: $, the video, fit, status bar, grid, speed buttons, the internet light (netFetch) and copy buttons.
+// app/js/core.js: Shared helpers: $, the video, fit, status bar, grid, speed buttons, the internet light (netFetch) and copy buttons.
 // Part of Grid Player, loaded by Grid-v5.html with a plain <script> (no modules, so it also works opened from disk).
 
 const $ = (id) => document.getElementById(id);
