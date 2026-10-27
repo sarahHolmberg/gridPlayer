@@ -1,152 +1,135 @@
 <!doctype html>
 <!-- Grid-v5.html -->
-<!-- NOT NEW: existing file, changed (everything except this page now lives in the app/ folder: styles, code, the video cutter and the extension. Double-click this file to start; keep the app folder next to it) -->
+<!-- NOT NEW: existing file, changed (minimal redesign: the side panel only shows the Next link and the step you are on (open a video, trim, record); everything else is in the ⋯ menu at the top right. Everything else lives in the app/ folder) -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Grid Player</title>
 <link rel="stylesheet" href="app/grid.css"> <!-- all the styles -->
 
 <div id="win">
-  <div id="titlebar">
+  <header id="titlebar">
     <div id="title">Grid Player</div>
-    <div id="net" title="Internet light: red = this app is not using the internet, green = it is using it right now"><i></i>Internet</div>
-    <div class="wbtn" aria-hidden="true">_</div><div class="wbtn" aria-hidden="true">□</div><div class="wbtn x" aria-hidden="true">✕</div>
-  </div>
+    <div id="net" title="Internet light: red = this app is not using the internet, green = it is using it right now"><i></i></div>
+    <button id="menuBtn" class="icon" title="More: help, update, settings, keys" aria-haspopup="true" aria-expanded="false">⋯</button>
+  </header>
 
-  <div id="client">
-    <div id="main">
-      <!-- The video is the main thing -->
-      <div id="stage" tabindex="-1">
-        <div id="wrap">
-          <video id="v" controls playsinline></video>
-          <div id="grid"></div>
-          <div id="cue" class="grid-only"></div>
-          <button id="infoBtn" class="grid-only" title="Recording steps (Q)">ℹ</button>
-        </div>
+  <div id="main">
+    <!-- The video is the main thing -->
+    <div id="stage" tabindex="-1">
+      <div id="wrap">
+        <video id="v" controls playsinline></video>
+        <div id="grid"></div>
+        <div id="cue" class="grid-only"></div>
+        <button id="infoBtn" class="grid-only" title="Recording steps (Q)">ℹ</button>
       </div>
-
-      <!-- Controls live around it -->
-      <div id="side">
-        <button id="helpBtn" title="Workflow help">❓ Help / Workflow</button>
-        <button id="updBtn" title="When you are online: get the newest version of this app from GitHub">⟳ Update from GitHub</button>
-        <button id="kbBtn" data-st="on" title="Turn keyboard shortcuts on/off. Green frame around the video = keys are live."></button>
-
-        <!-- The Instagram link to work on now (the oldest one), Done beside it. Filled by the script below. -->
-        <fieldset id="next">
-          <legend id="nextLegend">Next link</legend>
-          <div id="nextItem"></div>
-          <div id="linksMsg" role="status"></div>
-          <div class="row">
-            <button id="allBtn" title="Show / hide the whole list">▸ All links</button>
-            <button id="fetchBtn" title="Load the links again">↻</button>
-          </div>
-          <div id="allBox" hidden>
-            <div id="serverToggle" role="group" aria-label="Server">
-              <button data-server="main" title="The live site (studiomirrors.netlify.app)">Main</button>
-              <button data-server="dev" title="Your local dev server (npx netlify dev)">Dev</button>
-              <button data-server="mock" title="A pretend list inside this page, to try Done safely">Mock</button>
-            </div>
-            <button id="mockReset" hidden title="Put the pretend list back to its 4 links">↺ Reset mock list</button>
-            <div id="linksList"></div>
-          </div>
-        </fieldset>
-
-        <fieldset>
-          <legend>Video</legend>
-          <div class="row">
-            <label class="btn" for="file">📂 Open file…</label>
-            <input type="file" id="file" accept="video/*">
-          </div>
-          <div class="row" style="color:#555">…or drop a video file anywhere</div>
-        </fieldset>
-
-        <fieldset class="grid-only">
-          <legend>Grid</legend>
-          <div class="row">
-            <label>Size <input type="number" id="n" value="15" min="1" max="26"></label>
-            <label>Opacity <input type="range" id="op" min="0.1" max="1" step="0.1" value="0.6" style="width:70px;vertical-align:middle"></label>
-          </div>
-          <div class="row">
-            <label><input type="checkbox" id="show" checked> Grid <kbd>(G)</kbd></label>
-            <label><input type="checkbox" id="lbl" checked> Names <kbd>(N)</kbd></label>
-          </div>
-          <div class="row"><button id="backBtn" title="Back to trimming">✂ Back to trim <kbd>(T)</kbd></button></div>
-        </fieldset>
-
-        <fieldset>
-          <legend>Playback</legend>
-          <div class="row"><span class="lcd" id="time" title="Time from the In point">0.000 s</span></div>
-          <div class="row" id="speeds"></div>
-          <div class="row"><label><input type="checkbox" id="loop"> Loop <kbd>(L)</kbd></label></div>
-          <div class="row"><label title="Time moved per ←/→ press (Shift = 1 s)">Step <input type="number" id="step" value="40" min="1" max="5000" step="10"> ms</label></div>
-        </fieldset>
-
-        <fieldset class="trim-only">
-          <legend>Trim</legend>
-          <div class="row">
-            <button id="inBtn" title="Set In point at current time">[ In <kbd>(I)</kbd></button>
-            <button id="outBtn" title="Set Out point at current time">Out ] <kbd>(O)</kbd></button>
-          </div>
-          <div class="row">
-            <button id="clrBtn" title="Clear trim">Clear <kbd>(X)</kbd></button>
-          </div>
-          <div class="row"><span id="trimInfo"></span></div>
-          <div class="row"><button id="goBtn" disabled title="Use this range and continue (Enter)">✂ Trim &amp; continue <kbd>(Enter)</kbd></button></div>
-        </fieldset>
-
-        <fieldset class="grid-only">
-          <legend>Audio recording</legend>
-          <div class="row" style="align-items:flex-start">
-            <div class="recWrap">
-              <button id="recBtn" data-st="idle" title="Record / Pause / Resume (R)"></button>
-              <span id="recLbl">Rec</span>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:6px">
-              <span class="lcd sm" id="recTime">0:00.0</span>
-              <button id="saveBtn" disabled title="Stop and save as one file">💾 Save</button>
-            </div>
-          </div>
-          <button id="audioBtn" disabled title="Download the recording, then open TurboScribe">⬇ Export audio</button>
-          <button id="exportBtn" disabled title="Cut the video at In/Out without re-encoding: same quality, works offline (mp4 / mov)">⬇ Export trim video</button>
-        </fieldset>
-
-        <fieldset>
-          <legend>Keys</legend>
-          <div style="line-height:1.7;color:#333">
-            <span class="grid-only"><kbd>R</kbd> record / pause rec<br></span>
-            <kbd>Space</kbd> play / pause video<br>
-            <span class="trim-only"><kbd>I</kbd> / <kbd>O</kbd> in / out · <kbd>X</kbd> clear · <kbd>Enter</kbd> trim &amp; continue<br></span>
-            <kbd>A</kbd> slower · <kbd>D</kbd> faster<br>
-            <kbd>←</kbd> / <kbd>→</kbd> fine step · <kbd>Shift</kbd> 1 s<br>
-            <span class="grid-only"><kbd>G</kbd> grid · <kbd>N</kbd> names · <kbd>Q</kbd> steps · <kbd>T</kbd> back to trim<br></span>
-            <kbd>L</kbd> loop<br>
-            <kbd>H</kbd> hide this panel
-          </div>
-        </fieldset>
-      </div>
+      <!-- Before a video is open, this is the only thing on the stage -->
+      <label id="openHint" class="no-video-only" for="file"><b>📂 Open a video</b><span>or drop it anywhere</span></label>
     </div>
 
-    <div id="status"><span id="stText">Ready</span></div>
+    <!-- Side panel: the next link, then only the card for the step you are on -->
+    <aside id="side">
+      <section class="card" id="next">
+        <div class="cardHead"><h3 id="nextLegend">Next link</h3><button id="fetchBtn" class="icon" title="Load the links again">↻</button></div>
+        <div id="nextItem"></div>
+        <div class="row"><span id="linksMsg" role="status"></span><button id="allBtn" class="link" title="Show / hide the whole list">▸ All links</button></div>
+        <div id="allBox" hidden><div id="linksList"></div></div>
+      </section>
+
+      <!-- Playback: needed in both steps -->
+      <section class="card needs-video">
+        <div class="row between">
+          <span class="lcd" id="time" title="Time from the In point">0.000 s</span>
+          <div id="speeds" class="seg" title="Speed (A slower, D faster)"></div>
+        </div>
+      </section>
+
+      <!-- Step 1: trim -->
+      <section class="card needs-video trim-only">
+        <h3>Trim</h3>
+        <div class="row">
+          <button id="inBtn" title="Set In point at current time">[ In <kbd>I</kbd></button>
+          <button id="outBtn" title="Set Out point at current time">Out ] <kbd>O</kbd></button>
+          <button id="clrBtn" class="quiet" title="Clear trim">Clear <kbd>X</kbd></button>
+        </div>
+        <div id="trimInfo"></div>
+        <button id="goBtn" class="primary wide" disabled title="Use this range and continue (Enter)">✂ Trim &amp; continue <kbd>Enter</kbd></button>
+      </section>
+
+      <!-- Step 2: record -->
+      <section class="card needs-video grid-only">
+        <h3>Record</h3>
+        <div class="row">
+          <button id="recBtn" data-st="idle" title="Record / Pause / Resume (R)"></button>
+          <span id="recLbl">Rec</span>
+          <span class="lcd sm" id="recTime">0:00.0</span>
+          <button id="saveBtn" disabled title="Stop and save as one file">💾 Save</button>
+        </div>
+        <button id="audioBtn" class="primary wide" disabled title="Download the recording, then open TurboScribe">⬇ Export audio</button>
+        <button id="exportBtn" class="wide" disabled title="Cut the video at In/Out without re-encoding: same quality, works offline (mp4 / mov)">⬇ Export trim video</button>
+        <div class="row">
+          <label class="chip"><input type="checkbox" id="show" checked> Grid <kbd>G</kbd></label>
+          <label class="chip"><input type="checkbox" id="lbl" checked> Names <kbd>N</kbd></label>
+          <button id="backBtn" class="quiet" title="Back to trimming">✂ Back to trim <kbd>T</kbd></button>
+        </div>
+      </section>
+
+      <div id="status">
+        <span id="stText">Ready</span>
+        <label class="link needs-video" for="file" title="Open a different video">Open another</label>
+      </div>
+    </aside>
+  </div>
+</div>
+<input type="file" id="file" accept="video/*" hidden>
+
+<!-- ⋯ menu: everything that is not needed all the time -->
+<div id="menu" hidden>
+  <button id="helpBtn" title="Workflow help">❓ Help / workflow</button>
+  <button id="updBtn" title="When you are online: get the newest version of this app from GitHub">⟳ Update from GitHub</button>
+  <button id="kbBtn" data-st="on" title="Turn keyboard shortcuts on/off. Green frame around the video = keys are live."></button>
+
+  <h4>Settings</h4>
+  <label class="set">Grid size <input type="number" id="n" value="15" min="1" max="26"></label>
+  <label class="set">Grid opacity <input type="range" id="op" min="0.1" max="1" step="0.1" value="0.6"></label>
+  <label class="set" title="Time moved per ←/→ press (Shift = 1 s)">Step (ms) <input type="number" id="step" value="40" min="1" max="5000" step="10"></label>
+  <label class="set">Loop the video <span><input type="checkbox" id="loop"> <kbd>L</kbd></span></label>
+
+  <h4>Links from</h4>
+  <div id="serverToggle" class="seg" role="group" aria-label="Server">
+    <button data-server="main" title="The live site (studiomirrors.netlify.app)">Main</button>
+    <button data-server="dev" title="Your local dev server (npx netlify dev)">Dev</button>
+    <button data-server="mock" title="A pretend list inside this page, to try Done safely (its code is MOCK)">Mock</button>
+  </div>
+  <button id="mockReset" hidden title="Put the pretend list back to its 4 links">↺ Reset mock list</button>
+
+  <h4>Keys</h4>
+  <div class="keys">
+    <span class="grid-only"><kbd>R</kbd> record / pause rec<br></span>
+    <kbd>Space</kbd> play / pause video<br>
+    <span class="trim-only"><kbd>I</kbd> / <kbd>O</kbd> in / out · <kbd>X</kbd> clear · <kbd>Enter</kbd> trim &amp; continue<br></span>
+    <kbd>A</kbd> slower · <kbd>D</kbd> faster<br>
+    <kbd>←</kbd> / <kbd>→</kbd> fine step · <kbd>Shift</kbd> 1 s<br>
+    <span class="grid-only"><kbd>G</kbd> grid · <kbd>N</kbd> names · <kbd>Q</kbd> steps · <kbd>T</kbd> back to trim<br></span>
+    <kbd>L</kbd> loop · <kbd>H</kbd> hide the side panel
   </div>
 </div>
 
 <div id="help" hidden>
   <div id="helpBox">
-    <div id="helpTitle"><span>Help</span><div class="wbtn x" id="helpClose" style="cursor:pointer">✕</div></div>
-    <div class="tabs"><button class="tab on" data-tab="flow">Flow diagram</button></div>
+    <div id="helpTitle"><span>Workflow</span><button class="icon" id="helpClose" title="Close">✕</button></div>
     <div id="flow"></div>
   </div>
 </div>
 
-<!-- Done: asks for your personal code before the link is removed -->
+<!-- Done: asks for your personal code; the website checks it before the link is removed -->
 <div id="doneDlg" hidden>
   <div id="doneBox">
-    <div id="doneTitle"><span>Done with this link?</span><div class="wbtn x" id="doneClose" style="cursor:pointer">✕</div></div>
+    <div id="doneTitle"><span>Done with this link?</span><button class="icon" id="doneClose" title="Close">✕</button></div>
     <form id="doneForm">
       <div id="doneWhat"></div>
       <label>Personal code <input type="password" id="doneCode" autocomplete="off"></label>
       <div id="doneMsg" role="status"></div>
-      <div class="row"><button type="submit" id="doneOk">✔ Done, remove it</button><button type="button" id="doneCancel">Cancel</button></div>
+      <div class="row"><button type="submit" id="doneOk" class="primary">✔ Done, remove it</button><button type="button" id="doneCancel" class="quiet">Cancel</button></div>
     </form>
   </div>
 </div>
@@ -154,11 +137,11 @@
 <!-- Update from GitHub: filled by the script below. Only goes online when you open it or click Check. -->
 <div id="upd" hidden>
   <div id="updBox">
-    <div id="updTitle"><span>Update from GitHub</span><div class="wbtn x" id="updClose" style="cursor:pointer">✕</div></div>
+    <div id="updTitle"><span>Update from GitHub</span><button class="icon" id="updClose" title="Close">✕</button></div>
     <div id="updForm">
       <button id="updCheck" title="Compare this folder with the repo">↻ Check</button>
       <button id="updFolder" title="Pick the Grid Player folder again">📂 Change folder</button>
-      <button id="updGo" disabled title="Download the files below and replace them in this folder">⬇ Install update</button>
+      <button id="updGo" class="primary" disabled title="Download the files below and replace them in this folder">⬇ Install update</button>
     </div>
     <div id="updMsg" role="status"></div>
     <div id="updList"></div>
@@ -183,7 +166,7 @@
         Already installed? Click its reload arrow ⟳ on chrome://extensions (older copies cannot talk to the app), and check step 4.
       </div>
     </div>
-    <div id="extBtns"><button id="extRetry" hidden title="Reload the app and look for the extension again">↻ Check again</button></div>
+    <div id="extBtns"><button id="extRetry" class="primary" hidden title="Reload the app and look for the extension again">↻ Check again</button></div>
   </div>
 </div>
 
@@ -196,5 +179,6 @@
 <script src="app/js/links.js"></script>
 <script src="app/js/update.js"></script>
 <script src="app/js/extension-check.js"></script>
+<script src="app/js/menu.js"></script>
 <script src="app/js/keys.js"></script>
 <script src="app/js/main.js"></script>

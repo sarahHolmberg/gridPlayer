@@ -23,6 +23,7 @@ addEventListener("dragover", (e) => e.preventDefault());
 addEventListener("drop", (e) => { e.preventDefault(); if ($("extGate").hidden) loadFile(e.dataTransfer.files[0]); }); // no video while the extension check covers the app
 
 v.addEventListener("loadedmetadata", () => {
+  document.body.classList.add("has-video"); // shows the playback / trim / record cards (grid.css)
   clearTrim(); // new video -> reset trim
   $("goBtn").disabled = false;
   $("exportBtn").disabled = false;

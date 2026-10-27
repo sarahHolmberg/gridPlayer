@@ -5,7 +5,7 @@
 // Offline the app works exactly as before: nothing is checked or downloaded until you open this window.
 // Needs Chrome or Edge: a web page can only write into a folder you pick yourself (File System Access API).
 // Files that only exist on this computer are never touched or deleted. Every file that gets replaced is first
-// copied to _backup/<date>/ inside the folder, so you can put the old one back by hand.
+// copied to _backup/ inside the folder, so you can put the old one back by hand. Only the most recent update's backup is kept.
 const REPO = { owner: "sarahHolmberg", name: "gridPlayer", branch: "main" }; // CHANGE HERE: where updates come from
 const API = `https://api.github.com/repos/${REPO.owner}/${REPO.name}`;
 const SKIP = (path) => path.split("/").some((p) => p.startsWith(".")); // .DS_Store, .github, ... are never copied
@@ -123,7 +123,6 @@ async function updCheck(pickAgain) {
 // A connection that drops halfway therefore changes nothing.
 async function updInstall() {
   updBusy(true);
-  const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
   try {
     const got = [];
     for (const [i, f] of updFiles.entries()) {
@@ -135,16 +134,18 @@ async function updInstall() {
       if ((await blobSha(bytes)) !== f.sha) throw new Error(`${f.path} did not arrive intact. Nothing was changed; try again.`);
       got.push({ ...f, bytes });
     }
+    // Only the newest backup is kept: the previous one goes first (nothing to remove the first time).
+    await updDir.removeEntry("_backup", { recursive: true }).catch((err) => { if (err.name !== "NotFoundError") throw err; });
     for (const f of got) {
       updLog(`Writing ${f.path}`);
       const old = await readLocal(updDir, f.path);
-      if (old) await writeLocal(updDir, `_backup/${stamp}/${f.path}`, old);
+      if (old) await writeLocal(updDir, `_backup/${f.path}`, old);
       await writeLocal(updDir, f.path, f.bytes);
     }
     const ext = got.some((f) => f.path.startsWith("app/extension/"));
     updFiles = []; updDone = true; renderUpd();
     $("updGo").textContent = "↻ Reload Grid Player";
-    updLog(`Updated ${got.length} file${got.length === 1 ? "" : "s"} (old versions in _backup/${stamp}). Reload to use the new version.` +
+    updLog(`Updated ${got.length} file${got.length === 1 ? "" : "s"} (old versions in _backup). Reload to use the new version.` +
       (ext ? " The extension changed too: click its reload arrow in chrome://extensions." : ""));
   } catch (err) { updError(err); }
   finally { updBusy(false); }

@@ -3,7 +3,8 @@
 
 // ---- Instagram links: the side panel shows the NEXT link to work on (the oldest one) with Done beside it. ----
 // "▸ All links" opens the whole list underneath (same rows as before: link, name, Copy name). This page holds no data:
-// it only displays what the server sends. Done asks for your personal code, removes the link, and the next one moves up.
+// it only displays what the server sends. Done asks for your personal code and sends it to the website, which checks it
+// (the real code is only on the website, never in this app) and removes the link; the next one moves up.
 // CHANGE HERE: where the list comes from. If your dev address is different (for example a Codespaces
 // address like https://<name>-8888.app.github.dev), put it in "dev". "mock" is a pretend list inside this page.
 const SERVERS = {
@@ -11,8 +12,7 @@ const SERVERS = {
   dev: "http://localhost:8888/.netlify/functions/links-api",
   mock: null,
 };
-let linksServer = "mock"; // CHANGE HERE: used until you pick one with the toggle (set back to "main" once Done works on the real server)
-const DONE_CODE = "LEGBANEJEAN"; // CHANGE HERE: your personal code for Done (capitals do not matter). Temporary: the real check belongs on the server.
+let linksServer = "main"; // CHANGE HERE: used until you pick one with the toggle (menu ⋯ -> Links from)
 let links = [], allOpen = false; // the list, oldest first (links[0] = the one to work on now); whether "All links" is open
 
 // ---- Mock server: a pretend list kept in this browser (localStorage), so Done can be tried without touching the real one ----
@@ -22,6 +22,7 @@ const MOCK_LINKS = [ // out of order on purpose: the app must still show MOCK-FI
   { id: "m4", link: "https://www.instagram.com/reel/MOCK-FOURTH/", name: "", createdAt: "2026-10-04T09:00:00Z" },
   { id: "m2", link: "https://www.instagram.com/reel/MOCK-SECOND/", name: "Mock Ben", createdAt: "2026-10-02T09:00:00Z" },
 ];
+const MOCK_CODE = "MOCK"; // the pretend list's own code for Done (capitals do not matter); the real one is set in Netlify
 const mock = {
   load() { try { return JSON.parse(localStorage.getItem("mockLinks")) ?? MOCK_LINKS; } catch { return MOCK_LINKS; } },
   save(list) { try { localStorage.setItem("mockLinks", JSON.stringify(list)); } catch {} },
@@ -37,24 +38,39 @@ async function getLinks(server) {
   if (!res.ok) throw new Error(data.error || "Request failed.");
   return data.links || [];
 }
-// Only the mock can remove links for now: the real server's delete is added once the studiomirrors code is here.
-async function removeLink(server, it) {
-  if (server === "mock") { await mock.wait(); mock.save(mock.load().filter((x) => x.id !== it.id)); return; }
-  throw new Error(`Removing links on the ${server} server is not set up yet. Open "All links" and pick Mock to try Done.`);
+// Real servers: DELETE { id, code } -> the website checks the code (403 = wrong) and removes that one link
+const wrongCode = () => Object.assign(new Error("Wrong code. Try again."), { wrongCode: true });
+async function removeLink(server, it, code) {
+  if (server === "mock") {
+    await mock.wait();
+    if (code.trim().toUpperCase() !== MOCK_CODE) throw wrongCode();
+    mock.save(mock.load().filter((x) => x.id !== it.id));
+    return;
+  }
+  const res = await netFetch(SERVERS[server], {
+    method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: it.id, code }), cache: "no-store",
+  });
+  const data = await res.json().catch(() => ({}));
+  console.log(`[done] status ${res.status}`);
+  if (res.status === 403) throw wrongCode();
+  if (res.status === 404) return; // already removed (for example on the Video Vault page): same result
+  if (!res.ok) throw new Error(data.error || `Removing failed (${res.status}).`);
 }
-// Oldest first: by createdAt when the server sends it, otherwise the server's own order is kept (sort is stable)
-const byAge = (list) => [...list].sort((a, b) => (Date.parse(a.createdAt) || 0) - (Date.parse(b.createdAt) || 0));
+// Oldest first: by createdAt when the server sends it, then by id (a newer link gets a bigger id)
+const byAge = (list) => [...list].sort((a, b) => (Date.parse(a.createdAt) || 0) - (Date.parse(b.createdAt) || 0) || a.id - b.id);
 
 // CHANGE HERE: every link is shown (and opened) as ONE link = this prefix + the Instagram link.
 const LINK_PREFIX = "https://f-d.app/";
 
 const fullLink = (it) => (it.link.startsWith(LINK_PREFIX) ? it.link : LINK_PREFIX + it.link); // one link: prefix + Instagram link
+// What the link SAYS (short, so it fits): "f-d.app › instagram.com/reel/…". Clicking still opens the full link; hovering shows it.
+const shortLink = (it) => "f-d.app › " + fullLink(it).slice(LINK_PREFIX.length).replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 
 function linkRow(it) {
   const row = document.createElement("div");
   row.className = "lk";
   const a = document.createElement("a");
-  a.href = fullLink(it); a.target = "_blank"; a.rel = "noopener noreferrer"; a.textContent = fullLink(it);
+  a.href = a.title = fullLink(it); a.target = "_blank"; a.rel = "noopener noreferrer"; a.textContent = shortLink(it);
   row.append(a); // the link has no copy button
   if (it.name) {
     const who = document.createElement("span");
@@ -129,20 +145,20 @@ function doneOpen(it) {
 function doneClose() { $("doneDlg").hidden = true; doneItem = null; reclaim(); }
 $("doneForm").onsubmit = async (e) => {
   e.preventDefault();
-  if ($("doneCode").value.trim().toUpperCase() !== DONE_CODE.toUpperCase()) {
-    console.warn("[done] wrong code");
-    $("doneMsg").textContent = "Wrong code. Try again.";
-    return $("doneCode").select();
-  }
-  $("doneOk").disabled = true; $("doneMsg").textContent = "Removing…";
+  const code = $("doneCode").value;
+  if (!code.trim()) { $("doneMsg").textContent = "Type your code first."; return $("doneCode").focus(); }
+  $("doneOk").disabled = true; $("doneMsg").textContent = "Checking…";
   try {
-    await removeLink(linksServer, doneItem);
+    await removeLink(linksServer, doneItem, code);
     console.log(`[done] removed ${doneItem.link}`);
     doneClose();
     fetchLinks(); // the next link moves up
   } catch (err) {
-    console.error("[done] FAILED:", err);
-    $("doneMsg").textContent = err instanceof TypeError ? "Cannot reach the server (offline?). Nothing was removed." : err.message;
+    console.error("[done] FAILED:", err.message);
+    $("doneMsg").textContent = err instanceof TypeError
+      ? "Cannot reach the website (offline, or it does not accept Done yet). Nothing was removed."
+      : err.message;
+    if (err.wrongCode) $("doneCode").select();
   } finally {
     $("doneOk").disabled = false;
   }
