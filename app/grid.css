@@ -135,6 +135,9 @@ body.hide-side #side { display: none; }
 .lk:last-child { border-bottom: 0; }
 .lk > a { flex: 1; min-width: 0; overflow-wrap: anywhere; font-size: 12px; color: var(--accent); text-decoration: none; }
 .lk > a:hover { text-decoration: underline; }
+.lk > a.ig { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px;
+             border-radius: 6px; color: #c13584; } /* opens the plain Instagram link (no f-d.app) */
+.lk > a.ig:hover { background: #fbe7f1; }
 .ln { order: -1; flex-basis: 100%; display: flex; align-items: center; gap: 6px; } /* the name line */
 .who { font-weight: 600; overflow-wrap: anywhere; }
 .ln button { min-height: 22px; padding: 0 6px; font-size: 11px; }

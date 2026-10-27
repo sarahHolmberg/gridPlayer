@@ -64,6 +64,9 @@ const LINK_PREFIX = "https://f-d.app/";
 
 const fullLink = (it) => (it.link.startsWith(LINK_PREFIX) ? it.link : LINK_PREFIX + it.link); // one link: prefix + Instagram link
 // What the link SAYS (short, so it fits): "f-d.app › instagram.com/reel/…". Clicking still opens the full link; hovering shows it.
+// The plain Instagram link, without f-d.app in front: the small Instagram button beside every link opens it
+const instaLink = (it) => (it.link.startsWith(LINK_PREFIX) ? it.link.slice(LINK_PREFIX.length) : it.link);
+const IG_ICON = '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.3" cy="6.7" r="1.3" fill="currentColor"/></svg>';
 const shortLink = (it) => "f-d.app › " + fullLink(it).slice(LINK_PREFIX.length).replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
 
 function linkRow(it) {
@@ -71,7 +74,10 @@ function linkRow(it) {
   row.className = "lk";
   const a = document.createElement("a");
   a.href = a.title = fullLink(it); a.target = "_blank"; a.rel = "noopener noreferrer"; a.textContent = shortLink(it);
-  row.append(a); // the link has no copy button
+  const ig = document.createElement("a");
+  ig.className = "ig"; ig.href = ig.title = instaLink(it); ig.target = "_blank"; ig.rel = "noopener noreferrer";
+  ig.innerHTML = IG_ICON; ig.setAttribute("aria-label", "Open on Instagram");
+  row.append(a, ig); // the link has no copy button; the Instagram button sits right beside it
   if (it.name) {
     const who = document.createElement("span");
     who.className = "who";
@@ -90,7 +96,7 @@ function renderLinks(slideIn) {
     const done = document.createElement("button");
     done.id = "doneBtn"; done.textContent = "✔ Done"; done.title = "Finished with this link: remove it (asks for your code)";
     done.onclick = () => doneOpen(now);
-    row.firstChild.after(done); // Done sits right beside the link
+    row.querySelector(".ig").after(done); // Done sits right beside the link (after its Instagram button)
     if (slideIn) row.classList.add("enter"); // after a Done: the next link slides in (grid.css)
     $("nextItem").append(row);
   }
