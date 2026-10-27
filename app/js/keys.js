@@ -24,7 +24,7 @@ const typing = (e) => e.target.matches("input[type=number], input[type=text], in
 // Capture phase + stopPropagation: the video's own controls and focused buttons/checkboxes
 // never see these keys, so Space can't double-toggle or click whatever happens to be focused.
 addEventListener("keydown", (e) => {
-  if (!kbOn || !$("extGate").hidden || !$("help").hidden || !$("doneDlg").hidden || !$("upd").hidden || typing(e) || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (!kbOn || isBusy() || !$("extGate").hidden || !$("help").hidden || !$("doneDlg").hidden || !$("upd").hidden || typing(e) || e.ctrlKey || e.metaKey || e.altKey) return;
   const key = e.key.toLowerCase();
   if (e.repeat && !key.startsWith("arrow")) return; // only the arrows auto-repeat
   const fn = KEYS[key];

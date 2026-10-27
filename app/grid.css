@@ -178,6 +178,26 @@ body.hide-side #side { display: none; }
 #doneWhat { overflow-wrap: anywhere; font-size: 12px; }
 #doneMsg { min-height: 16px; color: var(--rec); }
 
+/* ---------- Done animation: tick in the window, the window fades away, the link swipes out, the next one slides in ---------- */
+body.busy::after { content: ""; position: fixed; inset: 0; z-index: 40; cursor: progress; } /* nothing can be clicked meanwhile */
+#next { overflow: hidden; } /* the swiping link does not spill out of its card */
+#doneOkMsg { padding: 22px 16px 30px; text-align: center; font-size: 15px; font-weight: 600; color: var(--ok); animation: pop .3s ease-out; }
+#doneOkMsg b { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; margin: 0 auto 10px;
+               border-radius: 50%; background: var(--ok); color: #fff; font-size: 24px; }
+#doneDlg.leaving { animation: fadeOut .25s ease-in forwards; }
+#doneDlg.leaving #doneBox { animation: shrink .25s ease-in forwards; }
+#nextItem .lk.swipe { animation: swipeOut .35s ease-in forwards; }
+#nextItem .lk.enter { animation: slideIn .35s ease-out; }
+.deleted { color: var(--ok); font-weight: 600; padding: 6px 0; animation: pop .25s ease-out; }
+@keyframes pop { from { transform: scale(.6); opacity: 0; } }
+@keyframes fadeOut { to { opacity: 0; } }
+@keyframes shrink { to { transform: scale(.94) translateY(8px); } }
+@keyframes swipeOut { to { transform: translateX(110%); opacity: 0; } }
+@keyframes slideIn { from { transform: translateX(-24px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { /* computers set to "reduce motion": no movement, same steps */
+  #doneOkMsg, #doneDlg.leaving, #doneDlg.leaving #doneBox, #nextItem .lk.swipe, #nextItem .lk.enter, .deleted { animation-duration: 1ms; }
+}
+
 /* ---------- Extension check: covers the whole app until the extension answers ---------- */
 #extGate { position: fixed; inset: 0; z-index: 20; background: var(--bg); display: flex; align-items: center; justify-content: center; }
 #extBox { width: min(500px, 94vw); max-height: 90vh; overflow-y: auto; background: var(--panel); border: 1px solid var(--line);

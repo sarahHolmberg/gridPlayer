@@ -81,7 +81,7 @@ function linkRow(it) {
   return row;
 }
 
-function renderLinks() {
+function renderLinks(slideIn) {
   const now = links[0];
   $("nextLegend").textContent = "Next link" + (linksServer === "mock" ? " (MOCK)" : "");
   $("nextItem").innerHTML = "";
@@ -91,6 +91,7 @@ function renderLinks() {
     done.id = "doneBtn"; done.textContent = "✔ Done"; done.title = "Finished with this link: remove it (asks for your code)";
     done.onclick = () => doneOpen(now);
     row.firstChild.after(done); // Done sits right beside the link
+    if (slideIn) row.classList.add("enter"); // after a Done: the next link slides in (grid.css)
     $("nextItem").append(row);
   }
   $("linksMsg").textContent = !links.length ? "No links waiting. 🎉" : links.length === 1 ? "Nothing else waiting." : `${links.length - 1} more waiting`;
@@ -138,21 +139,50 @@ function doneOpen(it) {
   doneItem = it;
   $("doneWhat").textContent = (it.name ? it.name + " · " : "") + fullLink(it);
   $("doneCode").value = ""; $("doneMsg").textContent = "";
+  $("doneForm").hidden = false; $("doneOkMsg").hidden = true;
   $("doneDlg").hidden = false;
   $("doneCode").focus();
   console.log(`[done] asking for the code: ${it.link}`);
 }
-function doneClose() { $("doneDlg").hidden = true; doneItem = null; reclaim(); }
+function doneClose() { if (isBusy()) return; $("doneDlg").hidden = true; doneItem = null; reclaim(); }
+
+// ---- Done animation: tick in the window -> window fades away -> the link swipes out -> "Video deleted" -> next link slides in ----
+// From the click until the next link is in place the page is busy: clicks, keys and dropped files are ignored (grid.css body.busy).
+const DONE_MS = { tick: 700, leave: 250, swipe: 350, deleted: 800 }; // CHANGE HERE: how long each part of the animation lasts
+const pause = (ms) => new Promise((r) => setTimeout(r, ms));
+const isBusy = () => document.body.classList.contains("busy");
+const setBusy = (on) => { document.body.classList.toggle("busy", on); console.log(`[done] page ${on ? "busy" : "free again"}`); };
+
+async function doneAnimation(server) {
+  const next = getLinks(server).catch((err) => err); // load the next link while the animation plays
+  $("doneForm").hidden = true; $("doneOkMsg").hidden = false; // the green tick
+  await pause(DONE_MS.tick);
+  $("doneDlg").classList.add("leaving");
+  await pause(DONE_MS.leave);
+  $("doneDlg").hidden = true; $("doneDlg").classList.remove("leaving");
+  $("nextItem").querySelector(".lk")?.classList.add("swipe");
+  await pause(DONE_MS.swipe);
+  $("nextItem").innerHTML = '<div class="deleted">✓ Video deleted</div>';
+  const [list] = await Promise.all([next, pause(DONE_MS.deleted)]);
+  if (server !== linksServer) return; // the toggle was switched meanwhile
+  if (list instanceof Error) return fetchLinks(); // shows why the list could not load
+  links = byAge(list);
+  renderLinks(true);
+}
+
 $("doneForm").onsubmit = async (e) => {
   e.preventDefault();
+  if (isBusy()) return;
   const code = $("doneCode").value;
   if (!code.trim()) { $("doneMsg").textContent = "Type your code first."; return $("doneCode").focus(); }
+  const server = linksServer;
+  setBusy(true);
   $("doneOk").disabled = true; $("doneMsg").textContent = "Checking…";
   try {
-    await removeLink(linksServer, doneItem, code);
+    await removeLink(server, doneItem, code);
     console.log(`[done] removed ${doneItem.link}`);
-    doneClose();
-    fetchLinks(); // the next link moves up
+    await doneAnimation(server);
+    doneItem = null;
   } catch (err) {
     console.error("[done] FAILED:", err.message);
     $("doneMsg").textContent = err instanceof TypeError
@@ -161,6 +191,8 @@ $("doneForm").onsubmit = async (e) => {
     if (err.wrongCode) $("doneCode").select();
   } finally {
     $("doneOk").disabled = false;
+    setBusy(false);
+    if ($("doneDlg").hidden) reclaim();
   }
 };
 $("doneCancel").onclick = doneClose;

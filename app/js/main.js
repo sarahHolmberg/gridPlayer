@@ -20,7 +20,7 @@ function loadFile(f) {
 }
 $("file").onchange = (e) => loadFile(e.target.files[0]);
 addEventListener("dragover", (e) => e.preventDefault());
-addEventListener("drop", (e) => { e.preventDefault(); if ($("extGate").hidden) loadFile(e.dataTransfer.files[0]); }); // no video while the extension check covers the app
+addEventListener("drop", (e) => { e.preventDefault(); if ($("extGate").hidden && !isBusy()) loadFile(e.dataTransfer.files[0]); }); // no video while the extension check covers the app or a Done is running
 
 v.addEventListener("loadedmetadata", () => {
   document.body.classList.add("has-video"); // shows the playback / trim / record cards (grid.css)
