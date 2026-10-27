@@ -15,6 +15,7 @@ function loadFile(f) {
   if (!f || !f.type.startsWith("video/")) return;
   currentFile = f; // kept so the trim export can send this exact file
   v.src = URL.createObjectURL(f);
+  tlLoad(f); // the beat timeline reads the sound in the background (timeline.js)
   $("title").textContent = f.name + " - Grid Player";
   console.log(`[file] loaded ${f.name} (${(f.size / 1e6).toFixed(1)} MB)`);
 }

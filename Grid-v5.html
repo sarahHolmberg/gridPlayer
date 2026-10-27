@@ -14,7 +14,8 @@
   </header>
 
   <div id="main">
-    <!-- The video is the main thing -->
+    <!-- The video is the main thing; in the grid view the beat timeline sits under it -->
+    <div id="center">
     <div id="stage" tabindex="-1">
       <div id="wrap">
         <video id="v" controls playsinline></video>
@@ -24,6 +25,22 @@
       </div>
       <!-- Before a video is open, this is the only thing on the stage -->
       <label id="openHint" class="no-video-only" for="file"><b>📂 Open a video</b><span>or drop it anywhere</span></label>
+    </div>
+
+    <!-- Beat timeline (grid view only): the sound scrolls past the middle line, with the beat grid over it -->
+    <div id="tl" class="needs-video grid-only">
+      <canvas id="tlCanvas" title="Drag to scrub · click to jump · scroll to zoom"></canvas>
+      <div id="tlMsg"></div>
+      <div id="tlBar">
+        <span id="tlPos">Bar 1 · Beat 1</span>
+        <label title="Beats per minute">BPM <input type="number" id="bpm" value="120" min="40" max="240" step="0.1"></label>
+        <button id="tapBtn" title="Tap along with the beat to find the BPM (B)">Tap <kbd>B</kbd></button>
+        <button id="beat1Btn" title="The beat under the middle line becomes beat 1 (K)">Beat 1 here <kbd>K</kbd></button>
+        <span class="seg" title="Move the whole beat grid 10 ms"><button id="gridEarlier">◂ 10 ms</button><button id="gridLater">10 ms ▸</button></span>
+        <label class="chip" title="Clicks, drags and ←/→ land on beats (Shift + ←/→ = a whole bar)"><input type="checkbox" id="snap" checked> Snap <kbd>S</kbd></label>
+        <span class="seg" title="Zoom (or scroll on the waveform)"><button id="zoomOut">−</button><button id="zoomIn">+</button></span>
+      </div>
+    </div>
     </div>
 
     <!-- Side panel: the next link, then only the card for the step you are on -->
@@ -108,7 +125,8 @@
     <kbd>Space</kbd> play / pause video<br>
     <span class="trim-only"><kbd>I</kbd> / <kbd>O</kbd> in / out · <kbd>X</kbd> clear · <kbd>Enter</kbd> trim &amp; continue<br></span>
     <kbd>A</kbd> slower · <kbd>D</kbd> faster<br>
-    <kbd>←</kbd> / <kbd>→</kbd> fine step · <kbd>Shift</kbd> 1 s<br>
+    <kbd>←</kbd> / <kbd>→</kbd> fine step · <kbd>Shift</kbd> 1 s <span class="grid-only">(Snap on: one beat · <kbd>Shift</kbd> one bar)</span><br>
+    <span class="grid-only"><kbd>B</kbd> tap the beat · <kbd>K</kbd> beat 1 here · <kbd>S</kbd> snap on / off<br></span>
     <span class="grid-only"><kbd>G</kbd> grid · <kbd>N</kbd> names · <kbd>Q</kbd> steps · <kbd>T</kbd> back to trim<br></span>
     <kbd>L</kbd> loop · <kbd>H</kbd> hide the side panel
   </div>
@@ -180,6 +198,7 @@
 <script src="app/js/links.js"></script>
 <script src="app/js/update.js"></script>
 <script src="app/js/extension-check.js"></script>
+<script src="app/js/timeline.js"></script>
 <script src="app/js/menu.js"></script>
 <script src="app/js/keys.js"></script>
 <script src="app/js/main.js"></script>
