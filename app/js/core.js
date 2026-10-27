@@ -4,7 +4,7 @@
 const $ = (id) => document.getElementById(id);
 const v = $("v");
 
-// Cell name = column letter + row number, top-left origin: A1 (top-left) ... O15 (bottom-right)
+// Cell name = column letter + row number, top-left origin: A1 (top-left) ... T20 (bottom-right) on the default 20 x 20 grid
 const cellName = (col, row) => String.fromCharCode(65 + col) + (row + 1);
 
 // ---- Make the video as big as possible: fit its aspect ratio into the stage ----

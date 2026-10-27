@@ -1,6 +1,6 @@
 // Turns a cell name like "H8" into pixels. Same naming as grid-player.html:
 // letter = column (A = left), number = row (1 = top).
-export const cellRect = (name: string, width: number, height: number, n = 15) => {
+export const cellRect = (name: string, width: number, height: number, n = 20) => {
   const col = name.charCodeAt(0) - 65;
   const row = parseInt(name.slice(1), 10) - 1;
   const cw = width / n;
