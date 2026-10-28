@@ -24,11 +24,12 @@ const CAP_TEMPLATE = {
 };
 const CAP_SECONDS = 0.2;   // CHANGE HERE: how long a caption lasts ("to" = "from" + this, never past the next caption)
 const CAP_LANG = "en-US";  // CHANGE HERE: the language you speak in
+const capSay = (cell, time) => `grid cell ${cell}, time ${time}`; // CHANGE HERE: what the app says out loud after each click
 
 // One line = { id, from, cell, base (typed), heard: { result key: spoken words } }. Line 1 is the name bubble.
 let caps = [], capActive = null, capNextId = 1;
 const capText = (c) => [c.base, ...Object.values(c.heard)].filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
-const capClean = (s) => s.replace(/^\s*action\s+/i, "").replace(/[.,!?]+$/, "").trim(); // "Action jump and turn." -> "jump and turn"
+const capClean = (s) => s.replace(/grid cell\s+\w+( \d+)?,? time\s+[\d.]+/gi, "").replace(/^\s*action\s+/i, "").replace(/[.,!?]+$/, "").trim(); // "Action jump and turn." -> "jump and turn"
 const capTime = () => Math.max(0, v.currentTime - (trimMode ? 0 : tIn)); // the same time as the clock: from the In point
 
 // ---- Saved per video in this browser, so a reload does not lose the list ----
@@ -97,8 +98,33 @@ $("grid").addEventListener("click", (e) => {
   const hit = $("grid").children[row * n + col];
   hit?.classList.add("hit"); setTimeout(() => hit?.classList.remove("hit"), 300);
   capSave(); capDraw();
+  capAnnounce(c);
   console.log(`[captions] ${c.from.toFixed(3)} ${c.cell}`);
 });
+
+// ---- Say it out loud: "grid cell G10, time 2.802" through the speakers, so the microphone puts it into the normal recording too ----
+// (With headphones on, the microphone cannot hear it.) A new click cuts off the one before.
+let capSpeaking = false, capSpeakTimer = null;
+function capAnnounce(c) {
+  if (!$("capVoice").checked || !window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(capSay(c.cell, c.from.toFixed(3)));
+  u.lang = CAP_LANG; u.rate = 1.1;
+  // Listen pauses while the app talks, so its voice is not written into the line (stop() still keeps what you said before the click)
+  capSpeaking = true;
+  capSR?.stop();
+  const done = () => {
+    if (speechSynthesis.speaking || speechSynthesis.pending) return; // a newer click is talking now
+    clearTimeout(capSpeakTimer);
+    if (!capSpeaking) return;
+    capSpeaking = false;
+    if (capListening) micStart();
+  };
+  u.onend = u.onerror = () => setTimeout(done, 300); // a moment for the echo to die away
+  clearTimeout(capSpeakTimer);
+  capSpeakTimer = setTimeout(() => { speechSynthesis.cancel(); done(); }, 6000); // some browsers never say they finished
+  speechSynthesis.speak(u);
+}
 
 // ---- Speech: Chrome's speech recognition (needs the internet: Chrome sends the sound to Google) ----
 // Each piece of speech belongs to the line that was active when you STARTED saying it, so clicking the next cell mid-sentence is fine.
@@ -112,7 +138,7 @@ function micSet(on) {
   // the internet light (core.js) is green while capListening
   netBusy += on ? 1 : -1;
   if (netBusy) { clearTimeout(netTimer); $("net").classList.add("on"); } else $("net").classList.remove("on");
-  if (on) micStart(); else capSR?.stop();
+  if (on) { if (!capSpeaking) micStart(); } else capSR?.stop();
   console.log(`[captions] mic ${on ? "on" : "off"}`);
 }
 function micStart() {
@@ -135,7 +161,7 @@ function micStart() {
     if (e.error === "not-allowed" || e.error === "service-not-allowed") { setStatus("Microphone or speech not allowed. Type the actions instead."); micSet(false); }
     else if (e.error === "network") { setStatus("Speech needs the internet. Type the actions instead."); micSet(false); }
   };
-  capSR.onend = () => { if (capListening && session === capSession) micStart(); }; // Chrome stops after a silence: keep going
+  capSR.onend = () => { if (capListening && !capSpeaking && session === capSession) micStart(); }; // Chrome stops after a silence: keep going
   capSR.start();
 }
 $("capMic").onclick = () => {
