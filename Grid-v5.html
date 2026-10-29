@@ -154,6 +154,18 @@
   </div>
 </div>
 
+<!-- Export audio reminder: both boxes ticked -> the export runs (recording.js) -->
+<div id="expDlg" hidden>
+  <div id="expBox">
+    <div id="expTitle"><span>Before you export</span><button class="icon" id="expClose" title="Close">✕</button></div>
+    <form id="expForm">
+      <label><input type="checkbox" id="expSteps"> I have done the steps</label>
+      <label><input type="checkbox" id="expName"> I have added the name of the bubble</label>
+      <div class="row"><button type="submit" id="expOk" class="primary" disabled>⬇ Export audio</button><button type="button" id="expCancel" class="quiet">Cancel</button></div>
+    </form>
+  </div>
+</div>
+
 <!-- Update from GitHub: filled by the script below. Only goes online when you open it or click Check. -->
 <div id="upd" hidden>
   <div id="updBox">
