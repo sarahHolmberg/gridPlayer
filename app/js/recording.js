@@ -80,4 +80,15 @@ function exportAudio() {
     if (!w) setStatus("Popup blocked: allow popups for this page, or open " + SCRIBE_URL);
   });
 }
-$("audioBtn").onclick = exportAudio;
+// Reminder first: two questions, and only when both are ticked does the export run
+function expAsk(on) {
+  $("expDlg").hidden = !on;
+  if (on) { $("expSteps").checked = $("expName").checked = false; $("expOk").disabled = true; }
+  console.log(`[export] reminder ${on ? "open" : "closed"}`);
+}
+$("audioBtn").onclick = () => { if (mr) expAsk(true); };
+$("expForm").onchange = () => ($("expOk").disabled = !($("expSteps").checked && $("expName").checked));
+$("expForm").onsubmit = (e) => { e.preventDefault(); if ($("expOk").disabled) return; expAsk(false); exportAudio(); };
+$("expClose").onclick = $("expCancel").onclick = () => expAsk(false);
+$("expDlg").onclick = (e) => { if (e.target === $("expDlg")) expAsk(false); };
+addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("expDlg").hidden) expAsk(false); });
