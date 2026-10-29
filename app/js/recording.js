@@ -1,9 +1,17 @@
 // app/js/recording.js: Audio recording (Rec / Pause / Resume / Save) and Export audio (then opens TurboScribe).
 // Part of Grid Player, loaded by Grid-v5.html with a plain <script> (no modules, so it also works opened from disk).
 
+// ---- The mixer: what gets recorded is the microphone PLUS the cell announcements (announce.js), mixed inside the page ----
+//   mic ──> mixer ──> mixOut ──> MediaRecorder        (announce.js also plugs its clips into the mixer)
+// The announcements never leave the page as sound before they are recorded, so headphones make no difference.
+const actx = new AudioContext(); // the browser keeps it paused until a click: resumed on Rec and on a cell click
+const mixer = actx.createGain();
+const mixOut = actx.createMediaStreamDestination();
+mixer.connect(mixOut);
+
 // ---- Audio recording: one MediaRecorder, pause()/resume() => a single file ----
 // States: idle -> recording <-> paused -> (Save) -> idle. Paused time is not recorded.
-let mr = null, stream = null, chunks = [], acc = 0, t0 = 0;
+let mr = null, stream = null, micNode = null, chunks = [], acc = 0, t0 = 0;
 
 const recElapsed = () => (acc + (mr && mr.state === "recording" ? performance.now() - t0 : 0)) / 1000;
 
@@ -18,10 +26,13 @@ function updateRec() {
 
 async function recToggle() {
   if (!mr) {
+    actx.resume();
     try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
     catch (err) { alert("Microphone not available: " + err.message); return; }
+    micNode = actx.createMediaStreamSource(stream);
+    micNode.connect(mixer);
     const mime = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"].find((t) => MediaRecorder.isTypeSupported(t));
-    mr = new MediaRecorder(stream, mime ? { mimeType: mime } : {});
+    mr = new MediaRecorder(mixOut.stream, mime ? { mimeType: mime } : {}); // the mix, not the bare mic
     chunks = [];
     mr.ondataavailable = (e) => e.data.size && chunks.push(e.data);
     mr.start(1000); // flush a chunk every second
@@ -46,8 +57,9 @@ function recSave(after) {
     a.click();
     console.log(`[rec] saved ${a.download} (${(blob.size / 1e6).toFixed(2)} MB)`);
     setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    micNode.disconnect();
     stream.getTracks().forEach((t) => t.stop()); // release the mic
-    mr = stream = null; chunks = []; acc = 0;
+    mr = stream = micNode = null; chunks = []; acc = 0;
     updateRec();
     after?.(); // e.g. open TurboScribe once the file is downloaded
   };
@@ -56,7 +68,7 @@ function recSave(after) {
 }
 
 $("recBtn").onclick = recToggle;
-$("saveBtn").onclick = recSave;
+$("saveBtn").onclick = () => recSave(); // not recSave itself: it would get the click as "after"
 
 // ---- Export audio: stop + download the recording, then open TurboScribe to transcribe it ----
 const SCRIBE_URL = "https://turboscribe.ai/"; // CHANGE HERE: the transcribing website

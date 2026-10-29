@@ -127,6 +127,7 @@
     <kbd>A</kbd> slower · <kbd>D</kbd> faster<br>
     <kbd>←</kbd> / <kbd>→</kbd> fine step · <kbd>Shift</kbd> 1 s <span class="grid-only">(Snap on: one beat · <kbd>Shift</kbd> one bar)</span><br>
     <span class="grid-only"><kbd>B</kbd> tap the beat · <kbd>K</kbd> beat 1 here · <kbd>S</kbd> snap on / off<br></span>
+    <span class="grid-only">Click a cell: the cell + time are spoken into the recording<br></span>
     <span class="grid-only"><kbd>G</kbd> grid · <kbd>N</kbd> names · <kbd>Q</kbd> steps · <kbd>T</kbd> back to trim<br></span>
     <kbd>L</kbd> loop · <kbd>H</kbd> hide the side panel
   </div>
@@ -192,6 +193,7 @@
 <script src="app/grid-trim.js"></script> <!-- the offline video cutter -->
 <!-- The app itself (app/js), split by feature. Plain scripts (not modules) so it also runs opened from disk; the ORDER matters: main.js last. -->
 <script src="app/js/core.js"></script>
+<script src="app/js/voice-clips.js"></script> <!-- the spoken words for announce.js -->
 <script src="app/js/recording.js"></script>
 <script src="app/js/trim.js"></script>
 <script src="app/js/help.js"></script>
@@ -199,6 +201,7 @@
 <script src="app/js/update.js"></script>
 <script src="app/js/extension-check.js"></script>
 <script src="app/js/timeline.js"></script>
+<script src="app/js/announce.js"></script> <!-- click a cell: says the cell + time into the recording -->
 <script src="app/js/menu.js"></script>
 <script src="app/js/keys.js"></script>
 <script src="app/js/main.js"></script>
