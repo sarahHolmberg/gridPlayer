@@ -12,6 +12,6 @@ Everything else lives in the `app` folder. Keep it next to `Grid-v5.html` and do
 | `extension/` | the FastDL Chrome extension: load it with **Load unpacked** in `chrome://extensions`, and turn on **Allow access to file URLs** |
 | `gridCell.ts` | helper that turns a cell name like `H8` into pixels |
 
-**Click captions (test)**: in the grid view, the card under Record. Tick **Click cells** (C) and click a cell: a new line gets the time and the cell. The app says "grid cell G10, time 2.802" out loud (untick **Say it** to stop that), so your microphone records it into the normal recording too. Click **🎤 Listen** (M) and say the action, and your words go into that line (Chrome, needs the internet). You can also type them. Line 1 is the name. **⬇ Export JSON** downloads the caption file. The normal recording still works the same, next to it.
+**Click a cell** (grid view): the app says the cell and the time, e.g. "G, four, two, point, one, four, six", straight into the recording, mixed with your voice. You hear it in your headphones too. While it is speaking, other clicks are ignored (the grid dims). Untick **Grid** (G) to use the video's own controls.
 
 To get the newest version: in the app, click **⟳ Update from GitHub**.

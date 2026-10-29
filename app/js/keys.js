@@ -13,14 +13,13 @@ const KEYS = {
   i: setIn, o: setOut, x: clearTrim,
   arrowleft: (e) => (snapOn() ? beatStep(-1, e.shiftKey) : nudge(e.shiftKey ? -1000 : -stepMs())), // fine steps, Shift = 1 s;
   arrowright: (e) => (snapOn() ? beatStep(1, e.shiftKey) : nudge(e.shiftKey ? 1000 : stepMs())),   // with Snap on: beats / bars
-  c: () => $("capOn").click(), m: () => $("capMic").click(), // click captions (captions.js)
   b: tapTempo, k: setBeat1, s: () => $("snap").click(),      // beat timeline (timeline.js)
   a: () => stepSpeed(-1), d: () => stepSpeed(1),
   g: () => $("show").click(), n: () => $("lbl").click(), l: () => $("loop").click(),
   enter: goGrid, t: goTrim,
   h: () => document.body.classList.toggle("hide-side"), // video gets the full width; ResizeObserver refits
 };
-const GRID_ONLY = new Set(["c", "m", "r", "g", "n", "t", "q", "b", "k", "s"]), TRIM_ONLY = new Set(["i", "o", "x", "enter"]);
+const GRID_ONLY = new Set(["r", "g", "n", "t", "q", "b", "k", "s"]), TRIM_ONLY = new Set(["i", "o", "x", "enter"]);
 const typing = (e) => e.target.matches("input[type=number], input[type=text], input[type=password], textarea");
 
 // Capture phase + stopPropagation: the video's own controls and focused buttons/checkboxes

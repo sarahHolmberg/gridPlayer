@@ -84,10 +84,12 @@ video { display: block; width: 100%; height: 100%; }
 .cell { position: relative; border: 0 solid; border-right-width: 1px; border-bottom-width: 1px; }
 .cell span { position: absolute; top: 2px; left: 3px; color: #fff; text-shadow: 0 0 3px #000, 0 0 3px #000;
              font: bold calc(100cqw / var(--n) * 0.26) monospace; }
-/* Click captions: with "Click cells" on, the grid takes the clicks (captions.js) */
-#grid.clickable { pointer-events: auto; cursor: crosshair; }
-#grid.clickable .cell:hover { background: rgba(255,255,255,.18); }
-.cell.hit { background: rgba(252,184,60,.6) !important; }
+/* Grid view: click a cell = the cell + time are spoken into the recording (announce.js). Untick Grid (G) to reach the video's own controls. */
+body:not(.trim-mode) #grid { pointer-events: auto; cursor: crosshair; }
+.cell:hover { background: rgba(255,255,255,.15); }
+.cell.hit { background: rgba(252,184,60,.6); }
+#grid.refuse { animation: refuse .4s; } /* a click while it is still speaking is ignored: the grid dims */
+@keyframes refuse { 30% { opacity: .35; } }
 #openHint { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 30px 40px; cursor: pointer;
             color: #a8a8a0; border: 1.5px dashed #4a4a45; border-radius: 12px; }
 #openHint b { font-size: 16px; color: #fff; }
@@ -164,20 +166,6 @@ body.hide-side #side { display: none; }
 @keyframes blink { 50% { opacity: .6; } }
 #recLbl { min-width: 40px; font-size: 12px; color: var(--muted); }
 #recTime { margin-right: auto; }
-
-/* Click captions (test): one line per click = time · cell · words */
-.card h3 small { font-weight: 400; text-transform: none; letter-spacing: 0; }
-#capMic.on { background: var(--rec); border-color: var(--rec); color: #fff; }
-#capList { max-height: 40vh; overflow-y: auto; display: flex; flex-direction: column; gap: 3px; }
-#capList:empty { display: none; }
-.cap { display: flex; align-items: center; gap: 6px; padding: 2px 4px; border-radius: 6px; }
-.cap.now { background: var(--accent-soft); }
-.cap:first-child b::after { content: " name"; font-weight: 400; font-size: 10px; color: var(--muted); }
-.capT { font: 12px ui-monospace, Menlo, Consolas, monospace; }
-.cap b { flex: none; font: 600 12px ui-monospace, Menlo, Consolas, monospace; }
-.cap input[type=text] { flex: 1; min-width: 0; padding: 3px 6px; }
-.cap .icon { width: 22px; min-height: 22px; font-size: 11px; }
-#capCount { font-size: 12px; color: var(--muted); }
 
 /* ---------- ⋯ menu ---------- */
 #menu { position: fixed; top: 44px; right: 8px; z-index: 15; width: 268px; max-height: calc(100vh - 56px); overflow-y: auto;

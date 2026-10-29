@@ -90,19 +90,6 @@
         </div>
       </section>
 
-      <!-- TEST, beside the recording above: click a cell = time + cell, then say the action (app/js/captions.js) -->
-      <section class="card needs-video grid-only" id="caps">
-        <h3>Click captions <small>test</small></h3>
-        <div class="row">
-          <label class="chip" title="Clicking the grid adds a line with the time and the cell (the video's own controls are covered while this is on)"><input type="checkbox" id="capOn"> Click cells <kbd>C</kbd></label>
-          <label class="chip" title="After each click the app says &quot;grid cell G10, time 2.802&quot; through the speakers, so your microphone records it too"><input type="checkbox" id="capVoice" checked> Say it</label>
-          <button id="capMic" title="Say the action after each click; your words go into that line (Chrome, needs the internet)">🎤 Listen (M)</button>
-        </div>
-        <div id="capList"></div>
-        <div class="row between"><span id="capCount"></span><button id="capClear" class="quiet" disabled title="Delete all lines">Clear</button></div>
-        <button id="capJson" class="primary wide" disabled title="Download the caption file (JSON)">⬇ Export JSON</button>
-      </section>
-
       <div id="status">
         <span id="stText">Ready</span>
         <label class="link needs-video" for="file" title="Open a different video">Open another</label>
@@ -140,7 +127,7 @@
     <kbd>A</kbd> slower · <kbd>D</kbd> faster<br>
     <kbd>←</kbd> / <kbd>→</kbd> fine step · <kbd>Shift</kbd> 1 s <span class="grid-only">(Snap on: one beat · <kbd>Shift</kbd> one bar)</span><br>
     <span class="grid-only"><kbd>B</kbd> tap the beat · <kbd>K</kbd> beat 1 here · <kbd>S</kbd> snap on / off<br></span>
-    <span class="grid-only"><kbd>C</kbd> click cells · <kbd>M</kbd> listen (click captions)<br></span>
+    <span class="grid-only">Click a cell: the cell + time are spoken into the recording<br></span>
     <span class="grid-only"><kbd>G</kbd> grid · <kbd>N</kbd> names · <kbd>Q</kbd> steps · <kbd>T</kbd> back to trim<br></span>
     <kbd>L</kbd> loop · <kbd>H</kbd> hide the side panel
   </div>
@@ -206,6 +193,7 @@
 <script src="app/grid-trim.js"></script> <!-- the offline video cutter -->
 <!-- The app itself (app/js), split by feature. Plain scripts (not modules) so it also runs opened from disk; the ORDER matters: main.js last. -->
 <script src="app/js/core.js"></script>
+<script src="app/js/voice-clips.js"></script> <!-- the spoken words for announce.js -->
 <script src="app/js/recording.js"></script>
 <script src="app/js/trim.js"></script>
 <script src="app/js/help.js"></script>
@@ -213,7 +201,7 @@
 <script src="app/js/update.js"></script>
 <script src="app/js/extension-check.js"></script>
 <script src="app/js/timeline.js"></script>
-<script src="app/js/captions.js"></script> <!-- TEST: click captions -->
+<script src="app/js/announce.js"></script> <!-- click a cell: says the cell + time into the recording -->
 <script src="app/js/menu.js"></script>
 <script src="app/js/keys.js"></script>
 <script src="app/js/main.js"></script>
