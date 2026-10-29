@@ -19,10 +19,11 @@ Promise.all(Object.entries(VOICE_CLIPS).map(async ([name, url]) => {
   clipBufs.set(name, await actx.decodeAudioData(bytes.buffer));
 })).then(() => console.log(`[announce] ${clipBufs.size} clips ready`), (err) => console.error("[announce] clips failed:", err));
 
-// G4 @ 2.146 -> target cell, G, 4, time, 2, point, 1, 4, 6. The row is one number word ("seventeen"); the time is read digit by digit, always 3 decimals.
+// G4 @ 12.146 -> target cell, G, 4, time, 12, point, 1, 4, 6. The row is one number word ("seventeen"), and so are the whole seconds
+// up to 20 ("twelve"; from 21 on digit by digit: "two, one"). After the point: digit by digit, always 3 decimals.
 function announceWords(cell, t) {
   const [whole, frac] = t.toFixed(3).split(".");
-  return ["target", cell[0], cell.slice(1), "time", ...whole, "point", ...frac];
+  return ["target", cell[0], cell.slice(1), "time", ...(+whole <= 20 ? [whole] : whole), "point", ...frac];
 }
 
 // While one is playing, other clicks are ignored (not queued): the grid dims for a moment so you can see the click was dropped
