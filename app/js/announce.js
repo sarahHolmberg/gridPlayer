@@ -1,4 +1,4 @@
-// app/js/announce.js: Click a grid cell -> the app says the cell and the time ("G, four, two, point, one, four, six") INTO the recording.
+// app/js/announce.js: Click a grid cell -> the app says "target cell G4, time 2.146" INTO the recording.
 // Part of Grid Player, loaded by Grid-v5.html with a plain <script> (no modules, so it also works opened from disk).
 // The words are the clips in voice-clips.js, played on the mixer from recording.js, so they land in the same file as your voice.
 // You also hear them in your headphones, recording or not (handy to check it works).
@@ -12,17 +12,17 @@ announceGain.gain.value = ANNOUNCE_GAIN;
 announceGain.connect(mixer);
 announceGain.connect(actx.destination);
 
-// Decode all 42 clips once at start-up, so a click plays at once
+// Decode all 44 clips once at start-up, so a click plays at once
 const clipBufs = new Map();
 Promise.all(Object.entries(VOICE_CLIPS).map(async ([name, url]) => {
   const bytes = Uint8Array.from(atob(url.slice(url.indexOf(",") + 1)), (c) => c.charCodeAt(0));
   clipBufs.set(name, await actx.decodeAudioData(bytes.buffer));
 })).then(() => console.log(`[announce] ${clipBufs.size} clips ready`), (err) => console.error("[announce] clips failed:", err));
 
-// G4 @ 2.146 -> G, 4, 2, point, 1, 4, 6. The row is one number word ("seventeen"); the time is read digit by digit, always 3 decimals.
+// G4 @ 2.146 -> target cell, G, 4, time, 2, point, 1, 4, 6. The row is one number word ("seventeen"); the time is read digit by digit, always 3 decimals.
 function announceWords(cell, t) {
   const [whole, frac] = t.toFixed(3).split(".");
-  return [cell[0], cell.slice(1), ...whole, "point", ...frac];
+  return ["target", cell[0], cell.slice(1), "time", ...whole, "point", ...frac];
 }
 
 // While one is playing, other clicks are ignored (not queued): the grid dims for a moment so you can see the click was dropped
