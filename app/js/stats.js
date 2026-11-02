@@ -1,15 +1,17 @@
 // app/js/stats.js: Videos done: the 📊 button (bottom right) asks for your code and shows how many videos you have done and the money.
 // Part of Grid Player, loaded by Grid-v5.html with a plain <script> (no modules, so it also works opened from disk).
 // The website counts them: every Done is saved there under the code that was typed (links.js). Same server as the links (⋯ -> Links from).
-// Real servers: POST { code } -> { who, count, payPerVideo, currency, total, videos: [{ name, link, stored, doneAt }] } (403 = wrong code)
+// Real servers: POST { code } -> { who, count, payAmount, payFor, payPerVideo, currency, total, videos: [{ name, link, stored, doneAt }] }
+// (403 = wrong code). The pay is payAmount for payFor videos (17 000 XAF for 30); the website works out the total.
 
-const MOCK_PAY = { payPerVideo: 17000, currency: "XAF" }; // the pretend list only; the real amount is set on the website
+const MOCK_PAY = { payAmount: 17000, payFor: 30, currency: "XAF" }; // the pretend list only; the real pay is set on the website
 async function getStats(server, code) {
   if (server === "mock") {
     await mock.wait();
     if (code.trim().toUpperCase() !== MOCK_CODE) throw wrongCode();
     const videos = mock.loadDone();
-    return { who: MOCK_CODE, count: videos.length, ...MOCK_PAY, total: videos.length * MOCK_PAY.payPerVideo, videos };
+    const { payAmount, payFor } = MOCK_PAY;
+    return { who: MOCK_CODE, count: videos.length, ...MOCK_PAY, payPerVideo: payAmount / payFor, total: Math.round((videos.length * payAmount) / payFor), videos };
   }
   const res = await netFetch(SERVERS[server], {
     method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code }), cache: "no-store",
@@ -21,7 +23,7 @@ async function getStats(server, code) {
   return data;
 }
 
-const money = (n, cur) => n.toLocaleString("fr-FR").replace(/ | /g, " ") + " " + cur; // 34000 -> "34 000 XAF"
+const money = (n, cur) => Math.round(n).toLocaleString("fr-FR").replace(/ | /g, " ") + " " + cur; // 34000 -> "34 000 XAF"
 function statsLink(href, text) {
   const a = document.createElement("a");
   a.href = a.title = href; a.target = "_blank"; a.rel = "noopener noreferrer"; a.textContent = text;
@@ -30,7 +32,7 @@ function statsLink(href, text) {
 function statsRender(d) {
   $("statsCount").textContent = d.count;
   $("statsTotal").textContent = money(d.total, d.currency);
-  $("statsRate").textContent = `${d.count} × ${money(d.payPerVideo, d.currency)}`;
+  $("statsRate").textContent = `${money(d.payAmount, d.currency)} for ${d.payFor} videos (about ${money(d.payPerVideo, d.currency)} each)`;
   const list = $("statsList");
   list.innerHTML = "";
   if (!d.videos.length) list.textContent = "No videos done with this code yet.";
