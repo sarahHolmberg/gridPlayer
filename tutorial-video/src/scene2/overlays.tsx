@@ -330,7 +330,7 @@ const roundRect = (r: Rect, rad: number) => {
 export const Spotlight: React.FC<{holes: Rect[]; amount: number; children: React.ReactNode}> = ({holes, amount, children}) => {
   if (amount <= 0.01) return <>{children}</>;
   const O = {x: -200, y: -150, w: 2320, h: 1380};
-  const path = holes.map((h) => roundRect({...h, x: h.x - O.x, y: h.y - O.y}, 16)).join(" ") || "M0 0Z";
+  const path = holes.map((h) => roundRect({...h, x: h.x - O.x, y: h.y - O.y}, 16)).filter(Boolean).join(" ") || "M0 0Z";
   return (
     <>
       <div style={{position: "absolute", left: 0, top: 0, width: 1920, height: 1080, filter: `blur(${2.5 * amount}px) brightness(${1 - 0.6 * amount})`}}>

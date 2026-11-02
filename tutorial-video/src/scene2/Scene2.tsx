@@ -4,7 +4,7 @@ import {CONFIG, sec} from "../config";
 import {CONFIG2 as K} from "./config2";
 import {ease, pop, track, window01} from "../anim";
 import {BrowserWindow, C, IDLE_DOWNLOAD} from "../ui";
-import {Backdrop, Cam, Caption, CaptionSpec, Cursor, Pt, Ripple, World, clickPress, fontFamily} from "../shared";
+import {Backdrop, Cam, Caption, CaptionSpec, Cursor, Pt, Ripple, StepIndicator, World, clickPress, fontFamily} from "../shared";
 import {BEATS, beatPulse, EV, OUT_V, SEGMENTS, videoAt} from "./timeline";
 import {center, COUNT, CUBES, DECK, pad, PLAY_BTN, PROGRESS, Rect, TIMER_CARD, TRIM_BTN, TRIM_CARD, OUT_BTN, union, VIDEO} from "./layout2";
 import {GridPlayerApp2} from "./App2";
@@ -87,19 +87,6 @@ for (const s of SEGMENTS) {
 
 const bounce = (f: number, atSec: number) =>
   spring({frame: f - sec(atSec), fps, config: {damping: 9, stiffness: 170, mass: 0.8}});
-
-const StepIndicator: React.FC<{show: number}> = ({show}) => (
-  <div style={{
-    position: "absolute", left: 40, top: 22, opacity: show, transform: `translateY(${(1 - show) * -20}px)`,
-    display: "flex", alignItems: "center", gap: 14, background: "rgba(9,13,24,.88)", borderRadius: 14,
-    padding: "10px 20px 10px 12px", boxShadow: "0 10px 30px rgba(0,0,0,.4)", border: "1px solid rgba(255,255,255,.12)",
-  }}>
-    <div style={{background: C.accent, color: "#fff", fontWeight: 800, fontSize: 18, letterSpacing: 1, padding: "5px 12px", borderRadius: 8}}>
-      STEP {K.stepIndicator.step} OF {K.stepIndicator.total}
-    </div>
-    <div style={{color: "#fff", fontSize: 24, fontWeight: 700}}>{K.stepIndicator.title}</div>
-  </div>
-);
 
 const BeatAudio: React.FC = () => (
   <>
@@ -189,7 +176,7 @@ export const Scene2: React.FC = () => {
           <Cursor p={cur} pressed={press} opacity={Math.max(0, ease(f, 2.2, 0.6) - ease(f, EV.fadeOut, 1))} />
         </World>
 
-        <StepIndicator show={ease(f, 0.4, 0.8)} />
+        <StepIndicator show={ease(f, 0.4, 0.8)} step={K.stepIndicator.step} title={K.stepIndicator.title} />
         {CAPTIONS.map((c, i) => <Caption key={i} f={f} c={c} />)}
       </AbsoluteFill>
     </AbsoluteFill>

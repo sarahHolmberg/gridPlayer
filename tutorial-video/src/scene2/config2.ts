@@ -26,7 +26,7 @@ export const CONFIG2 = {
   fadeOut: 2.4,
 
   // ── Text ──
-  stepIndicator: {step: 3, total: 3, title: "Trim on the beat"},
+  stepIndicator: {step: 3, title: "Trim on the beat"}, // total comes from STEP_TOTAL in shared.tsx
   captions: {
     intro: "Next: trim the video on the beat",
     listen: "Listen for the first beat",

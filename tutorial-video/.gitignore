@@ -2,4 +2,8 @@ node_modules
 out/*
 !out/scene1.mp4
 !out/scene2.mp4
+!out/scene3.mp4
+!out/scene4.mp4
+!out/scene5.mp4
+!out/full.mp4
 .DS_Store

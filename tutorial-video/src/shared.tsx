@@ -100,3 +100,19 @@ export const Caption: React.FC<{f: number; c: CaptionSpec}> = ({f, c}) => {
     </div>
   );
 };
+
+/* ───────────── Step indicator (screen space, top-left) ───────────── */
+export const STEP_TOTAL = 6; // Download, Trim, Record, Export, Upload, Done
+
+export const StepIndicator: React.FC<{show: number; step: number; title: string; total?: number}> = ({show, step, title, total = STEP_TOTAL}) => (
+  <div style={{
+    position: "absolute", left: 40, top: 22, opacity: show, transform: `translateY(${(1 - show) * -20}px)`,
+    display: "flex", alignItems: "center", gap: 14, background: "rgba(9,13,24,.88)", borderRadius: 14,
+    padding: "10px 20px 10px 12px", boxShadow: "0 10px 30px rgba(0,0,0,.4)", border: "1px solid rgba(255,255,255,.12)",
+  }}>
+    <div style={{background: C.accent, color: "#fff", fontWeight: 800, fontSize: 18, letterSpacing: 1, padding: "5px 12px", borderRadius: 8}}>
+      STEP {step} OF {total}
+    </div>
+    <div style={{color: "#fff", fontSize: 24, fontWeight: 700}}>{title}</div>
+  </div>
+);

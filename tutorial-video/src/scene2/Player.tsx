@@ -65,7 +65,7 @@ const Dancer: React.FC<{d: Look; v: number}> = ({d, v}) => {
   );
 };
 
-const Studio: React.FC = () => {
+export const Studio: React.FC = () => {
   const {w, h} = VIDEO;
   const floorY = h * 0.66;
   return (

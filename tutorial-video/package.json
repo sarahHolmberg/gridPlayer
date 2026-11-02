@@ -6,11 +6,16 @@
     "studio": "remotion studio",
     "render": "remotion render Scene1 out/scene1.mp4",
     "render:scene2": "remotion render Scene2 out/scene2.mp4",
-    "kicks": "node scripts/make-kicks.mjs"
+    "kicks": "node scripts/make-kicks.mjs",
+    "render:scene3": "remotion render Scene3 out/scene3.mp4",
+    "render:scene4": "remotion render Scene4 out/scene4.mp4",
+    "render:scene5": "remotion render Scene5 out/scene5.mp4",
+    "full": "bash scripts/join.sh"
   },
   "dependencies": {
     "@remotion/cli": "^4.0.538",
     "@remotion/fonts": "^4.0.538",
+    "lucide-react": "^0.460.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "remotion": "^4.0.538"

@@ -84,7 +84,7 @@ const TrafficLights: React.FC = () => (
   </div>
 );
 
-const BrowserChrome: React.FC<{download: DownloadState; tabTitle: string}> = ({download, tabTitle}) => (
+const BrowserChrome: React.FC<{download: DownloadState; tabTitle: string; url: string}> = ({download, tabTitle, url}) => (
   <>
     {/* Tab strip */}
     <div style={{...abs(0, 0, WIN.w, TAB_H), background: "#dee1e6", display: "flex", alignItems: "flex-end", paddingLeft: 20}}>
@@ -112,7 +112,7 @@ const BrowserChrome: React.FC<{download: DownloadState; tabTitle: string}> = ({d
         gap: 10, padding: "0 16px", fontSize: 16, color: "#202124",
       }}>
         <LockIcon />
-        <span>{CONFIG.content.url}</span>
+        <span>{url}</span>
       </div>
       <div style={{width: 8}} />
       <DownloadButton s={download} />
@@ -169,12 +169,16 @@ const DropBox: React.FC<{d: DropState}> = ({d}) => {
   );
 };
 
-export const LinkCard: React.FC<{highlight: number; press: number}> = ({highlight, press}) => {
-  const c = CONFIG.content;
+export type LinkCardData = {name?: string; linkLines?: string[]; waiting?: React.ReactNode};
+
+export const LinkCard: React.FC<{highlight: number; press: number; donePress?: number; doneGlow?: number; data?: LinkCardData; noFrame?: boolean}> = ({
+  highlight, press, donePress = 0, doneGlow = 0, data = {}, noFrame,
+}) => {
+  const c = {...CONFIG.content, ...Object.fromEntries(Object.entries(data).filter(([, v]) => v !== undefined))} as typeof CONFIG.content & {waiting: React.ReactNode};
   const x = CARD.pad;
   return (
     <div style={{
-      ...abs(CARD.x - SIDEBAR_X, CARD.y - STAGE.y, CARD.w, CARD_ROWS.height),
+      ...(noFrame ? abs(0, 0, CARD.w, CARD_ROWS.height) : abs(CARD.x - SIDEBAR_X, CARD.y - STAGE.y, CARD.w, CARD_ROWS.height)),
       background: C.panel, border: `1px solid ${C.line}`, borderRadius: 14, boxShadow: "0 1px 2px rgba(0,0,0,.04)",
     }}>
       <div style={{...abs(x, CARD_ROWS.header, CARD.w - 2 * x, 24), display: "flex", alignItems: "center", justifyContent: "space-between"}}>
@@ -208,6 +212,7 @@ export const LinkCard: React.FC<{highlight: number; press: number}> = ({highligh
       <div style={{
         ...abs(CARD.w - x - 98, CARD_ROWS.link + 30, 98, 46), background: C.ok, borderRadius: 8, color: "#fff",
         fontWeight: 700, fontSize: 19, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+        transform: `scale(${1 - 0.08 * donePress + 0.06 * doneGlow})`, boxShadow: `0 0 ${24 * doneGlow}px rgba(34,197,94,${0.8 * doneGlow})`,
       }}>
         <CheckIcon size={17} />Done
       </div>
@@ -255,14 +260,14 @@ export const GridPlayerApp: React.FC<{highlight: number; press: number; drop: Dr
   </>
 );
 
-export const BrowserWindow: React.FC<{download: DownloadState; tabTitle?: string; children: React.ReactNode}> = ({
-  download, tabTitle = CONFIG.content.tabTitle, children,
+export const BrowserWindow: React.FC<{download: DownloadState; tabTitle?: string; url?: string; children: React.ReactNode}> = ({
+  download, tabTitle = CONFIG.content.tabTitle, url = CONFIG.content.url, children,
 }) => (
   <div style={{
     ...abs(WIN.x, WIN.y, WIN.w, WIN.h), borderRadius: 14, overflow: "hidden", background: "#fff",
     boxShadow: "0 50px 120px rgba(0,0,0,.45), 0 12px 30px rgba(0,0,0,.25), 0 0 0 1px rgba(0,0,0,.25)",
   }}>
-    <BrowserChrome download={download} tabTitle={tabTitle} />
+    <BrowserChrome download={download} tabTitle={tabTitle} url={url} />
     {children}
   </div>
 );
