@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "studio": "remotion studio",
-    "render": "remotion render Scene1 out/scene1.mp4"
+    "render": "remotion render Scene1 out/scene1.mp4",
+    "render:scene2": "remotion render Scene2 out/scene2.mp4",
+    "kicks": "node scripts/make-kicks.mjs"
   },
   "dependencies": {
     "@remotion/cli": "^4.0.538",

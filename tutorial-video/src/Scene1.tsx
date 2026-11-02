@@ -1,25 +1,15 @@
 import React from "react";
-import {AbsoluteFill, Easing, interpolate, staticFile, useCurrentFrame} from "remotion";
-import {loadFont} from "@remotion/fonts";
+import {AbsoluteFill, Easing, interpolate, useCurrentFrame} from "remotion";
 import {CONFIG, sec} from "./config";
-import {ease, pop, track, window01} from "./anim";
+import {ease, pop, track} from "./anim";
 import {DOWNLOAD, LINK_POINT, STAGE_CENTER, TOAST, TOAST_FILE} from "./layout";
 import {BrowserWindow, C, DownloadState, DownloadToast, DropState, GridPlayerApp} from "./ui";
 import {VideoFileIcon} from "./icons";
-
-// Inter is bundled in public/fonts so rendering works offline
-const fontFamily = "Inter";
-loadFont({family: fontFamily, url: staticFile("fonts/inter-latin-wght-normal.woff2"), weight: "100 900"});
+import {Backdrop, Cam, Caption, Cursor, Pt, Ripple, World, clickPress, fontFamily} from "./shared";
 
 const T = CONFIG.timing;
-const W = CONFIG.width, H = CONFIG.height;
-// The world is laid out SHARP times bigger and scaled back down by the camera,
-// so text stays crisp when the camera zooms in (3D layers are rasterized at their own size).
-const SHARP = 2.4;
 
-/* ───────────── Camera ─────────────
-   cx/cy = world point at the center of the frame, z = zoom, rx/ry = 3D tilt in degrees */
-type Cam = {cx: number; cy: number; z: number; rx: number; ry: number};
+/* ───────────── Camera ───────────── */
 const camera = (f: number): Cam =>
   track<Cam>(f, {cx: 960, cy: 570, z: 0.9, rx: 12, ry: -9}, [
     {at: T.pushIn, dur: 2.4, v: {cx: 960, cy: 545, z: 1.0, rx: 4, ry: -3}},
@@ -30,7 +20,6 @@ const camera = (f: number): Cam =>
   ]);
 
 /* ───────────── Cursor (world coordinates) ───────────── */
-type Pt = {x: number; y: number};
 const cursorPos = (f: number): Pt =>
   track<Pt>(f, {x: 1180, y: 780}, [
     {at: T.cursorToLink, dur: 1.6, v: LINK_POINT, arc: 0.12},
@@ -39,57 +28,6 @@ const cursorPos = (f: number): Pt =>
     {at: T.drag, dur: 1.6, v: STAGE_CENTER, arc: -0.12},
     {at: T.drop + 0.4, dur: 1.2, v: {x: STAGE_CENTER.x + 150, y: STAGE_CENTER.y + 130}, arc: 0.1},
   ]);
-
-const Cursor: React.FC<{p: Pt; pressed: number; opacity: number; scale: number}> = ({p, pressed, opacity, scale}) => (
-  <div style={{
-    position: "absolute", left: p.x, top: p.y, opacity, transformOrigin: "0 0",
-    transform: `scale(${scale * (1 - 0.15 * pressed)})`, filter: "drop-shadow(0 3px 5px rgba(0,0,0,.35))",
-  }}>
-    <svg width={30} height={42} viewBox="0 0 20 28" style={{display: "block", marginLeft: -3, marginTop: -2}}>
-      <path d="M2 2v20.5l5.2-5 3.4 8 3.6-1.6-3.4-7.8H18z" fill="#111" stroke="#fff" strokeWidth={1.6} strokeLinejoin="round" />
-    </svg>
-  </div>
-);
-
-const Ripple: React.FC<{f: number; at: number; p: Pt; color?: string}> = ({f, at, p, color = C.accent}) => {
-  const t = (f - sec(at)) / sec(0.6);
-  if (t < 0 || t > 1) return null;
-  const r = interpolate(t, [0, 1], [6, 58], {easing: Easing.out(Easing.cubic)});
-  return (
-    <div style={{
-      position: "absolute", left: p.x - r, top: p.y - r, width: 2 * r, height: 2 * r, borderRadius: "50%",
-      border: `3px solid ${color}`, background: `${color}22`, opacity: 1 - t,
-    }} />
-  );
-};
-
-/* ───────────── Lower-third caption (screen space) ───────────── */
-const Caption: React.FC<{f: number; c: (typeof CONFIG.captions)[number]}> = ({f, c}) => {
-  const vis = window01(f, c.from, c.to);
-  if (vis <= 0) return null;
-  const enter = ease(f, c.from, 0.8);
-  return (
-    <div style={{
-      position: "absolute", left: 110, bottom: 84, opacity: vis,
-      transform: `translateY(${(1 - enter) * 40}px)`, display: "flex", alignItems: "stretch",
-      background: "rgba(255,255,255,.94)", borderRadius: 16, overflow: "hidden",
-      boxShadow: "0 20px 50px rgba(0,0,0,.35)",
-    }}>
-      <div style={{width: 8, background: C.accent, transformOrigin: "bottom", transform: `scaleY(${enter})`}} />
-      <div style={{display: "flex", alignItems: "center", gap: 18, padding: "20px 30px 20px 24px"}}>
-        {c.step && (
-          <div style={{
-            background: C.accent, color: "#fff", fontWeight: 700, fontSize: 22, letterSpacing: 1,
-            padding: "6px 14px", borderRadius: 9, textTransform: "uppercase",
-          }}>{c.step}</div>
-        )}
-        <div style={{fontSize: 36, fontWeight: 600, color: C.text, letterSpacing: -0.3}}>
-          {c.text}
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export const Scene1: React.FC = () => {
   const f = useCurrentFrame();
@@ -102,8 +40,7 @@ export const Scene1: React.FC = () => {
 
   // Step 1: link highlight + click
   const highlight = ease(f, T.linkHighlight, 0.8) - ease(f, T.cameraToDownload + 0.6, 0.8);
-  const clickPress = (at: number) => ease(f, at - 0.1, 0.25) - ease(f, at + 0.08, 0.35);
-  const press = clickPress(T.click);
+  const press = clickPress(f, T.click);
 
   // Download progress
   const prog = interpolate(f, [sec(T.progress[0]), sec(T.progress[1])], [0, 1], {
@@ -147,23 +84,13 @@ export const Scene1: React.FC = () => {
   const ghostLift = pop(f, T.grab);
   const ghostSink = ease(f, T.drop, 0.4);
 
-  const worldTransform =
-    `translate(${W / 2}px, ${H / 2}px) perspective(2600px) rotateX(${cam.rx}deg) rotateY(${cam.ry}deg) ` +
-    `scale(${cam.z / SHARP}) translate(${-cam.cx * SHARP}px, ${-cam.cy * SHARP}px)`;
-
   return (
     <AbsoluteFill style={{background: "#000", fontFamily, color: C.text}}>
       <AbsoluteFill style={{opacity: fade}}>
-        {/* backdrop */}
-        <AbsoluteFill style={{background: "radial-gradient(ellipse at 30% 20%, #2b3b63 0%, #151b2e 45%, #0a0d16 100%)"}} />
-        <AbsoluteFill style={{
-          background: "radial-gradient(circle at 85% 90%, rgba(37,99,235,.28), rgba(37,99,235,0) 40%)",
-          transform: `translate(${Math.sin(f / 60) * 20}px, ${Math.cos(f / 70) * 15}px)`,
-        }} />
+        <Backdrop f={f} />
 
         {/* the camera-moved world */}
-        <AbsoluteFill style={{transformOrigin: "0 0", transform: worldTransform}}>
-          <div style={{position: "absolute", left: 0, top: 0, width: W, height: H, zoom: SHARP}}>
+        <World cam={cam}>
           <BrowserWindow download={download}>
             <GridPlayerApp highlight={Math.max(0, highlight)} press={press} drop={drop} />
           </BrowserWindow>
@@ -191,8 +118,7 @@ export const Scene1: React.FC = () => {
           )}
 
           <Cursor p={cur} pressed={pressed} opacity={Math.max(0, cursorOpacity)} scale={1} />
-          </div>
-        </AbsoluteFill>
+        </World>
 
         {/* captions sit on top of everything, unaffected by the camera */}
         {CONFIG.captions.map((c, i) => <Caption key={i} f={f} c={c} />)}

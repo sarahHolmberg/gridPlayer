@@ -9,6 +9,8 @@ import {
 } from "./icons";
 
 // Colors taken from the real app (app/grid.css)
+export const abs2 = (x: number, y: number, w?: number, h?: number) => abs(x, y, w, h);
+
 export const C = {
   bg: "#f4f4f2",
   panel: "#ffffff",
@@ -82,17 +84,17 @@ const TrafficLights: React.FC = () => (
   </div>
 );
 
-const BrowserChrome: React.FC<{download: DownloadState}> = ({download}) => (
+const BrowserChrome: React.FC<{download: DownloadState; tabTitle: string}> = ({download, tabTitle}) => (
   <>
     {/* Tab strip */}
     <div style={{...abs(0, 0, WIN.w, TAB_H), background: "#dee1e6", display: "flex", alignItems: "flex-end", paddingLeft: 20}}>
       <div style={{height: TAB_H, display: "flex", alignItems: "center", marginRight: 22}}><TrafficLights /></div>
       <div style={{
-        height: 38, width: 250, background: "#fff", borderRadius: "10px 10px 0 0", display: "flex",
+        height: 38, width: tabTitle.length > 16 ? 330 : 250, background: "#fff", borderRadius: "10px 10px 0 0", display: "flex",
         alignItems: "center", gap: 10, padding: "0 14px", fontSize: 15, color: "#202124",
       }}>
         <GlobeIcon />
-        <span style={{flex: 1}}>{CONFIG.content.tabTitle}</span>
+        <span style={{flex: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis"}}>{tabTitle}</span>
         <span style={{color: "#5f6368", fontSize: 16}}>×</span>
       </div>
       <div style={{height: 38, display: "flex", alignItems: "center", padding: "0 14px", color: "#5f6368", fontSize: 22}}>+</div>
@@ -167,7 +169,7 @@ const DropBox: React.FC<{d: DropState}> = ({d}) => {
   );
 };
 
-const LinkCard: React.FC<{highlight: number; press: number}> = ({highlight, press}) => {
+export const LinkCard: React.FC<{highlight: number; press: number}> = ({highlight, press}) => {
   const c = CONFIG.content;
   const x = CARD.pad;
   return (
@@ -217,19 +219,24 @@ const LinkCard: React.FC<{highlight: number; press: number}> = ({highlight, pres
   );
 };
 
+export const AppTitleBar: React.FC<{title: string}> = ({title}) => (
+  <div style={{
+    ...abs(0, TAB_H + ADDR_H, WIN.w, TITLE_H), background: C.panel, borderBottom: `1px solid ${C.line}`,
+    display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 18px 0 22px",
+  }}>
+    <span style={{fontSize: 19, fontWeight: 600}}>{title}</span>
+    <div style={{display: "flex", alignItems: "center", gap: 22}}>
+      <div style={{width: 11, height: 11, borderRadius: "50%", background: C.rec, opacity: 0.55}} />
+      <KebabIcon color={C.muted} horizontal />
+    </div>
+  </div>
+);
+
+export const IDLE_DOWNLOAD: DownloadState = {progress: 0, ringOpacity: 0, done: 0, glow: 0, shine: 0, scale: 1, arrowBob: 0};
+
 export const GridPlayerApp: React.FC<{highlight: number; press: number; drop: DropState}> = ({highlight, press, drop}) => (
   <>
-    {/* app title bar */}
-    <div style={{
-      ...abs(0, TAB_H + ADDR_H, WIN.w, TITLE_H), background: C.panel, borderBottom: `1px solid ${C.line}`,
-      display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 18px 0 22px",
-    }}>
-      <span style={{fontSize: 19, fontWeight: 600}}>{CONFIG.content.appTitle}</span>
-      <div style={{display: "flex", alignItems: "center", gap: 22}}>
-        <div style={{width: 11, height: 11, borderRadius: "50%", background: C.rec, opacity: 0.55}} />
-        <KebabIcon color={C.muted} horizontal />
-      </div>
-    </div>
+    <AppTitleBar title={CONFIG.content.appTitle} />
     {/* video stage */}
     <div style={{
       ...abs(0, STAGE.y - WIN.y, STAGE.w, STAGE.h), background: "#000", overflow: "hidden",
@@ -248,12 +255,14 @@ export const GridPlayerApp: React.FC<{highlight: number; press: number; drop: Dr
   </>
 );
 
-export const BrowserWindow: React.FC<{download: DownloadState; children: React.ReactNode}> = ({download, children}) => (
+export const BrowserWindow: React.FC<{download: DownloadState; tabTitle?: string; children: React.ReactNode}> = ({
+  download, tabTitle = CONFIG.content.tabTitle, children,
+}) => (
   <div style={{
     ...abs(WIN.x, WIN.y, WIN.w, WIN.h), borderRadius: 14, overflow: "hidden", background: "#fff",
     boxShadow: "0 50px 120px rgba(0,0,0,.45), 0 12px 30px rgba(0,0,0,.25), 0 0 0 1px rgba(0,0,0,.25)",
   }}>
-    <BrowserChrome download={download} />
+    <BrowserChrome download={download} tabTitle={tabTitle} />
     {children}
   </div>
 );
