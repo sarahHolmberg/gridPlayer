@@ -14,4 +14,8 @@ Everything else lives in the `app` folder. Keep it next to `Grid-v5.html` and do
 
 **Click a cell** (grid view): the app says the cell and the time, e.g. "target cell G4, time 2.146", straight into the recording, mixed with your voice. You hear it in your headphones too. While it is speaking, other clicks are ignored (the grid dims). Untick **Grid** (G) to use the video's own controls.
 
+**📊 Videos done** (bottom right): type your code and see how many videos you have done, the money (17 000 XAF each) and the links. Every **Done** is counted under the code you typed, so use your own code. In Done you can also paste the link to the stored video.
+
+**👁 Stage info** (top left of the video area): how-to text and video for the stage you are on. Put the videos in `app/info` (see the README there).
+
 To get the newest version: in the app, click **⟳ Update from GitHub**.

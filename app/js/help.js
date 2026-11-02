@@ -37,3 +37,46 @@ $("helpBtn").onclick = () => helpToggle(true);
 $("helpClose").onclick = () => helpToggle(false);
 $("help").onclick = (e) => { if (e.target === $("help")) helpToggle(false); };
 addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("help").hidden) helpToggle(false); });
+
+// ---- Stage info: the small 👁 on the video area opens how-to text + a video for the stage you are on ----
+// CHANGE HERE: the texts, and the videos. To add a video, put the file in the app/info folder with the name below
+// (any length, mp4). Until the file is there the window says "Video coming soon".
+const INFO = {
+  download: {
+    title: "1 · Download the video and open it",
+    text: "Copy the Next link, open it, and download the video with the FastDL extension. Then drop the video on this window (or click Open a video).",
+    video: "app/info/1-download.mp4",
+  },
+  trim: {
+    title: "2 · Trim",
+    text: "Play to where the dance starts and press I, then where it ends and press O. Check it, then press Enter (Trim & continue).",
+    video: "app/info/2-trim.mp4",
+  },
+  actions: {
+    title: "3 · Record the actions",
+    text: "Press R to record. Say the action, then click the target cell: the app says the cell and the time into the recording. When you are done, click Export audio.",
+    video: "app/info/3-actions.mp4",
+  },
+};
+function infoOpen(key) {
+  const it = INFO[key];
+  $("infoHead").textContent = it.title;
+  $("infoText").textContent = it.text;
+  $("infoVid").hidden = false; $("infoNoVid").hidden = true;
+  $("infoVid").onerror = () => { // the file is not there yet
+    $("infoVid").hidden = true; $("infoNoVid").hidden = false;
+    $("infoNoVid").textContent = `Video coming soon (${it.video}).`;
+  };
+  $("infoVid").src = it.video;
+  $("info").hidden = false;
+  console.log(`[info] ${key}`);
+}
+function infoClose() {
+  $("infoVid").pause(); $("infoVid").removeAttribute("src"); $("infoVid").load();
+  $("info").hidden = true;
+  reclaim();
+}
+document.querySelectorAll(".eye").forEach((b) => (b.onclick = () => infoOpen(b.dataset.info)));
+$("infoClose").onclick = infoClose;
+$("info").onclick = (e) => { if (e.target === $("info")) infoClose(); };
+addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("info").hidden) infoClose(); });

@@ -23,6 +23,10 @@
         <div id="cue" class="grid-only"></div>
         <button id="infoBtn" class="grid-only" title="Recording steps (Q)">ℹ</button>
       </div>
+      <!-- Stage info (help.js): one eye per stage, only the one for the stage you are on shows -->
+      <button class="eye no-video-only" data-info="download" title="How to: download the video and open it here">👁</button>
+      <button class="eye needs-video trim-only" data-info="trim" title="How to: trim">👁</button>
+      <button class="eye needs-video grid-only" data-info="actions" title="How to: record the actions">👁</button>
       <!-- Before a video is open, this is the only thing on the stage -->
       <label id="openHint" class="no-video-only" for="file"><b>📂 Open a video</b><span>or drop it anywhere</span></label>
     </div>
@@ -146,11 +150,44 @@
     <div id="doneTitle"><span>Done with this link?</span><button class="icon" id="doneClose" title="Close">✕</button></div>
     <form id="doneForm">
       <div id="doneWhat"></div>
+      <label>Link to the stored video (optional) <input type="text" id="doneStored" placeholder="https://fileflap.net/…" autocomplete="off"></label>
       <label>Personal code <input type="password" id="doneCode" autocomplete="off"></label>
       <div id="doneMsg" role="status"></div>
       <div class="row"><button type="submit" id="doneOk" class="primary">✔ Done, remove it</button><button type="button" id="doneCancel" class="quiet">Cancel</button></div>
     </form>
     <div id="doneOkMsg" hidden><b>✓</b>Video deleted</div> <!-- shown for a moment after a Done -->
+  </div>
+</div>
+
+<!-- Videos done (stats.js): the small 📊 button at the bottom right opens it; your code shows your videos and the money -->
+<button id="statsBtn" title="Videos done: how many and how much">📊</button>
+<div id="statsDlg" hidden>
+  <div id="statsBox">
+    <div id="statsTitle"><span>Videos done</span><button class="icon" id="statsClose" title="Close">✕</button></div>
+    <form id="statsForm">
+      <label>Your code <input type="password" id="statsCode" autocomplete="off"></label>
+      <button type="submit" id="statsOk" class="primary">Show</button>
+    </form>
+    <div id="statsMsg" role="status"></div>
+    <div id="statsOut" hidden>
+      <div id="statsTiles">
+        <div><b id="statsCount">0</b><span>videos done</span></div>
+        <div><b id="statsTotal">0</b><span id="statsRate"></span></div>
+      </div>
+      <div id="statsList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Stage info (help.js): text + a how-to video for the stage -->
+<div id="info" hidden>
+  <div id="infoBox">
+    <div id="infoTitle"><span id="infoHead"></span><button class="icon" id="infoClose" title="Close">✕</button></div>
+    <div id="infoBody">
+      <p id="infoText"></p>
+      <video id="infoVid" controls playsinline preload="metadata"></video>
+      <div id="infoNoVid" hidden></div>
+    </div>
   </div>
 </div>
 
@@ -210,6 +247,7 @@
 <script src="app/js/trim.js"></script>
 <script src="app/js/help.js"></script>
 <script src="app/js/links.js"></script>
+<script src="app/js/stats.js"></script>
 <script src="app/js/update.js"></script>
 <script src="app/js/extension-check.js"></script>
 <script src="app/js/timeline.js"></script>
