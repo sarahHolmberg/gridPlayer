@@ -225,9 +225,12 @@ body.hide-side #side { display: none; }
 .eye { position: absolute; top: 8px; left: 8px; z-index: 7; width: 26px; height: 26px; min-height: 0; padding: 0; border-radius: 50%;
        border: 0; background: var(--accent); color: #fff; font-size: 13px; line-height: 1; box-shadow: 0 1px 6px rgba(0,0,0,.35); }
 .eye:hover { background: #1d4ed8; }
-#infoBox { width: min(560px, 94vw); }
+#infoBox { width: min(760px, 94vw); }
 #infoBody { overflow-y: auto; padding: 4px 16px 16px; display: flex; flex-direction: column; gap: 10px; }
 #infoBody p { margin: 0; line-height: 1.5; }
+#infoTabs { display: flex; flex-wrap: wrap; gap: 6px; }
+#infoTabs button { font-size: 12px; min-height: 28px; padding: 3px 10px; }
+#infoTabs button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
 #infoVid { width: 100%; max-height: 50vh; border-radius: 8px; background: #000; }
 #infoNoVid { padding: 22px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 8px; }
 #doneForm { display: flex; flex-direction: column; gap: 10px; padding: 8px 16px 16px; }

@@ -8,7 +8,9 @@
 // copied to _backup/ inside the folder, so you can put the old one back by hand. Only the most recent update's backup is kept.
 const REPO = { owner: "sarahHolmberg", name: "gridPlayer", branch: "main" }; // CHANGE HERE: where updates come from
 const API = `https://api.github.com/repos/${REPO.owner}/${REPO.name}`;
-const SKIP = (path) => path.split("/").some((p) => p.startsWith(".")); // .DS_Store, .github, ... are never copied
+const SKIP = (path) =>
+  path.split("/").some((p) => p.startsWith(".")) || // .DS_Store, .github, ... are never copied
+  path.startsWith("tutorial-video/"); // the Remotion project that makes the how-to videos: big, and not needed to run the app
 let updDir = null, updFiles = [], updCommit = null, updDone = false; // the picked folder, the files that differ, the repo version they come from
 
 const updLog = (msg) => { $("updMsg").textContent = msg; console.log(`[update] ${msg}`); };
