@@ -27,6 +27,8 @@ const mock = {
   load() { try { return JSON.parse(localStorage.getItem("mockLinks")) ?? MOCK_LINKS; } catch { return MOCK_LINKS; } },
   save(list) { try { localStorage.setItem("mockLinks", JSON.stringify(list)); } catch {} },
   wait: () => new Promise((r) => setTimeout(r, 300)), // feels like a real request
+  loadDone() { try { return JSON.parse(localStorage.getItem("mockDone")) ?? []; } catch { return []; } }, // the pretend "videos done"
+  saveDone(list) { try { localStorage.setItem("mockDone", JSON.stringify(list)); } catch {} },
 };
 
 // Real servers: GET -> { links: [{ link, name, ... }] }
@@ -38,17 +40,19 @@ async function getLinks(server) {
   if (!res.ok) throw new Error(data.error || "Request failed.");
   return data.links || [];
 }
-// Real servers: DELETE { id, code } -> the website checks the code (403 = wrong) and removes that one link
+// Real servers: DELETE { id, code, stored } -> the website checks the code (403 = wrong), notes the video as done by that code
+// (with the link to the stored video) and removes that one link
 const wrongCode = () => Object.assign(new Error("Wrong code. Try again."), { wrongCode: true });
-async function removeLink(server, it, code) {
+async function removeLink(server, it, code, stored) {
   if (server === "mock") {
     await mock.wait();
     if (code.trim().toUpperCase() !== MOCK_CODE) throw wrongCode();
     mock.save(mock.load().filter((x) => x.id !== it.id));
+    mock.saveDone([{ name: it.name, link: it.link, stored, doneAt: new Date().toISOString() }, ...mock.loadDone()]);
     return;
   }
   const res = await netFetch(SERVERS[server], {
-    method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: it.id, code }), cache: "no-store",
+    method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: it.id, code, stored }), cache: "no-store",
   });
   const data = await res.json().catch(() => ({}));
   console.log(`[done] status ${res.status}`);
@@ -128,7 +132,7 @@ async function fetchLinks() {
 
 $("fetchBtn").onclick = fetchLinks;
 $("allBtn").onclick = () => { allOpen = !allOpen; $("allBox").hidden = !allOpen; renderLinks(); };
-$("mockReset").onclick = () => { try { localStorage.removeItem("mockLinks"); } catch {} console.log("[links] mock list reset"); fetchLinks(); };
+$("mockReset").onclick = () => { try { localStorage.removeItem("mockLinks"); localStorage.removeItem("mockDone"); } catch {} console.log("[links] mock list reset"); fetchLinks(); };
 function setServer(s, reload) {
   linksServer = s;
   document.querySelectorAll("#serverToggle button").forEach((b) => b.classList.toggle("on", b.dataset.server === s));
@@ -144,10 +148,10 @@ let doneItem = null;
 function doneOpen(it) {
   doneItem = it;
   $("doneWhat").textContent = (it.name ? it.name + " · " : "") + fullLink(it);
-  $("doneCode").value = ""; $("doneMsg").textContent = "";
+  $("doneCode").value = $("doneStored").value = ""; $("doneMsg").textContent = "";
   $("doneForm").hidden = false; $("doneOkMsg").hidden = true;
   $("doneDlg").hidden = false;
-  $("doneCode").focus();
+  $("doneStored").focus();
   console.log(`[done] asking for the code: ${it.link}`);
 }
 function doneClose() { if (isBusy()) return; $("doneDlg").hidden = true; doneItem = null; reclaim(); }
@@ -181,11 +185,13 @@ $("doneForm").onsubmit = async (e) => {
   if (isBusy()) return;
   const code = $("doneCode").value;
   if (!code.trim()) { $("doneMsg").textContent = "Type your code first."; return $("doneCode").focus(); }
+  const stored = $("doneStored").value.trim();
+  if (stored && !/^https?:\/\//i.test(stored)) { $("doneMsg").textContent = "The stored-video link must start with https://"; return $("doneStored").focus(); }
   const server = linksServer;
   setBusy(true);
   $("doneOk").disabled = true; $("doneMsg").textContent = "Checking…";
   try {
-    await removeLink(server, doneItem, code);
+    await removeLink(server, doneItem, code, stored);
     console.log(`[done] removed ${doneItem.link}`);
     await doneAnimation(server);
     doneItem = null;
