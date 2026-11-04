@@ -55,7 +55,7 @@ const INFO = {
   },
   send: {
     title: "4 · Send to Studio Mirrors",
-    text: "Upload the recording and the trimmed video on FileFlap and copy the link. Paste it here, type your name, and click Send: Studio Mirrors gets an email with the link, the name and the Instagram link. Then press Done.",
+    text: "Upload the recording and the trimmed video on FileFlap and copy the link. Paste it here and click Send: Studio Mirrors gets an email with the link, the name and the Instagram link. Then it asks if you are done: click Done and type your code.",
     videos: [{ label: "Upload, then Done", src: "app/info/5-upload-done.mp4" }],
   },
   actions: {

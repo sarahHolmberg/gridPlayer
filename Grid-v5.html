@@ -101,9 +101,7 @@
         <h3>Send to Studio Mirrors</h3>
         <div id="sendWhat"></div>
         <a id="flapBtn" class="btn wide" href="https://fileflap.net/" target="_blank" rel="noopener noreferrer" title="Upload the recording and the trimmed video, then copy the link">⬆ 1. Upload both files on FileFlap</a>
-        <label class="fld">2. FileFlap link <input type="text" id="sendLink" placeholder="https://fileflap.net/…" autocomplete="off"></label>
-        <label class="fld">Your name <input type="text" id="sendFrom" autocomplete="name"></label>
-        <label class="fld">Note (optional) <textarea id="sendNote" rows="2"></textarea></label>
+        <label class="fld">2. FileFlap transfer link <input type="text" id="sendLink" placeholder="https://fileflap.net/…" autocomplete="off"></label>
         <div id="sendMsg" role="status"></div>
         <button id="sendBtn" class="primary wide" title="Email it all to Studio Mirrors">📨 3. Send to Studio Mirrors</button>
         <button id="sendBack" class="quiet" title="Back to recording">◂ Back to record</button>
@@ -213,6 +211,15 @@
       <video id="infoVid" controls playsinline preload="metadata"></video>
       <div id="infoNoVid" hidden></div>
     </div>
+  </div>
+</div>
+
+<!-- After Send (send.js): "Are you done with this video?" Done = the usual Done window (asks for your code) -->
+<div id="askDone" hidden>
+  <div id="askDoneBox">
+    <div id="askDoneTitle"><span>✓ Sent. Are you done with this video?</span></div>
+    <div id="askDoneWhat"></div>
+    <div class="row"><button id="askDoneYes" class="primary">✔ Done</button><button id="askDoneNo" class="quiet">Not yet</button></div>
   </div>
 </div>
 

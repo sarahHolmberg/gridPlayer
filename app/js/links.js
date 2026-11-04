@@ -174,7 +174,7 @@ function doneOpen(it) {
   $("doneStored").value = sentLink; // the FileFlap link from Send (send.js), if it was sent
   $("doneForm").hidden = false; $("doneOkMsg").hidden = true;
   $("doneDlg").hidden = false;
-  $("doneStored").focus();
+  $(sentLink ? "doneCode" : "doneStored").focus(); // link already there (from Send): straight to the code
   console.log(`[done] asking for the code: ${it.link}`);
 }
 function doneClose() { if (isBusy()) return; $("doneDlg").hidden = true; doneItem = null; reclaim(); }

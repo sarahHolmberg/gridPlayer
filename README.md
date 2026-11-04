@@ -18,7 +18,7 @@ Everything else lives in the `app` folder. Keep it next to `Grid-v5.html` and do
 
 **👁 Stage info** (top left of the video area): how-to text and video for the stage you are on. Put the videos in `app/info` (see the README there).
 
-**Step 4 · Send** (after recording, **Next: Send ▸**): upload the recording and the trimmed video on FileFlap, paste the link, type your name and click **📨 Send to Studio Mirrors**: Studio Mirrors gets an email with the link, the name and the Instagram link. Done then fills in that link for you. Sending needs the Web3Forms key in `app/js/send.js` (free: type the receiving email at web3forms.com and the key arrives there).
+**Step 4 · Send** (after recording, **Next: Send ▸**): upload the recording and the trimmed video on FileFlap, paste the FileFlap transfer link (only that is accepted) and click **📨 Send to Studio Mirrors**: Studio Mirrors gets an email with the link, the name and the Instagram link. Then it asks "Are you done with this video?": **✔ Done** opens Done (your code), with the link filled in. Sending needs the Web3Forms key in `app/js/send.js` (free: type the receiving email at web3forms.com and the key arrives there).
 
 **🖼** beside a link's Instagram button shows the picture that came with it.
 
