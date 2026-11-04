@@ -100,6 +100,8 @@ body:not(.trim-mode) #grid { pointer-events: auto; cursor: crosshair; }
 
 /* ---------- Beat timeline (grid view): the sound scrolls past the middle line, beat grid over it ---------- */
 #tl { flex: none; height: 150px; display: flex; flex-direction: column; background: #0b0b0a; border-top: 1px solid #262624; color: #d8d8d2; position: relative; }
+body:not(.trim-mode) #tl.folded { height: auto; } /* recording step: folded = only the button bar */
+body:not(.trim-mode) #tl.folded > :not(#tlBar), body:not(.trim-mode) #tl.folded #tlBar > :not(#tlFold) { display: none; }
 #tlCanvas { flex: 1; min-height: 0; width: 100%; cursor: grab; touch-action: none; }
 #tlCanvas:active { cursor: grabbing; }
 #tlMsg { position: absolute; left: 0; right: 0; top: 46px; text-align: center; font-size: 12px; color: #9a9a92; pointer-events: none; }
@@ -294,3 +296,102 @@ body.busy::after { content: ""; position: fixed; inset: 0; z-index: 40; cursor: 
   #main { flex-direction: column; }
   #side { width: auto; max-height: 45vh; border-left: 0; border-top: 1px solid var(--line); }
 }
+
+/* =====================================================================================================
+   Windows XP look (Luna blue). Sits last, so it wins over the plain styles above.
+   CHANGE HERE: the colours of the XP look.
+   ===================================================================================================== */
+:root {
+  --bg: #ece9d8;        /* window face */
+  --panel: #ece9d8;     /* dialogs, menu */
+  --line: #aca899;      /* borders */
+  --text: #000;
+  --muted: #555;
+  --accent: #0046d5;    /* links, XP blue */
+  --accent-soft: #c1d2ee;
+  --ok: #2a7d1e;
+  --ok-soft: #d8f5d0;
+  --xp-blue: linear-gradient(#0997ff 0, #0053ee 8%, #0050ee 40%, #06f 88%, #06f 93%, #005bff 95%, #003dd7 100%);
+}
+body { font: 11px/1.35 Tahoma, Verdana, sans-serif; background: #0831d9; }
+#win { padding: 0 3px 3px; background: #0831d9; }
+#titlebar { height: 30px; border: 0; border-radius: 7px 7px 0 0; background: var(--xp-blue); padding: 0 4px 0 8px; }
+#title { color: #fff; font: bold 13px "Trebuchet MS", Tahoma, sans-serif; text-shadow: 1px 1px #0f1089; }
+#menuBtn { width: 22px; min-height: 22px; height: 22px; border: 1px solid #fff; border-radius: 3px; color: #fff; font-size: 13px;
+           background: radial-gradient(circle at 30% 25%, #6a9cff, #2457e6 70%); }
+#menuBtn:hover { background: radial-gradient(circle at 30% 25%, #8bb3ff, #3b6cf0 70%); color: #fff; }
+#net { display: flex; align-items: center; padding: 3px 6px; border-radius: 10px; background: rgba(0,0,0,.25); }
+#net i { width: 9px; height: 9px; opacity: 1; background: #e8281a; box-shadow: 0 0 0 1px rgba(255,255,255,.7); }
+#net.on i { background: #3fd13f; box-shadow: 0 0 6px #3fd13f, 0 0 0 1px rgba(255,255,255,.7); }
+#main { background: var(--bg); }
+
+/* XP buttons and fields */
+button, .btn {
+  font: 11px Tahoma, Verdana, sans-serif; color: #000; min-height: 23px; padding: 3px 8px;
+  border: 1px solid #003c74; border-radius: 3px; background: linear-gradient(#fff, #ecebe5 86%, #d8d0c4);
+}
+button:hover, .btn:hover { border-color: #003c74; background: linear-gradient(#fff, #ecebe5 86%, #d8d0c4); box-shadow: inset 0 0 0 2px #fcb83c; }
+button:active, .btn:active { background: #cdcac0; box-shadow: none; }
+button.on { background: #d9d6c8; color: #000; border-color: #003c74; box-shadow: inset 1px 1px 3px #8d8a7a; }
+button:disabled, .primary:disabled { color: #aca899; border-color: #c9c7ba; background: #f4f3ee; box-shadow: none; }
+.primary { color: #000; font-weight: bold; border-color: #003c74; background: linear-gradient(#fff, #ecebe5 86%, #d8d0c4); box-shadow: inset 0 0 0 1px #8ab4f8; }
+.primary:hover { background: linear-gradient(#fff, #ecebe5 86%, #d8d0c4); box-shadow: inset 0 0 0 2px #fcb83c; }
+.quiet, .icon { border-color: transparent; background: transparent; color: #000; box-shadow: none; }
+.quiet:hover, .icon:hover { border-color: #003c74; background: linear-gradient(#fff, #ecebe5 86%, #d8d0c4); }
+.link, .link:hover { border: 0; background: none; box-shadow: none; color: var(--accent); min-height: 0; padding: 0; }
+.primary kbd { background: none; color: #555; }
+kbd { font: 10px Tahoma, sans-serif; color: #555; background: none; padding: 0 2px; }
+input[type=number], input[type=text], input[type=password], #sendCard textarea { border: 1px solid #7f9db9; border-radius: 0; font: 11px Tahoma, sans-serif; background: #fff; }
+input:focus, textarea:focus { outline: 1px solid #316ac5; border-color: #316ac5; }
+.lcd { display: inline-block; padding: 2px 6px; background: #fff; border: 1px solid #7f9db9; font: bold 18px "Lucida Console", Consolas, monospace; }
+.lcd.sm { font-size: 14px; }
+.seg { border: 0; border-radius: 0; gap: 2px; overflow: visible; }
+.seg button, .seg button + button { border: 1px solid #003c74; border-radius: 3px; min-height: 21px; padding: 1px 6px; font-size: 11px; }
+.seg button.on { background: #d9d6c8; color: #000; }
+#doneBtn { color: #fff; font-weight: bold; border-color: #1d5b12; background: linear-gradient(#5ec84e, #3c9a2e 60%, #2a7d1e); }
+#doneBtn:hover { background: linear-gradient(#6fd85f, #46aa38 60%, #2f8a22); box-shadow: inset 0 0 0 1px #c8f5c0; }
+
+/* Side panel = an XP task pane: blue, with boxes that have a white-to-blue header */
+#side { width: 236px; padding: 10px 8px; gap: 10px; border-left: 1px solid #0831d9; background: linear-gradient(#7ba2e7, #6375d6); }
+.card { gap: 6px; padding: 0 8px 8px; border: 1px solid #fff; border-radius: 4px 4px 0 0; background: #d6dff7; overflow: hidden; }
+.card h3 { margin: 0 -8px; padding: 5px 8px; font: bold 11px Tahoma, sans-serif; letter-spacing: 0; text-transform: none; color: #215dc6;
+           background: linear-gradient(to right, #fff, #c6d3f7); }
+.cardHead { margin: 0 -8px; padding-right: 2px; background: linear-gradient(to right, #fff, #c6d3f7); }
+.cardHead h3 { background: none; margin: 0; }
+#status { color: #fff; text-shadow: 0 0 2px #0f1089; }
+#status .link { color: #fff; text-decoration: underline; }
+.lk { border-color: #b4c5ea; }
+.ln button { min-height: 19px; }
+
+/* Beat timeline bar in XP grey under the dark waveform */
+#tlBar { background: var(--bg); color: #000; border-top: 1px solid #aca899; font-size: 11px; }
+#tlBar input[type=number] { background: #fff; color: #000; border-color: #7f9db9; }
+#tlBar button { min-height: 21px; padding: 1px 7px; font-size: 11px; color: #000; background: linear-gradient(#fff, #ecebe5 86%, #d8d0c4); border-color: #003c74; }
+#tlBar button:hover { background: linear-gradient(#fff, #ecebe5 86%, #d8d0c4); }
+#tlBar .seg button + button { border-left-color: #003c74; }
+#tlBar kbd { background: none; color: #555; }
+#tlPos { color: #0046d5; }
+
+/* ⋯ menu = an XP menu: white, blue highlight */
+#menu { top: 32px; border: 1px solid #aca899; border-radius: 0; background: #fff; box-shadow: 3px 3px 6px rgba(0,0,0,.35); }
+#menu > button { border: 0; border-radius: 0; background: none; box-shadow: none; }
+#menu > button:hover { background: #316ac5; color: #fff; box-shadow: none; }
+#menu h4 { font: bold 11px Tahoma, sans-serif; letter-spacing: 0; text-transform: none; color: #0046d5; }
+
+/* Windows = XP dialogs: blue title bar, beige face */
+#helpBox, #updBox, #doneBox, #expBox, #statsBox, #infoBox, #askDoneBox, #picBox, #extBox {
+  border: 3px solid #0831d9; border-top: 0; border-radius: 8px 8px 0 0; background: var(--bg); box-shadow: 4px 4px 12px rgba(0,0,0,.4); }
+#helpTitle, #doneTitle, #expTitle, #statsTitle, #infoTitle, #askDoneTitle, #updTitle, #extTitle, #picTitle {
+  margin: 0 -3px; padding: 5px 4px 5px 10px; border-radius: 7px 7px 0 0; background: var(--xp-blue);
+  color: #fff; font: bold 13px "Trebuchet MS", Tahoma, sans-serif; text-shadow: 1px 1px #0f1089; }
+#helpTitle .icon, #doneTitle .icon, #expTitle .icon, #statsTitle .icon, #infoTitle .icon, #updTitle .icon, #picTitle .icon {
+  width: 21px; min-height: 21px; height: 21px; border: 1px solid #fff; border-radius: 3px; color: #fff; font: bold 11px Tahoma;
+  background: radial-gradient(circle at 30% 25%, #f0987a, #d2401a 70%); }
+#picBox { padding: 0 6px 6px; }
+#statsTiles div { background: #fff; border-color: #7f9db9; border-radius: 0; }
+.blk { background: #fff; border-color: #7f9db9; border-radius: 0; }
+.blk.app { background: var(--ok-soft); border-color: #7bbf6e; }
+#extGate { background: #3a6ea5; }
+#statsBtn, .eye { border: 1px solid #fff; }
+#statsBtn { background: linear-gradient(#fff, #ecebe5 86%, #d8d0c4); border-color: #003c74; }
+.card > :first-child:not(h3):not(.cardHead) { margin-top: 8px; }

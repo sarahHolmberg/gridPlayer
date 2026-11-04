@@ -32,8 +32,8 @@
       <label id="openHint" class="no-video-only" for="file"><b>📂 Open a video</b><span>or drop it anywhere</span></label>
     </div>
 
-    <!-- Beat timeline (grid view only): the sound scrolls past the middle line, with the beat grid over it -->
-    <div id="tl" class="needs-video grid-only">
+    <!-- Beat timeline (trim and recording steps; can be folded away in the recording step): the sound scrolls past the middle line, with the beat grid over it -->
+    <div id="tl" class="needs-video">
       <canvas id="tlCanvas" title="Drag to scrub · click to jump · scroll to zoom"></canvas>
       <div id="tlMsg"></div>
       <div id="tlBar">
@@ -44,6 +44,7 @@
         <span class="seg" title="Move the whole beat grid 10 ms"><button id="gridEarlier">◂ 10 ms</button><button id="gridLater">10 ms ▸</button></span>
         <label class="chip" title="Clicks, drags and ←/→ land on beats (Shift + ←/→ = a whole bar)"><input type="checkbox" id="snap" checked> Snap <kbd>S</kbd></label>
         <span class="seg" title="Zoom (or scroll on the waveform)"><button id="zoomOut">−</button><button id="zoomIn">+</button></span>
+        <button id="tlFold" class="grid-only" title="Hide / show the beat timeline (recording step)">▾ Hide</button>
       </div>
     </div>
     </div>
@@ -142,8 +143,8 @@
     <kbd>Space</kbd> play / pause video<br>
     <span class="trim-only"><kbd>I</kbd> / <kbd>O</kbd> in / out · <kbd>X</kbd> clear · <kbd>Enter</kbd> trim &amp; continue<br></span>
     <kbd>A</kbd> slower · <kbd>D</kbd> faster<br>
-    <kbd>←</kbd> / <kbd>→</kbd> fine step · <kbd>Shift</kbd> 1 s <span class="grid-only">(Snap on: one beat · <kbd>Shift</kbd> one bar)</span><br>
-    <span class="grid-only"><kbd>B</kbd> tap the beat · <kbd>K</kbd> beat 1 here · <kbd>S</kbd> snap on / off<br></span>
+    <kbd>←</kbd> / <kbd>→</kbd> fine step · <kbd>Shift</kbd> 1 s <span>(Snap on: one beat · <kbd>Shift</kbd> one bar)</span><br>
+    <span><kbd>B</kbd> tap the beat · <kbd>K</kbd> beat 1 here · <kbd>S</kbd> snap on / off<br></span>
     <span class="grid-only">Click a cell: the cell + time are spoken into the recording<br></span>
     <span class="grid-only"><kbd>G</kbd> grid · <kbd>N</kbd> names · <kbd>Q</kbd> steps · <kbd>T</kbd> back to trim<br></span>
     <kbd>L</kbd> loop · <kbd>H</kbd> hide the side panel

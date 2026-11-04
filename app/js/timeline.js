@@ -1,4 +1,4 @@
-// app/js/timeline.js: Beat timeline under the video (grid view only), like a DJ app: the sound scrolls past a fixed middle line,
+// app/js/timeline.js: Beat timeline under the video (trim and recording steps), like a DJ app: the sound scrolls past a fixed middle line,
 // with a beat grid drawn over it (set the BPM and where beat 1 is). With Snap on, clicking, dragging and ←/→ land on beats.
 // Part of Grid Player, loaded by Grid-v5.html with a plain <script> (no modules, so it also works opened from disk).
 
@@ -12,7 +12,7 @@ const TL = {
   key: "",           // remembers the grid per video (localStorage)
 };
 const beatLen = () => 60 / TL.bpm;
-const snapOn = () => !trimMode && $("snap").checked;
+const snapOn = () => $("snap").checked; // trim too: In / Out can land on beats
 // The beat number (0 = beat 1) closest to time t, and its time
 const beatIndex = (t) => Math.round((t - TL.beat1) / beatLen());
 const beatTime = (k) => TL.beat1 + k * beatLen();
@@ -71,9 +71,9 @@ function tlDraw() {
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
   g.clearRect(0, 0, W, H);
 
-  // outside the trimmed part: darker
+  // outside the trimmed part (In -> Out): darker. In the trim step the In / Out points are drawn as green / red lines.
   g.fillStyle = "#0b0b0a"; g.fillRect(0, 0, W, H);
-  const a = Math.max(0, toX(lo())), b = Math.min(W, toX(hi() || v.duration || 0));
+  const a = Math.max(0, toX(tIn)), b = Math.min(W, toX(rangeEnd() || v.duration || 0));
   if (b > a) { g.fillStyle = "#171716"; g.fillRect(a, 0, b - a, H); }
 
   // waveform: one column per pixel, peak (light) and average loudness (strong)
@@ -98,6 +98,11 @@ function tlDraw() {
     if (bar) { g.fillStyle = k === 0 ? "#ff5a5f" : "#e8e8e3"; g.fillText(String(Math.floor(k / 4) + 1), x + 4, 2); }
   }
 
+  if (trimMode) {
+    if (tIn > 0) { g.fillStyle = "#3fd13f"; g.fillRect(Math.round(toX(tIn)) - 1, 0, 2, H); g.fillText("IN", toX(tIn) + 4, H - 14); }
+    if (tOut !== null) { g.fillStyle = "#ff5a5f"; g.fillRect(Math.round(toX(tOut)) - 1, 0, 2, H); g.fillText("OUT", toX(tOut) - 26, H - 14); }
+  }
+
   // the middle line = now
   g.fillStyle = "#fcb83c"; g.fillRect(mid - 1, 0, 2, H);
   g.beginPath(); g.moveTo(mid - 6, 0); g.lineTo(mid + 6, 0); g.lineTo(mid, 7); g.fill();
@@ -106,7 +111,18 @@ function tlDraw() {
   const k = Math.floor((now - TL.beat1) / beatLen() + 1e-6);
   $("tlPos").textContent = now < TL.beat1 - 1e-3 ? "before beat 1" : `Bar ${Math.floor(k / 4) + 1} · Beat ${((k % 4) + 4) % 4 + 1}`;
 }
-(function tlLoop() { if (!trimMode && document.body.classList.contains("has-video")) tlDraw(); requestAnimationFrame(tlLoop); })();
+(function tlLoop() { if (document.body.classList.contains("has-video") && !tlFolded()) tlDraw(); requestAnimationFrame(tlLoop); })();
+
+// ---- Fold away (recording step only; the trim step always shows it). Remembered in this browser. ----
+const tlFolded = () => !trimMode && $("tl").classList.contains("folded");
+function tlFold(on) {
+  $("tl").classList.toggle("folded", on);
+  $("tlFold").textContent = on ? "▴ Beat timeline" : "▾ Hide";
+  try { localStorage.setItem("tlFolded", on ? "1" : ""); } catch {}
+  console.log(`[timeline] ${on ? "folded" : "shown"}`);
+}
+$("tlFold").onclick = () => tlFold(!$("tl").classList.contains("folded"));
+try { if (localStorage.getItem("tlFolded")) tlFold(true); } catch {}
 
 // ---- Moving around: drag the waveform to scrub, click to jump (both snap to the nearest beat when Snap is on) ----
 let tlDrag = null;
