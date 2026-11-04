@@ -33,6 +33,7 @@ function clearTrim() { tIn = 0; tOut = null; updateTrim(); }
 function setMode(trim) {
   trimMode = trim;
   document.body.classList.toggle("trim-mode", trim);
+  document.body.classList.remove("send-mode"); // trim or record: never the send step (send.js)
   v.pause();
   if (!trim) v.currentTime = tIn; // start the trimmed clip at its In point
   fit(); updateStatus(); reclaim();

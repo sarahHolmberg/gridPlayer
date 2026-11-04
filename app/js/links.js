@@ -62,6 +62,18 @@ async function removeLink(server, it, code, stored) {
 }
 // The picture sent with the link (Video Vault): the same website, the links function, ?image=<id>. The mock list has none.
 const pictureUrl = (server, it) => (it.hasImage && SERVERS[server] ? SERVERS[server].replace(/links-api$/, "links") + "?image=" + encodeURIComponent(it.id) : null);
+// The picture window: opens over everything, click anywhere / ✕ / Escape closes it
+function picShow(src, name) {
+  $("picImg").src = src; $("picImg").alt = name ? "Picture: " + name : "Picture";
+  $("picHead").textContent = name || "Picture";
+  $("picErr").hidden = true; $("picImg").hidden = false;
+  $("picDlg").hidden = false;
+  console.log(`[links] picture: ${src}`);
+}
+$("picImg").onerror = () => { $("picImg").hidden = true; $("picErr").hidden = false; }; // offline, or the picture is gone
+const picClose = () => { $("picDlg").hidden = true; $("picImg").removeAttribute("src"); reclaim(); };
+$("picDlg").onclick = picClose;
+addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("picDlg").hidden) picClose(); });
 // Oldest first: by createdAt when the server sends it, then by id (a newer link gets a bigger id)
 const byAge = (list) => [...list].sort((a, b) => (Date.parse(a.createdAt) || 0) - (Date.parse(b.createdAt) || 0) || a.id - b.id);
 
@@ -84,6 +96,13 @@ function linkRow(it) {
   ig.className = "ig"; ig.href = ig.title = instaLink(it); ig.target = "_blank"; ig.rel = "noopener noreferrer";
   ig.innerHTML = IG_ICON; ig.setAttribute("aria-label", "Open on Instagram");
   row.append(a, ig); // the link has no copy button; the Instagram button sits right beside it
+  const pic = pictureUrl(linksServer, it);
+  if (pic) { // the picture sent with the link: a small button beside the Instagram one, click = see it
+    const pb = document.createElement("button");
+    pb.className = "picBtn"; pb.title = "See the picture"; pb.textContent = "🖼";
+    pb.onclick = () => picShow(pic, it.name);
+    ig.after(pb);
+  }
   if (it.name) {
     const who = document.createElement("span");
     who.className = "who";
@@ -102,17 +121,7 @@ function renderLinks(slideIn) {
     const done = document.createElement("button");
     done.id = "doneBtn"; done.textContent = "✔ Done"; done.title = "Finished with this link: remove it (asks for your code)";
     done.onclick = () => doneOpen(now);
-    row.querySelector(".ig").after(done); // Done sits right beside the link (after its Instagram button)
-    const pic = pictureUrl(linksServer, now);
-    if (pic) { // the picture of who the video is about, under the link; click = full size
-      const a = document.createElement("a");
-      a.className = "pic"; a.href = pic; a.target = "_blank"; a.rel = "noopener noreferrer"; a.title = "Open the picture";
-      const img = document.createElement("img");
-      img.src = pic; img.alt = now.name ? "Picture: " + now.name : "Picture";
-      img.onerror = () => a.remove(); // offline, or the picture is gone: just leave it out
-      a.append(img);
-      row.append(a);
-    }
+    (row.querySelector(".picBtn") || row.querySelector(".ig")).after(done); // Done sits right beside the link (after its Instagram button)
     if (slideIn) row.classList.add("enter"); // after a Done: the next link slides in (grid.css)
     $("nextItem").append(row);
   }
@@ -161,7 +170,8 @@ let doneItem = null;
 function doneOpen(it) {
   doneItem = it;
   $("doneWhat").textContent = (it.name ? it.name + " · " : "") + fullLink(it);
-  $("doneCode").value = $("doneStored").value = ""; $("doneMsg").textContent = "";
+  $("doneCode").value = ""; $("doneMsg").textContent = "";
+  $("doneStored").value = sentLink; // the FileFlap link from Send (send.js), if it was sent
   $("doneForm").hidden = false; $("doneOkMsg").hidden = true;
   $("doneDlg").hidden = false;
   $("doneStored").focus();
@@ -206,6 +216,7 @@ $("doneForm").onsubmit = async (e) => {
   try {
     await removeLink(server, doneItem, code, stored);
     console.log(`[done] removed ${doneItem.link}`);
+    sentLink = ""; $("sendLink").value = ""; // that video is finished: the next one gets its own link
     await doneAnimation(server);
     doneItem = null;
   } catch (err) {

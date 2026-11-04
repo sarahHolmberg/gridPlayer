@@ -53,6 +53,11 @@ const INFO = {
     text: "Play to where the dance starts and press I, then where it ends and press O. Check it, then press Enter (Trim & continue).",
     videos: [{ label: "Trim on the beat", src: "app/info/2-trim.mp4" }],
   },
+  send: {
+    title: "4 · Send to Studio Mirrors",
+    text: "Upload the recording and the trimmed video on FileFlap and copy the link. Paste it here, type your name, and click Send: Studio Mirrors gets an email with the link, the name and the Instagram link. Then press Done.",
+    videos: [{ label: "Upload, then Done", src: "app/info/5-upload-done.mp4" }],
+  },
   actions: {
     title: "3 · Record the actions",
     text: "Press R to record. Say the action, then click the target cell: the app says the cell and the time into the recording. When you are done, click Export audio. Then upload both files and press Done.",

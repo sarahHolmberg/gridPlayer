@@ -27,6 +27,7 @@
       <button class="eye no-video-only" data-info="download" title="How to: download the video and open it here">👁</button>
       <button class="eye needs-video trim-only" data-info="trim" title="How to: trim">👁</button>
       <button class="eye needs-video grid-only" data-info="actions" title="How to: record the actions">👁</button>
+      <button class="eye needs-video send-only" data-info="send" title="How to: send it to Studio Mirrors">👁</button>
       <!-- Before a video is open, this is the only thing on the stage -->
       <label id="openHint" class="no-video-only" for="file"><b>📂 Open a video</b><span>or drop it anywhere</span></label>
     </div>
@@ -77,7 +78,7 @@
       </section>
 
       <!-- Step 2: record -->
-      <section class="card needs-video grid-only">
+      <section class="card needs-video grid-only" id="recCard">
         <h3>Record</h3>
         <div class="row">
           <button id="recBtn" data-st="idle" title="Record / Pause / Resume (R)"></button>
@@ -92,6 +93,20 @@
           <label class="chip"><input type="checkbox" id="lbl" checked> Names <kbd>N</kbd></label>
           <button id="backBtn" class="quiet" title="Back to trimming">✂ Back to trim <kbd>T</kbd></button>
         </div>
+        <button id="toSendBtn" class="wide" title="Step 4: send it all to Studio Mirrors">Next: Send ▸</button>
+      </section>
+
+      <!-- Step 4: send (send.js): the FileFlap link with the recording + trimmed video, the name and link, by email to Studio Mirrors -->
+      <section class="card needs-video send-only" id="sendCard">
+        <h3>Send to Studio Mirrors</h3>
+        <div id="sendWhat"></div>
+        <a id="flapBtn" class="btn wide" href="https://fileflap.net/" target="_blank" rel="noopener noreferrer" title="Upload the recording and the trimmed video, then copy the link">⬆ 1. Upload both files on FileFlap</a>
+        <label class="fld">2. FileFlap link <input type="text" id="sendLink" placeholder="https://fileflap.net/…" autocomplete="off"></label>
+        <label class="fld">Your name <input type="text" id="sendFrom" autocomplete="name"></label>
+        <label class="fld">Note (optional) <textarea id="sendNote" rows="2"></textarea></label>
+        <div id="sendMsg" role="status"></div>
+        <button id="sendBtn" class="primary wide" title="Email it all to Studio Mirrors">📨 3. Send to Studio Mirrors</button>
+        <button id="sendBack" class="quiet" title="Back to recording">◂ Back to record</button>
       </section>
 
       <div id="status">
@@ -179,6 +194,15 @@
   </div>
 </div>
 
+<!-- The picture sent with a link (links.js): the 🖼 button beside the Instagram one opens it -->
+<div id="picDlg" hidden>
+  <div id="picBox">
+    <div id="picTitle"><span id="picHead"></span><button class="icon" title="Close">✕</button></div>
+    <img id="picImg" alt="">
+    <div id="picErr" hidden>The picture could not be loaded (offline?).</div>
+  </div>
+</div>
+
 <!-- Stage info (help.js): text + a how-to video for the stage -->
 <div id="info" hidden>
   <div id="infoBox">
@@ -249,6 +273,7 @@
 <script src="app/js/help.js"></script>
 <script src="app/js/links.js"></script>
 <script src="app/js/stats.js"></script>
+<script src="app/js/send.js"></script>
 <script src="app/js/update.js"></script>
 <script src="app/js/extension-check.js"></script>
 <script src="app/js/timeline.js"></script>

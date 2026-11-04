@@ -26,6 +26,9 @@ body:not(.has-video) .needs-video, body:not(.has-video) #wrap { display: none !i
 body.has-video .no-video-only { display: none !important; }
 body.trim-mode .grid-only, body.trim-mode #grid { display: none !important; }
 body:not(.trim-mode) .trim-only { display: none !important; }
+body:not(.send-mode) .send-only { display: none !important; } /* step 4: send (send.js) */
+body.send-mode #recCard, body.send-mode .eye[data-info=actions] { display: none !important; }
+body.send-mode #grid { pointer-events: none !important; } /* nothing to click on the grid when sending */
 
 /* ---------- Top bar ---------- */
 #win { height: 100%; display: flex; flex-direction: column; }
@@ -148,14 +151,29 @@ body.hide-side #side { display: none; }
 .who { font-weight: 600; overflow-wrap: anywhere; }
 .ln button { min-height: 22px; padding: 0 6px; font-size: 11px; }
 #nextItem .lk { padding: 0; border: 0; }
-#nextItem .pic { flex-basis: 100%; display: block; } /* the picture sent with the link (Video Vault) */
-#nextItem .pic img { display: block; max-width: 100%; max-height: 160px; border-radius: 6px; border: 1px solid var(--line); }
+.lk > .picBtn { flex: none; width: 26px; min-height: 26px; padding: 0; border-color: transparent; background: transparent; font-size: 14px; } /* the picture sent with the link */
+.lk > .picBtn:hover { background: var(--accent-soft); }
+#picDlg { position: fixed; inset: 0; z-index: 12; background: rgba(20,20,18,.7); display: flex; align-items: center; justify-content: center; cursor: zoom-out; }
+#picBox { display: flex; flex-direction: column; gap: 6px; max-width: 92vw; max-height: 90vh; padding: 10px; background: var(--panel); border-radius: 12px; }
+#picTitle { display: flex; align-items: center; font-weight: 600; padding-left: 4px; }
+#picHead { flex: 1; }
+#picImg { display: block; max-width: calc(92vw - 20px); max-height: calc(90vh - 60px); border-radius: 6px; }
+#picErr { padding: 30px; color: var(--muted); }
 #nextItem:empty { display: none; }
 #doneBtn { flex: none; background: var(--ok); border-color: var(--ok); color: #fff; font-weight: 600; }
 #doneBtn:hover { background: #166534; }
 #linksMsg { flex: 1; font-size: 12px; color: var(--muted); }
 #linksList { max-height: 40vh; overflow-y: auto; border-top: 1px solid var(--line); margin: 0 -12px -10px; padding: 0 12px; }
 #linksList .lk.now { background: var(--accent-soft); margin: 0 -12px; padding: 8px 12px; } /* the one you are working on */
+
+/* Step 4: send */
+#sendWhat { font-size: 12px; overflow-wrap: anywhere; }
+#sendWhat b { display: block; }
+#sendCard .fld { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--muted); white-space: normal; }
+#sendCard textarea { font: inherit; border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; resize: vertical; }
+#flapBtn { text-decoration: none; }
+#sendMsg { font-size: 12px; min-height: 16px; color: var(--rec); }
+#sendMsg.ok { color: var(--ok); font-weight: 600; }
 
 /* Record: red circle */
 #recBtn { width: 36px; height: 36px; min-height: 0; padding: 0; border-radius: 50%; border: 0; color: #fff;
