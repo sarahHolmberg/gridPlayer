@@ -8,7 +8,7 @@
 // CHANGE HERE: paste the Web3Forms access key between the quotes. Get it (free) at https://web3forms.com: type the email
 // address that should receive the videos, and the key arrives in that inbox. Every Send then goes to that address.
 // Empty = Send is not set up yet.
-const WEB3FORMS_KEY = "";
+const WEB3FORMS_KEY = "2db4d391-3422-441a-b361-364cf54c237e";
 // ==========================================================================================
 const WEB3FORMS_URL = "https://api.web3forms.com/submit";
 let sentLink = ""; // the FileFlap link that was last sent: Done fills it in as the stored-video link (links.js)
