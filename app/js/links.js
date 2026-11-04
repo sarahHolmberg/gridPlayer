@@ -60,6 +60,8 @@ async function removeLink(server, it, code, stored) {
   if (res.status === 404) return; // already removed (for example on the Video Vault page): same result
   if (!res.ok) throw new Error(data.error || `Removing failed (${res.status}).`);
 }
+// The picture sent with the link (Video Vault): the same website, the links function, ?image=<id>. The mock list has none.
+const pictureUrl = (server, it) => (it.hasImage && SERVERS[server] ? SERVERS[server].replace(/links-api$/, "links") + "?image=" + encodeURIComponent(it.id) : null);
 // Oldest first: by createdAt when the server sends it, then by id (a newer link gets a bigger id)
 const byAge = (list) => [...list].sort((a, b) => (Date.parse(a.createdAt) || 0) - (Date.parse(b.createdAt) || 0) || a.id - b.id);
 
@@ -101,6 +103,16 @@ function renderLinks(slideIn) {
     done.id = "doneBtn"; done.textContent = "✔ Done"; done.title = "Finished with this link: remove it (asks for your code)";
     done.onclick = () => doneOpen(now);
     row.querySelector(".ig").after(done); // Done sits right beside the link (after its Instagram button)
+    const pic = pictureUrl(linksServer, now);
+    if (pic) { // the picture of who the video is about, under the link; click = full size
+      const a = document.createElement("a");
+      a.className = "pic"; a.href = pic; a.target = "_blank"; a.rel = "noopener noreferrer"; a.title = "Open the picture";
+      const img = document.createElement("img");
+      img.src = pic; img.alt = now.name ? "Picture: " + now.name : "Picture";
+      img.onerror = () => a.remove(); // offline, or the picture is gone: just leave it out
+      a.append(img);
+      row.append(a);
+    }
     if (slideIn) row.classList.add("enter"); // after a Done: the next link slides in (grid.css)
     $("nextItem").append(row);
   }
@@ -123,6 +135,7 @@ async function fetchLinks() {
     renderLinks();
   } catch (err) {
     console.error("[links] FAILED:", err);
+    if (server !== linksServer) return; // the toggle was switched meanwhile: that error is about a list not shown any more
     links = []; renderLinks();
     $("linksMsg").textContent = err instanceof TypeError ? `Cannot reach the ${server} server (offline?). The rest of the app works as usual.` : err.message;
   } finally {

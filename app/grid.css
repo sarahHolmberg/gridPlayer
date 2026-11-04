@@ -148,6 +148,8 @@ body.hide-side #side { display: none; }
 .who { font-weight: 600; overflow-wrap: anywhere; }
 .ln button { min-height: 22px; padding: 0 6px; font-size: 11px; }
 #nextItem .lk { padding: 0; border: 0; }
+#nextItem .pic { flex-basis: 100%; display: block; } /* the picture sent with the link (Video Vault) */
+#nextItem .pic img { display: block; max-width: 100%; max-height: 160px; border-radius: 6px; border: 1px solid var(--line); }
 #nextItem:empty { display: none; }
 #doneBtn { flex: none; background: var(--ok); border-color: var(--ok); color: #fff; font-weight: 600; }
 #doneBtn:hover { background: #166534; }
