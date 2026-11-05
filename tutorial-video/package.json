@@ -10,7 +10,8 @@
     "render:scene3": "remotion render Scene3 out/scene3.mp4",
     "render:scene4": "remotion render Scene4 out/scene4.mp4",
     "render:scene5": "remotion render Scene5 out/scene5.mp4",
-    "full": "bash scripts/join.sh"
+    "full": "bash scripts/join.sh",
+    "render:find": "remotion render FindDancer out/find-dancer.mp4"
   },
   "dependencies": {
     "@remotion/cli": "^4.0.538",

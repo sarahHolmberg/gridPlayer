@@ -7,3 +7,4 @@ out/*
 !out/scene5.mp4
 !out/full.mp4
 .DS_Store
+!out/find-dancer.mp4
