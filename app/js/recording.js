@@ -1,4 +1,4 @@
-// app/js/recording.js: Audio recording (Rec / Pause / Resume / Save) and Export audio (then opens TurboScribe).
+// app/js/recording.js: Audio recording (Rec / Pause / Resume / Save) and Export audio (then opens FileFlap).
 // Part of Grid Player, loaded by Grid-v5.html with a plain <script> (no modules, so it also works opened from disk).
 
 // ---- The mixer: what gets recorded is the microphone PLUS the cell announcements (announce.js), mixed inside the page ----
@@ -61,7 +61,7 @@ function recSave(after) {
     stream.getTracks().forEach((t) => t.stop()); // release the mic
     mr = stream = micNode = null; chunks = []; acc = 0;
     updateRec();
-    after?.(); // e.g. open TurboScribe once the file is downloaded
+    after?.(); // e.g. open FileFlap once the file is downloaded
   };
   if (rec.state === "recording") acc += performance.now() - t0;
   rec.stop();
@@ -70,14 +70,15 @@ function recSave(after) {
 $("recBtn").onclick = recToggle;
 $("saveBtn").onclick = () => recSave(); // not recSave itself: it would get the click as "after"
 
-// ---- Export audio: stop + download the recording, then open TurboScribe to transcribe it ----
-const SCRIBE_URL = "https://turboscribe.ai/"; // CHANGE HERE: the transcribing website
+// ---- Export audio: stop + download the recording, then open FileFlap to upload it (with the trimmed video) ----
+// The #grid-player ending tells the extension (app/extension/fileflap.js) to show its "drag the files here" pop-up.
+const FLAP_URL = "https://fileflap.net/#grid-player"; // CHANGE HERE: where the files are uploaded
 function exportAudio() {
   if (!mr) return;
   recSave(() => {
-    const w = window.open(SCRIBE_URL, "_blank");
-    console.log(`[export] opened ${SCRIBE_URL} -> ${w ? "ok" : "blocked"}`);
-    if (!w) setStatus("Popup blocked: allow popups for this page, or open " + SCRIBE_URL);
+    const w = window.open(FLAP_URL, "_blank");
+    console.log(`[export] opened ${FLAP_URL} -> ${w ? "ok" : "blocked"}`);
+    if (!w) setStatus("Popup blocked: allow popups for this page, or open " + FLAP_URL);
   });
 }
 // Reminder first: two questions, and only when both are ticked does the export run

@@ -5,6 +5,8 @@
 // app/extension/grid-check.js runs on this page and leaves its version in <html data-grid-ext="…">. No answer = not installed,
 // or "Allow access to file URLs" is off (from here the two look the same).
 const EXT_WAIT_MS = 1500; // CHANGE HERE: how long to wait for the extension's answer
+const EXT_NEWEST = "1.2"; // CHANGE HERE: the version in app/extension/manifest.json; older = ask to reload it
+const extOlder = (v) => { const a = v.split(".").map(Number), b = EXT_NEWEST.split(".").map(Number); return a[0] < b[0] || (a[0] === b[0] && (a[1] || 0) < b[1]); };
 const extFound = () => document.documentElement.dataset.gridExt;
 function extCheck() {
   const t0 = performance.now();
@@ -12,6 +14,7 @@ function extCheck() {
     if (extFound()) {
       $("extGate").hidden = true;
       console.log(`[ext] FastDL extension v${extFound()} found after ${Math.round(performance.now() - t0)} ms`);
+      if (extOlder(extFound())) setStatus(`The extension is older (v${extFound()}): click its reload arrow ⟳ in chrome://extensions, then reload this page.`);
       return reclaim();
     }
     if (performance.now() - t0 < EXT_WAIT_MS) return setTimeout(look, 100);

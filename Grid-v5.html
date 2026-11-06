@@ -87,7 +87,7 @@
           <span class="lcd sm" id="recTime">0:00.0</span>
           <button id="saveBtn" disabled title="Stop and save as one file">💾 Save</button>
         </div>
-        <button id="audioBtn" class="primary wide" disabled title="Download the recording, then open TurboScribe">⬇ Export audio</button>
+        <button id="audioBtn" class="primary wide" disabled title="Download the recording, then open FileFlap to upload it">⬇ Export audio</button>
         <button id="exportBtn" class="wide" disabled title="Cut the video at In/Out without re-encoding: same quality, works offline (mp4 / mov)">⬇ Export trim video</button>
         <div class="row">
           <label class="chip"><input type="checkbox" id="show" checked> Grid <kbd>G</kbd></label>
@@ -101,7 +101,7 @@
       <section class="card needs-video send-only" id="sendCard">
         <h3>Send to Studio Mirrors</h3>
         <div id="sendWhat"></div>
-        <a id="flapBtn" class="btn wide" href="https://fileflap.net/" target="_blank" rel="noopener noreferrer" title="Upload the recording and the trimmed video, then copy the link">⬆ 1. Upload both files on FileFlap</a>
+        <a id="flapBtn" class="btn wide" href="https://fileflap.net/#grid-player" target="_blank" rel="noopener noreferrer" title="Upload the recording and the trimmed video, then copy the link">⬆ 1. Upload both files on FileFlap</a>
         <label class="fld">2. FileFlap transfer link <input type="text" id="sendLink" placeholder="https://fileflap.net/…" autocomplete="off"></label>
         <div id="sendMsg" role="status"></div>
         <button id="sendBtn" class="primary wide" title="Email it all to Studio Mirrors">📨 3. Send to Studio Mirrors</button>
@@ -224,6 +224,15 @@
   </div>
 </div>
 
+<!-- What's new (whatsnew.js): shown once after an update -->
+<div id="newDlg" hidden>
+  <div id="newBox">
+    <div id="newTitle"><span>✨ What's new in Grid Player</span><button class="icon" id="newClose" title="Close">✕</button></div>
+    <div id="newBody"></div>
+    <div class="row" id="newBtns"><button id="newOk" class="primary">OK, got it</button></div>
+  </div>
+</div>
+
 <!-- Export audio reminder: both boxes ticked -> the export runs (recording.js) -->
 <div id="expDlg" hidden>
   <div id="expBox">
@@ -288,4 +297,5 @@
 <script src="app/js/announce.js"></script> <!-- click a cell: says the cell + time into the recording -->
 <script src="app/js/menu.js"></script>
 <script src="app/js/keys.js"></script>
+<script src="app/js/whatsnew.js"></script> <!-- what changed in the last update -->
 <script src="app/js/main.js"></script>

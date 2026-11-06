@@ -60,7 +60,7 @@ const INFO = {
   },
   actions: {
     title: "3 · Record the actions",
-    text: "Press R to record. Say the action, then click the target cell: the app says the cell and the time into the recording. When you are done, click Export audio. Then upload both files and press Done.",
+    text: "Press R to record. Say the action, then click the target cell: the app says the cell and the time into the recording. When you are done, click Export audio: it downloads the recording and opens FileFlap. Click Export trim video too, drag both files onto FileFlap, then go to Send.",
     videos: [
       { label: "Record the actions", src: "app/info/3-actions.mp4" },
       { label: "Export audio + video", src: "app/info/4-export.mp4" },

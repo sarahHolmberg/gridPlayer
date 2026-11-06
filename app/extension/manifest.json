@@ -1,21 +1,47 @@
 {
   "manifest_version": 3,
   "name": "Grid FastDL auto-download",
-  "version": "1.1",
-  "description": "On fastdl.app: wait for the download button, click it, close the tab once the file is saved. Also tells the Grid Player page that it is installed.",
-  "permissions": ["downloads", "storage"],
-  "background": { "service_worker": "background.js" },
+  "version": "1.2",
+  "description": "On fastdl.app: wait for the download button, click it, close the tab once the file is saved. On fileflap.net (opened from the Grid Player): a short \"drag the files here\" pop-up. Also tells the Grid Player page that it is installed.",
+  "permissions": [
+    "downloads",
+    "storage"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "content_scripts": [
     {
-      "matches": ["https://fastdl.app/*"],
-      "js": ["content.js"],
+      "matches": [
+        "https://fastdl.app/*"
+      ],
+      "js": [
+        "content.js"
+      ],
       "run_at": "document_idle"
     },
     {
-      "matches": ["file:///*/Grid*.html", "file:///*/grid*.html"],
-      "js": ["grid-check.js"],
+      "matches": [
+        "https://fileflap.net/*",
+        "https://*.fileflap.net/*"
+      ],
+      "js": [
+        "fileflap.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "file:///*/Grid*.html",
+        "file:///*/grid*.html"
+      ],
+      "js": [
+        "grid-check.js"
+      ],
       "run_at": "document_end"
     }
   ],
-  "action": { "default_title": "Click to turn the FastDL auto-download ON / OFF" }
+  "action": {
+    "default_title": "Click to turn the FastDL auto-download ON / OFF"
+  }
 }
