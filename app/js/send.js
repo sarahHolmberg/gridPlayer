@@ -53,9 +53,11 @@ async function sendIt() {
   };
   $("sendBtn").disabled = true; say("Sending…");
   try {
-    const res = await netFetch(WEB3FORMS_URL, {
-      method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify(body),
-    });
+    // Sent as a plain form (like Web3Forms' own example), not JSON: then the browser sends it straight away, with no
+    // permission check first, which a page opened from a file on disk could fail
+    const form = new FormData();
+    Object.entries(body).forEach(([k, val]) => form.append(k, val));
+    const res = await netFetch(WEB3FORMS_URL, { method: "POST", headers: { Accept: "application/json" }, body: form });
     const data = await res.json().catch(() => ({}));
     console.log(`[send] status ${res.status}: ${data.message || ""}`);
     if (!res.ok || !data.success) throw new Error(data.message || `Sending failed (${res.status}).`);
