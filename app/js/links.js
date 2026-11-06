@@ -15,6 +15,10 @@ const SERVERS = {
 let linksServer = "main"; // CHANGE HERE: used until you pick one with the toggle (menu ⋯ -> Links from)
 let links = [], allOpen = false; // the list, oldest first (links[0] = the one to work on now); whether "All links" is open
 let linksNote = ""; // a note the server may send with the list: shown instead of "No links waiting" when the list is empty
+let linksAskCode = false; // the server wants your code before it sends your list (a box for it shows in the Next link card)
+// Your code, kept in this browser once typed, so the website can show YOUR list (and Done does not ask again)
+const myCode = { get() { try { return localStorage.getItem("myCode") || ""; } catch { return ""; } },
+                 set(c) { try { c ? localStorage.setItem("myCode", c) : localStorage.removeItem("myCode"); } catch {} } };
 
 // ---- Mock server: a pretend list kept in this browser (localStorage), so Done can be tried without touching the real one ----
 const MOCK_LINKS = [ // out of order on purpose: the app must still show MOCK-FIRST first
@@ -32,14 +36,16 @@ const mock = {
   saveDone(list) { try { localStorage.setItem("mockDone", JSON.stringify(list)); } catch {} },
 };
 
-// Real servers: GET -> { links: [{ link, name, ... }], message? } (message = the server's note, shown when the list is empty)
+// Real servers: GET (header X-Code = your code, if typed) -> { links: [{ link, name, ... }], message?, needCode? }
+// message = the server's note, shown when the list is empty; needCode = ask for your code and send it
 async function getLinks(server) {
   if (server === "mock") { await mock.wait(); return mock.load(); }
-  const res = await netFetch(SERVERS[server], { cache: "no-store" });
+  const code = myCode.get();
+  const res = await netFetch(SERVERS[server], { cache: "no-store", headers: code ? { "X-Code": code } : {} });
   const data = await res.json().catch(() => ({}));
   console.log(`[links] status ${res.status}`);
   if (!res.ok) throw new Error(data.error || "Request failed.");
-  return Object.assign(data.links || [], { note: data.message || "" });
+  return Object.assign(data.links || [], { note: data.message || "", askCode: !!data.needCode });
 }
 // Real servers: DELETE { id, code, stored } -> the website checks the code (403 = wrong), notes the video as done by that code
 // (with the link to the stored video) and removes that one link
@@ -113,10 +119,23 @@ function linkRow(it) {
   return row;
 }
 
+// "Your code" box: typed once, kept in this browser, then the list loads again with it
+function codeBox() {
+  const f = document.createElement("form");
+  f.className = "codeBox";
+  const inp = Object.assign(document.createElement("input"), { type: "password", placeholder: "Your code", autocomplete: "off" });
+  const ok = Object.assign(document.createElement("button"), { type: "submit", className: "primary", textContent: "Show my videos" });
+  f.append(inp, ok);
+  f.onsubmit = (e) => { e.preventDefault(); if (!inp.value.trim()) return inp.focus(); myCode.set(inp.value.trim()); fetchLinks(); };
+  setTimeout(() => inp.focus(), 0);
+  return f;
+}
+
 function renderLinks(slideIn) {
   const now = links[0];
   $("nextLegend").textContent = "Next link" + (linksServer === "mock" ? " (MOCK)" : "");
   $("nextItem").innerHTML = "";
+  if (!now && linksAskCode) $("nextItem").append(codeBox()); // the website wants your code first
   if (now) {
     const row = linkRow(now);
     const done = document.createElement("button");
@@ -141,7 +160,7 @@ async function fetchLinks() {
   try {
     const list = await getLinks(server);
     if (server !== linksServer) return; // the toggle was switched meanwhile: that answer is not wanted any more
-    links = byAge(list); linksNote = list.note || "";
+    links = byAge(list); linksNote = list.note || ""; linksAskCode = !!list.askCode;
     renderLinks();
   } catch (err) {
     console.error("[links] FAILED:", err);
@@ -171,7 +190,7 @@ let doneItem = null;
 function doneOpen(it) {
   doneItem = it;
   $("doneWhat").textContent = (it.name ? it.name + " · " : "") + fullLink(it);
-  $("doneCode").value = ""; $("doneMsg").textContent = "";
+  $("doneCode").value = myCode.get(); $("doneMsg").textContent = ""; // your code, if you typed it before
   $("doneStored").value = sentLink; // the FileFlap link from Send (send.js), if it was sent
   $("doneForm").hidden = false; $("doneOkMsg").hidden = true;
   $("doneDlg").hidden = false;
@@ -200,7 +219,7 @@ async function doneAnimation(server) {
   const [list] = await Promise.all([next, pause(DONE_MS.deleted)]);
   if (server !== linksServer) return; // the toggle was switched meanwhile
   if (list instanceof Error) return fetchLinks(); // shows why the list could not load
-  links = byAge(list); linksNote = list.note || "";
+  links = byAge(list); linksNote = list.note || ""; linksAskCode = !!list.askCode;
   renderLinks(true);
 }
 
@@ -218,6 +237,7 @@ $("doneForm").onsubmit = async (e) => {
     await removeLink(server, doneItem, code, stored);
     console.log(`[done] removed ${doneItem.link}`);
     sentLink = ""; $("sendLink").value = ""; // that video is finished: the next one gets its own link
+    myCode.set(code.trim()); // the code worked: keep it, so the list and the next Done know you
     await doneAnimation(server);
     doneItem = null;
   } catch (err) {

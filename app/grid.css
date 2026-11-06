@@ -153,6 +153,8 @@ body.hide-side #side { display: none; }
 .who { font-weight: 600; overflow-wrap: anywhere; }
 .ln button { min-height: 22px; padding: 0 6px; font-size: 11px; }
 #nextItem .lk { padding: 0; border: 0; }
+#nextItem .codeBox { display: flex; gap: 6px; margin-top: 2px; } /* the website wants your code before it shows your list */
+#nextItem .codeBox input { flex: 1; min-width: 0; }
 .lk > .picBtn { flex: none; width: 26px; min-height: 26px; padding: 0; border-color: transparent; background: transparent; font-size: 14px; } /* the picture sent with the link */
 .lk > .picBtn:hover { background: var(--accent-soft); }
 #picDlg { position: fixed; inset: 0; z-index: 12; background: rgba(20,20,18,.7); display: flex; align-items: center; justify-content: center; cursor: zoom-out; }
