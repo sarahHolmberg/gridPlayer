@@ -52,14 +52,14 @@ function say(words, gap = 0) {
   setTimeout(done, (at - actx.currentTime) * 1000 + 300); // ends when the last word has played
 }
 
-// ---- Say name (button / M): "at", then the Next link's name letter by letter, into the recording ----
+// ---- Say name (button / M): "name bubble", then the Next link's name letter by letter, into the recording ----
 // Ø -> O, é -> E, Æ -> A E (the letters without their marks); digits as numbers; a space = a short pause; anything else is skipped.
 const NAME_GAP = 0.08;   // CHANGE HERE: seconds between two letters (a little air, so each letter is heard)
 const NAME_SPACE = 0.3;  // CHANGE HERE: the pause for a space in the name
 function nameWords(name) {
   const plain = name.toUpperCase().replace(/Æ/g, "AE").replace(/Ø/g, "O").replace(/Œ/g, "OE").replace(/ß/g, "SS")
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  const words = ["at"];
+  const words = ["name"]; // "name bubble"
   for (const ch of plain) {
     if (/[A-Z0-9]/.test(ch)) words.push(ch);
     else if (/\s/.test(ch) && words[words.length - 1] !== null) words.push(null);
@@ -74,7 +74,7 @@ function sayName() {
   const words = nameWords(name);
   say(words, NAME_GAP);
   const rec = mr && mr.state === "recording";
-  setStatus(`🔊 @${name}` + (rec ? " · in the recording" : " · not recording, only in your headphones"));
+  setStatus(`🔊 Name bubble: ${name}` + (rec ? " · in the recording" : " · not recording, only in your headphones"));
   console.log(`[announce] name "${name}" -> ${words.map((w) => w ?? "(pause)").join(", ")}${rec ? " (recorded)" : ""}`);
 }
 $("nameBtn").onclick = sayName;

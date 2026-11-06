@@ -3,10 +3,10 @@
 
 // CHANGE HERE with every update: a new WHATS_NEW_VERSION (any new text, the date is easiest) and the list of changes.
 // Everyone who has not seen this version yet gets the window once.
-const WHATS_NEW_VERSION = "2026-11-06c";
+const WHATS_NEW_VERSION = "2026-11-06d";
 const WHATS_NEW = [
   ["🔤 Say name", [
-    "New button in the Record box (or press M): the app says \"at\" and then spells the Next link's name letter by letter.",
+    "New button in the Record box (or press M): the app says \"name bubble\" and then spells the Next link's name letter by letter.",
     "Like the cell and the time, it goes straight into the recording, and you hear it in your headphones.",
   ]],
   ["The picture is on the video", [
@@ -40,6 +40,7 @@ function whatsNew(on) {
   console.log(`[whatsnew] ${on ? "shown" : "closed"} (${WHATS_NEW_VERSION})`);
 }
 $("newOk").onclick = $("newClose").onclick = () => whatsNew(false);
+$("newUpd").onclick = () => { whatsNew(false); updToggle(true); }; // straight to Update from GitHub
 addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("newDlg").hidden) whatsNew(false); });
 // Once the extension check is out of the way (it covers the app until the extension answers)
 function whatsNewCheck() {
