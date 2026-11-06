@@ -242,8 +242,9 @@
   <div id="expBox">
     <div id="expTitle"><span>Before you export</span><button class="icon" id="expClose" title="Close">✕</button></div>
     <form id="expForm">
-      <label><input type="checkbox" id="expSteps"> I have done the steps</label>
-      <label><input type="checkbox" id="expName"> I have added the name of the bubble</label>
+      <label><input type="checkbox" id="expCaption"> <span>I have recorded the caption <small>(say <b>"caption"</b> first, then: what was hard for you, what you had to think about while recording this session, and what you liked about it)</small></span></label>
+      <label><input type="checkbox" id="expSteps"> <span>I have done the steps</span></label>
+      <label><input type="checkbox" id="expName"> <span>I have said the name <small>(say <b>"username"</b>, then click <b>🔤 Say name</b>, again if needed, until the name has been said out loud)</small></span></label>
       <div class="row"><button type="submit" id="expOk" class="primary" disabled>⬇ Export audio</button><button type="button" id="expCancel" class="quiet">Cancel</button></div>
     </form>
   </div>

@@ -3,8 +3,13 @@
 
 // CHANGE HERE with every update: a new WHATS_NEW_VERSION (any new text, the date is easiest) and the list of changes.
 // Everyone who has not seen this version yet gets the window once.
-const WHATS_NEW_VERSION = "2026-11-07";
+const WHATS_NEW_VERSION = "2026-11-07b";
 const WHATS_NEW = [
+  ["Before Export audio: three checks", [
+    "1. The caption: say \"caption\", then what was hard, what you had to think about, and what you liked about this session.",
+    "2. The steps.",
+    "3. The name: say \"username\", then click 🔤 Say name until the name has been said out loud.",
+  ]],
   ["A quicker voice", [
     "The cell, the time and the spelled name are said 10% faster (same voice, same pitch).",
   ]],

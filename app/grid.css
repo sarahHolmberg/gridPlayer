@@ -228,7 +228,10 @@ body.hide-side #side { display: none; }
 #updMsg { padding: 8px 16px; color: var(--muted); min-height: 18px; }
 #updList { overflow-y: auto; margin: 0 16px 16px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; min-height: 40px; }
 #expForm { display: flex; flex-direction: column; gap: 10px; padding: 8px 16px 16px; }
-#expForm label { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
+#expForm label { display: flex; align-items: flex-start; gap: 8px; font-size: 14px; cursor: pointer; white-space: normal; }
+#expForm label small { display: block; margin-top: 2px; font-size: 12px; color: var(--muted); line-height: 1.4; }
+#expForm label small b { color: var(--text); }
+#expForm input[type=checkbox] { flex: none; margin-top: 2px; }
 #expForm input[type=checkbox] { width: 16px; height: 16px; }
 /* Videos done (stats.js): the 📊 button bottom right, the code, two tiles, the list */
 #statsBtn { position: fixed; right: 14px; bottom: 34px; z-index: 8; width: 34px; height: 34px; min-height: 0; padding: 0; border-radius: 50%;

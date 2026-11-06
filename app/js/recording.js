@@ -84,11 +84,11 @@ function exportAudio() {
 // Reminder first: two questions, and only when both are ticked does the export run
 function expAsk(on) {
   $("expDlg").hidden = !on;
-  if (on) { $("expSteps").checked = $("expName").checked = false; $("expOk").disabled = true; }
+  if (on) { $("expForm").querySelectorAll("input[type=checkbox]").forEach((c) => (c.checked = false)); $("expOk").disabled = true; }
   console.log(`[export] reminder ${on ? "open" : "closed"}`);
 }
 $("audioBtn").onclick = () => { if (mr) expAsk(true); };
-$("expForm").onchange = () => ($("expOk").disabled = !($("expSteps").checked && $("expName").checked));
+$("expForm").onchange = () => ($("expOk").disabled = ![...$("expForm").querySelectorAll("input[type=checkbox]")].every((c) => c.checked)); // all ticked
 $("expForm").onsubmit = (e) => { e.preventDefault(); if ($("expOk").disabled) return; expAsk(false); exportAudio(); };
 $("expClose").onclick = $("expCancel").onclick = () => expAsk(false);
 $("expDlg").onclick = (e) => { if (e.target === $("expDlg")) expAsk(false); };
