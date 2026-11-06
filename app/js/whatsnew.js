@@ -3,8 +3,14 @@
 
 // CHANGE HERE with every update: a new WHATS_NEW_VERSION (any new text, the date is easiest) and the list of changes.
 // Everyone who has not seen this version yet gets the window once.
-const WHATS_NEW_VERSION = "2026-11-06d";
+const WHATS_NEW_VERSION = "2026-11-06e";
 const WHATS_NEW = [
+  ["Back on the new website", [
+    "The Grid Player gets its links from studio-mirrors.netlify.app again.",
+  ]],
+  ["Your deadline", [
+    "If you have a deadline, it shows every time you finish a video, right under \"Video deleted\".",
+  ]],
   ["🔤 Say name", [
     "New button in the Record box (or press M): the app says \"name bubble\" and then spells the Next link's name letter by letter.",
     "Like the cell and the time, it goes straight into the recording, and you hear it in your headphones.",
@@ -12,9 +18,6 @@ const WHATS_NEW = [
   ["The picture is on the video", [
     "The picture of the current link now shows small at the bottom left of the video.",
     "Click it to see it big. It changes with the Next link.",
-  ]],
-  ["Back to the first website", [
-    "The Grid Player gets its links from studiomirrors.netlify.app again.",
   ]],
   ["Earlier in this update", [
     "⬇ Export audio opens FileFlap (not the transcription website), with a short \"drag the files here\" reminder there.",

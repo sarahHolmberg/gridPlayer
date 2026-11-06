@@ -8,7 +8,7 @@
 // CHANGE HERE: where the list comes from. If your dev address is different (for example a Codespaces
 // address like https://<name>-8888.app.github.dev), put it in "dev". "mock" is a pretend list inside this page.
 const SERVERS = {
-  main: "https://studiomirrors.netlify.app/.netlify/functions/links-api",
+  main: "https://studio-mirrors.netlify.app/.netlify/functions/links-api",
   dev: "http://localhost:8888/.netlify/functions/links-api",
   mock: null,
 };
@@ -31,6 +31,7 @@ const MOCK_LINKS = [ // out of order on purpose: the app must still show MOCK-FI
   { id: "m4", link: "https://www.instagram.com/reel/MOCK-FOURTH/", name: "", createdAt: "2026-10-04T09:00:00Z" },
   { id: "m2", link: "https://www.instagram.com/reel/MOCK-SECOND/", name: "Mock Ben", createdAt: "2026-10-02T09:00:00Z" },
 ];
+const MOCK_DEADLINE = new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10); // the pretend list's deadline: a week from today
 const MOCK_CODE = "MOCK"; // the pretend list's own code for Done (capitals do not matter); the real one is set in Netlify
 const mock = {
   load() { try { return JSON.parse(localStorage.getItem("mockLinks")) ?? MOCK_LINKS; } catch { return MOCK_LINKS; } },
@@ -62,7 +63,7 @@ async function removeLink(server, it, code, stored) {
     if (code.trim().toUpperCase() !== MOCK_CODE) throw wrongCode();
     mock.save(mock.load().filter((x) => x.id !== it.id));
     mock.saveDone([{ name: it.name, link: it.link, stored, doneAt: new Date().toISOString() }, ...mock.loadDone()]);
-    return;
+    return MOCK_DEADLINE;
   }
   const res = await netFetch(SERVERS[server], {
     method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: it.id, code, stored }), cache: "no-store",
@@ -72,6 +73,7 @@ async function removeLink(server, it, code, stored) {
   if (res.status === 403) throw wrongCode();
   if (res.status === 404) return; // already removed (for example on the Video Vault page): same result
   if (!res.ok) throw new Error(data.error || `Removing failed (${res.status}).`);
+  return data.deadline || ""; // the person's deadline (set on the website), shown with "Video deleted"
 }
 // The picture sent with the link (Video Vault): the same website, the links function, ?image=<id>. The mock list has none.
 // A website that does not say (an older one, no hasImage): try anyway; a missing picture is simply left out.
@@ -222,21 +224,39 @@ function doneClose() { if (isBusy()) return; $("doneDlg").hidden = true; doneIte
 // ---- Done animation: tick in the window -> window fades away -> the link swipes out -> "Video deleted" -> next link slides in ----
 // From the click until the next link is in place the page is busy: clicks, keys and dropped files are ignored (grid.css body.busy).
 const DONE_MS = { tick: 700, leave: 250, swipe: 350, deleted: 800 }; // CHANGE HERE: how long each part of the animation lasts
+const DEADLINE_MS = 4500; // CHANGE HERE: with a deadline, the tick and "Video deleted" stay this long, so it can be read
+
+// The deadline notice: "⚠ DEADLINE 13 NOVEMBER 2026 · All your videos must be completed by this date · 7 days left"
+function deadlineBox(date) {
+  const d = new Date(date + "T00:00:00"), today = new Date(new Date().toDateString()); // whole calendar days, from today
+  const days = Math.round((d - today) / 864e5);
+  const box = document.createElement("div");
+  box.className = "deadline";
+  const head = document.createElement("b"); head.textContent = "⚠ DEADLINE: " + d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }).toUpperCase();
+  const what = document.createElement("span"); what.textContent = "All your videos must be completed by this date.";
+  const left = document.createElement("i");
+  left.textContent = days > 1 ? `${days} days left.` : days === 1 ? "1 day left." : days === 0 ? "Today is the last day." : "This deadline has passed.";
+  box.append(head, what, left);
+  return box;
+}
 const pause = (ms) => new Promise((r) => setTimeout(r, ms));
 const isBusy = () => document.body.classList.contains("busy");
 const setBusy = (on) => { document.body.classList.toggle("busy", on); console.log(`[done] page ${on ? "busy" : "free again"}`); };
 
-async function doneAnimation(server) {
+async function doneAnimation(server, deadline) {
   const next = getLinks(server).catch((err) => err); // load the next link while the animation plays
   $("doneForm").hidden = true; $("doneOkMsg").hidden = false; // the green tick
-  await pause(DONE_MS.tick);
+  $("doneOkMsg").querySelector(".deadline")?.remove();
+  if (deadline) $("doneOkMsg").append(deadlineBox(deadline));
+  await pause(deadline ? DEADLINE_MS : DONE_MS.tick);
   $("doneDlg").classList.add("leaving");
   await pause(DONE_MS.leave);
   $("doneDlg").hidden = true; $("doneDlg").classList.remove("leaving");
   $("nextItem").querySelector(".lk")?.classList.add("swipe");
   await pause(DONE_MS.swipe);
   $("nextItem").innerHTML = '<div class="deleted">✓ Video deleted</div>';
-  const [list] = await Promise.all([next, pause(DONE_MS.deleted)]);
+  if (deadline) $("nextItem").firstChild.append(deadlineBox(deadline));
+  const [list] = await Promise.all([next, pause(deadline ? DEADLINE_MS : DONE_MS.deleted)]);
   if (server !== linksServer) return; // the toggle was switched meanwhile
   if (list instanceof Error) return fetchLinks(); // shows why the list could not load
   links = byAge(list); linksNote = list.note || ""; linksAskCode = !!list.askCode;
@@ -254,11 +274,11 @@ $("doneForm").onsubmit = async (e) => {
   setBusy(true);
   $("doneOk").disabled = true; $("doneMsg").textContent = "Checking…";
   try {
-    await removeLink(server, doneItem, code, stored);
+    const deadline = await removeLink(server, doneItem, code, stored);
     console.log(`[done] removed ${doneItem.link}`);
     sentLink = ""; $("sendLink").value = ""; // that video is finished: the next one gets its own link
     myCode.set(code.trim()); // the code worked: keep it, so the list and the next Done know you
-    await doneAnimation(server);
+    await doneAnimation(server, deadline);
     doneItem = null;
   } catch (err) {
     console.error("[done] FAILED:", err.message);

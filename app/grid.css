@@ -407,3 +407,14 @@ input:focus, textarea:focus { outline: 1px solid #316ac5; border-color: #316ac5;
             background: #000; box-shadow: 0 2px 10px rgba(0,0,0,.5); cursor: zoom-in; }
 #stagePic img { display: block; height: 120px; max-width: 160px; object-fit: cover; border-radius: 4px; }
 #stagePic:hover { border-color: #fcb83c; background: #000; box-shadow: 0 2px 10px rgba(0,0,0,.5); }
+
+/* The deadline with "Video deleted" (links.js): red, can't be missed */
+.deadline { display: flex; flex-direction: column; gap: 3px; margin: 10px auto 0; padding: 10px 12px; max-width: 360px; text-align: center;
+            border: 2px solid #b00000; border-radius: 4px; background: #fff1f1; color: #8a0000; font-weight: normal;
+            box-shadow: 0 0 0 3px #ffd6d6; animation: deadlinePulse 1.2s ease-in-out 2; }
+#doneOkMsg .deadline b, .deadline b { display: block; width: auto; height: auto; margin: 0; border-radius: 0; background: none; color: #b00000;
+              font: bold 16px Tahoma, Verdana, sans-serif; letter-spacing: .03em; }
+.deadline span { font-size: 12px; color: #5a0000; }
+.deadline i { font-style: normal; font-weight: bold; font-size: 12px; }
+#nextItem .deleted .deadline { margin-top: 8px; }
+@keyframes deadlinePulse { 50% { box-shadow: 0 0 0 6px #ffb3b3; } }
