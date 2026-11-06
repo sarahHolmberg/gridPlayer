@@ -14,6 +14,7 @@ const SERVERS = {
 };
 let linksServer = "main"; // CHANGE HERE: used until you pick one with the toggle (menu ⋯ -> Links from)
 let links = [], allOpen = false; // the list, oldest first (links[0] = the one to work on now); whether "All links" is open
+let linksNote = ""; // a note the server may send with the list: shown instead of "No links waiting" when the list is empty
 
 // ---- Mock server: a pretend list kept in this browser (localStorage), so Done can be tried without touching the real one ----
 const MOCK_LINKS = [ // out of order on purpose: the app must still show MOCK-FIRST first
@@ -31,14 +32,14 @@ const mock = {
   saveDone(list) { try { localStorage.setItem("mockDone", JSON.stringify(list)); } catch {} },
 };
 
-// Real servers: GET -> { links: [{ link, name, ... }] }
+// Real servers: GET -> { links: [{ link, name, ... }], message? } (message = the server's note, shown when the list is empty)
 async function getLinks(server) {
   if (server === "mock") { await mock.wait(); return mock.load(); }
   const res = await netFetch(SERVERS[server], { cache: "no-store" });
   const data = await res.json().catch(() => ({}));
   console.log(`[links] status ${res.status}`);
   if (!res.ok) throw new Error(data.error || "Request failed.");
-  return data.links || [];
+  return Object.assign(data.links || [], { note: data.message || "" });
 }
 // Real servers: DELETE { id, code, stored } -> the website checks the code (403 = wrong), notes the video as done by that code
 // (with the link to the stored video) and removes that one link
@@ -125,7 +126,7 @@ function renderLinks(slideIn) {
     if (slideIn) row.classList.add("enter"); // after a Done: the next link slides in (grid.css)
     $("nextItem").append(row);
   }
-  $("linksMsg").textContent = !links.length ? "No links waiting. 🎉" : links.length === 1 ? "Nothing else waiting." : `${links.length - 1} more waiting`;
+  $("linksMsg").textContent = !links.length ? linksNote || "No links waiting. 🎉" : links.length === 1 ? "Nothing else waiting." : `${links.length - 1} more waiting`;
   $("allBtn").textContent = `${allOpen ? "▾" : "▸"} All links (${links.length})`;
   $("linksList").innerHTML = "";
   links.forEach((it, i) => { const r = linkRow(it); if (!i) r.classList.add("now"); $("linksList").append(r); });
@@ -140,7 +141,7 @@ async function fetchLinks() {
   try {
     const list = await getLinks(server);
     if (server !== linksServer) return; // the toggle was switched meanwhile: that answer is not wanted any more
-    links = byAge(list);
+    links = byAge(list); linksNote = list.note || "";
     renderLinks();
   } catch (err) {
     console.error("[links] FAILED:", err);
@@ -199,7 +200,7 @@ async function doneAnimation(server) {
   const [list] = await Promise.all([next, pause(DONE_MS.deleted)]);
   if (server !== linksServer) return; // the toggle was switched meanwhile
   if (list instanceof Error) return fetchLinks(); // shows why the list could not load
-  links = byAge(list);
+  links = byAge(list); linksNote = list.note || "";
   renderLinks(true);
 }
 
