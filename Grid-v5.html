@@ -28,6 +28,8 @@
       <button class="eye needs-video trim-only" data-info="trim" title="How to: trim">👁</button>
       <button class="eye needs-video grid-only" data-info="actions" title="How to: record the actions">👁</button>
       <button class="eye needs-video send-only" data-info="send" title="How to: send it to Studio Mirrors">👁</button>
+      <!-- The current link's picture (links.js): small, bottom left of the video; click = full size -->
+      <button id="stagePic" class="needs-video" hidden><img id="stagePicImg" alt="The picture of this link"></button>
       <!-- Before a video is open, this is the only thing on the stage -->
       <label id="openHint" class="no-video-only" for="file"><b>📂 Open a video</b><span>or drop it anywhere</span></label>
     </div>
@@ -131,7 +133,7 @@
 
   <h4>Links from</h4>
   <div id="serverToggle" class="seg" role="group" aria-label="Server">
-    <button data-server="main" title="The live site (studio-mirrors.netlify.app)">Main</button>
+    <button data-server="main" title="The live site (studiomirrors.netlify.app)">Main</button>
     <button data-server="dev" title="Your local dev server (npx netlify dev)">Dev</button>
     <button data-server="mock" title="A pretend list inside this page, to try Done safely (its code is MOCK)">Mock</button>
   </div>

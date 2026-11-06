@@ -8,7 +8,7 @@
 // CHANGE HERE: where the list comes from. If your dev address is different (for example a Codespaces
 // address like https://<name>-8888.app.github.dev), put it in "dev". "mock" is a pretend list inside this page.
 const SERVERS = {
-  main: "https://studio-mirrors.netlify.app/.netlify/functions/links-api",
+  main: "https://studiomirrors.netlify.app/.netlify/functions/links-api",
   dev: "http://localhost:8888/.netlify/functions/links-api",
   mock: null,
 };
@@ -17,6 +17,10 @@ let links = [], allOpen = false; // the list, oldest first (links[0] = the one t
 let linksNote = ""; // a note the server may send with the list: shown instead of "No links waiting" when the list is empty
 let linksAskCode = false; // the server wants your code before it sends your list (a box for it shows in the Next link card)
 // Your code, kept in this browser once typed, so the website can show YOUR list (and Done does not ask again)
+const codeAsked = { // the websites that asked for your code (remembered, so the first request already carries it)
+  has(u) { try { return (JSON.parse(localStorage.getItem("codeAsked")) || []).includes(u); } catch { return false; } },
+  add(u) { try { localStorage.setItem("codeAsked", JSON.stringify([...(JSON.parse(localStorage.getItem("codeAsked")) || []), u])); } catch {} },
+};
 const myCode = { get() { try { return localStorage.getItem("myCode") || ""; } catch { return ""; } },
                  set(c) { try { c ? localStorage.setItem("myCode", c) : localStorage.removeItem("myCode"); } catch {} } };
 
@@ -40,11 +44,13 @@ const mock = {
 // message = the server's note, shown when the list is empty; needCode = ask for your code and send it
 async function getLinks(server) {
   if (server === "mock") { await mock.wait(); return mock.load(); }
-  const code = myCode.get();
-  const res = await netFetch(SERVERS[server], { cache: "no-store", headers: code ? { "X-Code": code } : {} });
+  // Your code goes only to a website that has asked for it (an older one refuses a request that carries it)
+  const url = SERVERS[server], code = myCode.get(), asked = codeAsked.has(url);
+  const res = await netFetch(url, { cache: "no-store", headers: code && asked ? { "X-Code": code } : {} });
   const data = await res.json().catch(() => ({}));
   console.log(`[links] status ${res.status}`);
   if (!res.ok) throw new Error(data.error || "Request failed.");
+  if (data.needCode && !asked) { codeAsked.add(url); if (code) return getLinks(server); } // it wants the code: ask again, with it
   return Object.assign(data.links || [], { note: data.message || "", askCode: !!data.needCode });
 }
 // Real servers: DELETE { id, code, stored } -> the website checks the code (403 = wrong), notes the video as done by that code
@@ -68,7 +74,8 @@ async function removeLink(server, it, code, stored) {
   if (!res.ok) throw new Error(data.error || `Removing failed (${res.status}).`);
 }
 // The picture sent with the link (Video Vault): the same website, the links function, ?image=<id>. The mock list has none.
-const pictureUrl = (server, it) => (it.hasImage && SERVERS[server] ? SERVERS[server].replace(/links-api$/, "links") + "?image=" + encodeURIComponent(it.id) : null);
+// A website that does not say (an older one, no hasImage): try anyway; a missing picture is simply left out.
+const pictureUrl = (server, it) => ((it.hasImage ?? true) && SERVERS[server] ? SERVERS[server].replace(/links-api$/, "links") + "?image=" + encodeURIComponent(it.id) : null);
 // The picture window: opens over everything, click anywhere / ✕ / Escape closes it
 function picShow(src, name) {
   $("picImg").src = src; $("picImg").alt = name ? "Picture: " + name : "Picture";
@@ -119,6 +126,18 @@ function linkRow(it) {
   return row;
 }
 
+// The current link's picture, small, over the video (bottom left); click = full size. Hidden when there is none.
+function stagePic(it) {
+  const src = it ? pictureUrl(linksServer, it) : null;
+  $("stagePic").hidden = true;
+  if (!src) return $("stagePicImg").removeAttribute("src");
+  $("stagePicImg").onload = () => ($("stagePic").hidden = false); // only once it really loaded
+  $("stagePicImg").onerror = () => ($("stagePic").hidden = true);
+  $("stagePicImg").src = src;
+  $("stagePic").onclick = () => picShow(src, it.name);
+  $("stagePic").title = (it.name ? it.name + ": " : "") + "the picture of this link (click to see it big)";
+}
+
 // "Your code" box: typed once, kept in this browser, then the list loads again with it
 function codeBox() {
   const f = document.createElement("form");
@@ -133,6 +152,7 @@ function codeBox() {
 
 function renderLinks(slideIn) {
   const now = links[0];
+  stagePic(now);
   $("nextLegend").textContent = "Next link" + (linksServer === "mock" ? " (MOCK)" : "");
   $("nextItem").innerHTML = "";
   if (!now && linksAskCode) $("nextItem").append(codeBox()); // the website wants your code first

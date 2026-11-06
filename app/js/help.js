@@ -13,10 +13,10 @@ $("infoBtn").onclick = toggleCue;
 
 // ---- Help modal with flow diagram. Fill in the links below (null = "link coming"). ----x
 const LINKS = {
-  fetch: "https://studio-mirrors.netlify.app/",
+  fetch: "https://studiomirrors.netlify.app/",
   download: "https://fastdl.app/en5IW#google_vignette",
   send: "https://fileflap.net/",
-  del: "https://studio-mirrors.netlify.app/",
+  del: "https://studiomirrors.netlify.app/",
 };
 const FLOW = [
   ["Fetch Instagram links", "fetch"],

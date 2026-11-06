@@ -3,22 +3,18 @@
 
 // CHANGE HERE with every update: a new WHATS_NEW_VERSION (any new text, the date is easiest) and the list of changes.
 // Everyone who has not seen this version yet gets the window once.
-const WHATS_NEW_VERSION = "2026-11-06";
+const WHATS_NEW_VERSION = "2026-11-06b";
 const WHATS_NEW = [
-  ["Export audio now opens FileFlap", [
-    "⬇ Export audio still downloads the recording, but no longer opens the transcription website (TurboScribe).",
-    "It opens FileFlap instead, so you can upload the recording straight away.",
+  ["The picture is on the video", [
+    "The picture of the current link now shows small at the bottom left of the video.",
+    "Click it to see it big. It changes with the Next link.",
   ]],
-  ["A reminder on FileFlap", [
-    "When FileFlap opens from the Grid Player, a small window says: drag the recording and the trimmed video here.",
-    "It also reminds you to click ⬇ Export trim video first if you have not yet.",
-    "It closes by itself after 3 seconds, or click ✕.",
-    "This needs the newest extension: open chrome://extensions and click the reload arrow ⟳ on \"Grid FastDL auto-download\".",
+  ["Back to the first website", [
+    "The Grid Player gets its links from studiomirrors.netlify.app again.",
   ]],
-  ["Also new since the last updates", [
-    "The app now talks to the new website (studio-mirrors.netlify.app).",
-    "Sending to Studio Mirrors is more reliable.",
-    "This window: after every update it tells you what changed.",
+  ["Earlier in this update", [
+    "⬇ Export audio opens FileFlap (not the transcription website), with a short \"drag the files here\" reminder there.",
+    "That reminder needs the newest extension: chrome://extensions, then the reload arrow ⟳ on \"Grid FastDL auto-download\".",
   ]],
 ];
 
