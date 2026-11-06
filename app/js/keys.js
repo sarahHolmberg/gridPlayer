@@ -9,7 +9,7 @@ function spaceToggle() {
 
 const KEYS = {
   " ": spaceToggle,
-  q: toggleCue, r: recToggle,                                // R: start / pause / resume the recording
+  q: toggleCue, r: recToggle, m: () => sayName(),            // M: spell the Next link's name into the recording (announce.js)                                // R: start / pause / resume the recording
   i: setIn, o: setOut, x: clearTrim,
   arrowleft: (e) => (snapOn() ? beatStep(-1, e.shiftKey) : nudge(e.shiftKey ? -1000 : -stepMs())), // fine steps, Shift = 1 s;
   arrowright: (e) => (snapOn() ? beatStep(1, e.shiftKey) : nudge(e.shiftKey ? 1000 : stepMs())),   // with Snap on: beats / bars
@@ -19,7 +19,7 @@ const KEYS = {
   enter: goGrid, t: goTrim,
   h: () => document.body.classList.toggle("hide-side"), // video gets the full width; ResizeObserver refits
 };
-const GRID_ONLY = new Set(["r", "g", "n", "t", "q"]), TRIM_ONLY = new Set(["i", "o", "x", "enter"]);
+const GRID_ONLY = new Set(["r", "g", "n", "t", "q", "m"]), TRIM_ONLY = new Set(["i", "o", "x", "enter"]);
 const typing = (e) => e.target.matches("input[type=number], input[type=text], input[type=password], textarea");
 
 // Capture phase + stopPropagation: the video's own controls and focused buttons/checkboxes

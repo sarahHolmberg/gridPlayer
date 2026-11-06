@@ -29,23 +29,55 @@ function announceWords(cell, t) {
 // While one is playing, other clicks are ignored (not queued): the grid dims for a moment so you can see the click was dropped
 let announcing = false, announceNo = 0;
 function announce(cell, t) {
-  const words = announceWords(cell, t), bufs = words.map((w) => clipBufs.get(w));
-  if (bufs.some((b) => !b)) { setStatus(`No voice clip for ${words[bufs.indexOf(undefined)]} (the clips cover A1–T20)`); return false; }
+  const words = announceWords(cell, t);
+  if (words.some((w) => !clipBufs.has(w))) { setStatus(`No voice clip for ${words.find((w) => !clipBufs.has(w))} (the clips cover A1–T20)`); return false; }
+  say(words);
+  return true;
+}
+// Plays the clips one after the other on the audio clock, into the recording and the headphones. null = a short pause.
+function say(words, gap = 0) {
+  const bufs = words.map((w) => (w === null ? null : clipBufs.get(w)));
   actx.resume();
   announcing = true;
   const no = ++announceNo, done = () => { if (no === announceNo) announcing = false; }; // an old timer cannot end a newer one
   let at = actx.currentTime + 0.05; // back to back on the audio clock: no gaps, no overlaps
-  bufs.forEach((b, i) => {
+  bufs.forEach((b) => {
+    if (!b) { at += NAME_SPACE; return; } // a space in a name
     const src = actx.createBufferSource();
     src.buffer = b;
     src.connect(announceGain);
     src.start(at);
-    at += b.duration;
-    if (i === bufs.length - 1) src.onended = done;
+    at += b.duration + gap;
   });
-  setTimeout(done, (at - actx.currentTime) * 1000 + 300); // in case onended never comes
-  return true;
+  setTimeout(done, (at - actx.currentTime) * 1000 + 300); // ends when the last word has played
 }
+
+// ---- Say name (button / M): "at", then the Next link's name letter by letter, into the recording ----
+// Ø -> O, é -> E, Æ -> A E (the letters without their marks); digits as numbers; a space = a short pause; anything else is skipped.
+const NAME_GAP = 0.08;   // CHANGE HERE: seconds between two letters (a little air, so each letter is heard)
+const NAME_SPACE = 0.3;  // CHANGE HERE: the pause for a space in the name
+function nameWords(name) {
+  const plain = name.toUpperCase().replace(/Æ/g, "AE").replace(/Ø/g, "O").replace(/Œ/g, "OE").replace(/ß/g, "SS")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const words = ["at"];
+  for (const ch of plain) {
+    if (/[A-Z0-9]/.test(ch)) words.push(ch);
+    else if (/\s/.test(ch) && words[words.length - 1] !== null) words.push(null);
+  }
+  while (words[words.length - 1] === null) words.pop();
+  return words;
+}
+function sayName() {
+  const name = (links[0]?.name || "").trim();
+  if (!name) return setStatus("The Next link has no name to spell.");
+  if (announcing || !clipBufs.size) return setStatus(announcing ? "Still speaking: try again in a moment." : "The voice is still loading.");
+  const words = nameWords(name);
+  say(words, NAME_GAP);
+  const rec = mr && mr.state === "recording";
+  setStatus(`🔊 @${name}` + (rec ? " · in the recording" : " · not recording, only in your headphones"));
+  console.log(`[announce] name "${name}" -> ${words.map((w) => w ?? "(pause)").join(", ")}${rec ? " (recorded)" : ""}`);
+}
+$("nameBtn").onclick = sayName;
 
 $("grid").addEventListener("click", (e) => {
   const t = Math.max(0, v.currentTime - (trimMode ? 0 : tIn)); // the moment of the click, the same time as the clock
