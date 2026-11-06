@@ -54,8 +54,8 @@ function say(words, gap = 0) {
 
 // ---- Say name (button / M): "name bubble", then the Next link's name letter by letter, into the recording ----
 // Ø -> O, é -> E, Æ -> A E (the letters without their marks); digits as numbers; a space = a short pause; anything else is skipped.
-const NAME_GAP = 0.08;   // CHANGE HERE: seconds between two letters (a little air, so each letter is heard)
-const NAME_SPACE = 0.3;  // CHANGE HERE: the pause for a space in the name
+const NAME_GAP = 0.07;   // CHANGE HERE: seconds between two letters (a little air, so each letter is heard)
+const NAME_SPACE = 0.27;  // CHANGE HERE: the pause for a space in the name
 function nameWords(name) {
   const plain = name.toUpperCase().replace(/Æ/g, "AE").replace(/Ø/g, "O").replace(/Œ/g, "OE").replace(/ß/g, "SS")
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "");

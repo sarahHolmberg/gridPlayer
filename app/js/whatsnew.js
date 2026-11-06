@@ -3,8 +3,11 @@
 
 // CHANGE HERE with every update: a new WHATS_NEW_VERSION (any new text, the date is easiest) and the list of changes.
 // Everyone who has not seen this version yet gets the window once.
-const WHATS_NEW_VERSION = "2026-11-06e";
+const WHATS_NEW_VERSION = "2026-11-07";
 const WHATS_NEW = [
+  ["A quicker voice", [
+    "The cell, the time and the spelled name are said 10% faster (same voice, same pitch).",
+  ]],
   ["Back on the new website", [
     "The Grid Player gets its links from studio-mirrors.netlify.app again.",
   ]],
