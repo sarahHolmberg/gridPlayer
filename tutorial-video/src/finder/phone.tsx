@@ -241,7 +241,9 @@ export const Toast: React.FC<{p: number; text: string}> = ({p, text}) =>
 /* ───────── screenshot + crop (markup editor) ───────── */
 export const EDIT = {x: 31, y: 120, s: 0.85}; // where the screenshot sits in the editor
 export const EDIT_DONE = {x: 38, y: 70};
-export const MarkupScreen: React.FC<{shot: React.ReactNode; crop: {x: number; y: number; w: number; h: number}; cropped: number; donePress: number}> = ({shot, crop, cropped, donePress}) => {
+export const MarkupScreen: React.FC<{shot: React.ReactNode; crop: {x: number; y: number; w: number; h: number}; cropped: number; donePress: number; result?: React.ReactNode; resultSize?: {w: number; h: number}}> = ({
+  shot, crop, cropped, donePress, result, resultSize = {w: 220, h: 420},
+}) => {
   const W = SW * EDIT.s, H = SH * EDIT.s;
   const C = (k: number) => k * EDIT.s;
   const cx = EDIT.x + C(crop.x), cy = EDIT.y + C(crop.y), cw = C(crop.w), ch = C(crop.h);
@@ -269,8 +271,8 @@ export const MarkupScreen: React.FC<{shot: React.ReactNode; crop: {x: number; y:
         </>
       )}
       {cropped > 0 && (
-        <div style={{position: "absolute", left: SW / 2 - 110, top: 190, width: 220, height: 420, opacity: cropped, transform: `scale(${0.8 + 0.2 * cropped})`, borderRadius: 8, overflow: "hidden", boxShadow: "0 10px 30px rgba(0,0,0,.6)"}}>
-          <CroppedPic w={220} h={420} />
+        <div style={{position: "absolute", left: SW / 2 - resultSize.w / 2, top: 190, width: resultSize.w, height: resultSize.h, opacity: cropped, transform: `scale(${0.8 + 0.2 * cropped})`, borderRadius: 8, overflow: "hidden", boxShadow: "0 10px 30px rgba(0,0,0,.6)"}}>
+          {result ?? <CroppedPic w={resultSize.w} h={resultSize.h} />}
         </div>
       )}
       <div style={{position: "absolute", left: 0, right: 0, bottom: 0, height: 90, background: "#2c2c2e", display: "flex", alignItems: "center", justifyContent: "space-around"}}>
@@ -290,6 +292,12 @@ export const CroppedPic: React.FC<{w: number; h: number}> = ({w, h}) => {
     </svg>
   );
 };
+/** The profile picture, cropped tightly: the circle fills the square. */
+export const AvatarPic: React.FC<{d: number; look?: number}> = ({d, look = 2}) => (
+  <div style={{width: d, height: d, background: "#000"}}><Avatar look={look} d={d} /></div>
+);
+export const AVATAR_CROP = {x: PROF.avatar.x, y: PROF.avatar.y, w: PROF.avatar.d, h: PROF.avatar.d};
+
 // crop rectangle around the account person in the post screen (screen-local)
 export const CROP_TARGET = (() => {
   const p1 = postPoint(0.42 - 0.088, 250), p2 = postPoint(0.42 + 0.088, 708);
@@ -308,7 +316,7 @@ export const PASTE_BUBBLE = {x: 120, y: VAULT.linkY - 36};
 
 export const BrowserScreen: React.FC<{
   name: string; link: string; focus: "name" | "link" | null; paste: number; submitPress: number; msg: string;
-  dialog: number; choosePress: number; picker: number; photoPress: number; preview: number; sendPress: number; sending: boolean;
+  dialog: number; choosePress: number; picker: number; sel1: number; sel2: number; preview: number; sendPress: number; sending: boolean;
 }> = (s) => {
   const field = (y: number, text: string, focused: boolean, placeholder: string) => (
     <div style={{
@@ -363,10 +371,15 @@ export const BrowserScreen: React.FC<{
             <div style={{marginTop: 12}}>Choose a picture or take a photo:</div>
             <div style={{display: "flex", alignItems: "center", gap: 8, marginTop: 8}}>
               <div style={{border: `2px ${s.choosePress > 0.3 ? "inset" : "outset"} #fff`, padding: "6px 10px", background: "#e4e4e4"}}>Choose File</div>
-              <span style={{color: "#333"}}>{s.preview > 0.5 ? "nora_crop.jpg" : "no file chosen"}</span>
+              <span style={{color: "#333"}}>{s.preview > 0.5 ? "2 pictures" : "no file chosen"}</span>
             </div>
             <div style={{marginTop: 8, color: "#555", fontSize: 12}}>…or copy a picture and paste it here (Ctrl+V).</div>
-            {s.preview > 0 && <div style={{marginTop: 8, width: 110, height: 170, border: "1px solid #7f9db9", opacity: s.preview, overflow: "hidden"}}><CroppedPic w={110} h={170} /></div>}
+            {s.preview > 0 && (
+              <div style={{display: "flex", gap: 10, marginTop: 8, opacity: s.preview, alignItems: "flex-start"}}>
+                <div style={{width: 100, height: 160, border: "1px solid #7f9db9", overflow: "hidden"}}><CroppedPic w={100} h={160} /></div>
+                <div style={{width: 100, height: 100, border: "1px solid #7f9db9", overflow: "hidden"}}><AvatarPic d={100} /></div>
+              </div>
+            )}
             <div style={{position: "absolute", left: 14, bottom: 14, display: "flex", gap: 8}}>
               <div style={{border: `2px ${s.sendPress > 0.3 ? "inset" : "outset"} #fff`, padding: "10px 16px", color: s.preview > 0.5 ? "#000" : "#999"}}>{s.sending ? "Sending…" : "Send"}</div>
               <div style={{border: "2px outset #fff", padding: "10px 16px"}}>Back</div>
@@ -377,11 +390,14 @@ export const BrowserScreen: React.FC<{
       {/* photo picker */}
       {s.picker > 0 && (
         <div style={{position: "absolute", left: 0, top: 260 + (1 - s.picker) * 600, width: SW, height: SH - 260, background: "#fff", borderRadius: "16px 16px 0 0", fontFamily: sans, boxShadow: "0 -10px 30px rgba(0,0,0,.4)"}}>
-          <div style={{padding: "16px 18px 10px", fontWeight: 800, fontSize: 18, color: "#111"}}>Photos</div>
+          <div style={{padding: "16px 18px 10px", fontWeight: 800, fontSize: 18, color: "#111", display: "flex", justifyContent: "space-between"}}>Photos<span style={{color: "#3b82f6", opacity: s.sel2 > 0 ? 1 : 0.35}}>Add (2)</span></div>
           <div style={{display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 3, padding: "0 3px"}}>
             {[0, 1, 2, 3, 4, 5].map((i) => (
-              <div key={i} style={{height: 170, overflow: "hidden", background: "#ddd", outline: i === 0 && s.photoPress > 0 ? "4px solid #3b82f6" : "none", outlineOffset: -4}}>
-                {i === 0 ? <CroppedPic w={133} h={170} /> : <ThumbCell t={FINDER.startPosts[i]} v={i} />}
+              <div key={i} style={{position: "relative", height: 170, overflow: "hidden", background: "#000", outline: (i === 0 && s.sel1 > 0) || (i === 1 && s.sel2 > 0) ? "4px solid #3b82f6" : "none", outlineOffset: -4}}>
+                {i === 0 ? <CroppedPic w={133} h={170} /> : i === 1 ? <div style={{paddingTop: 18}}><AvatarPic d={133} /></div> : <ThumbCell t={FINDER.startPosts[i]} v={i} />}
+                {i < 2 && (i === 0 ? s.sel1 : s.sel2) > 0 && (
+                  <div style={{position: "absolute", right: 6, bottom: 6, width: 26, height: 26, borderRadius: "50%", background: "#3b82f6", color: "#fff", fontWeight: 800, fontSize: 15, display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid #fff", transform: `scale(${i === 0 ? s.sel1 : s.sel2})`}}>{i + 1}</div>
+                )}
               </div>
             ))}
           </div>

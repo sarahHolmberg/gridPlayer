@@ -11,12 +11,14 @@ export const FINDER = {
     tags: 4.0, // tag icon → open a tagged dancer
     fail: 4.8, // not in Norway → back
     ok: 5.6, // another dancer: Norway ✓
+    avatar: 7.4, // screenshot the profile, crop tightly to the profile picture
     browse: 6.6, // training video with 2+ people
     share: 4.6, // Share → Copy link
     shot: 7.2, // screenshot, crop to the account person
     site: 7.6, // Video Vault: name + link + Submit
-    pic: 6.6, // add the cropped picture, Send
+    pic: 8.0, // add both cropped pictures, Send
     recap: 6.0,
+    time: 6.4, // "about 50 seconds per link, at most"
     fade: 1.0,
   },
 
@@ -64,16 +66,17 @@ export const FINDER = {
   checklist: [
     "A video where several people dance",
     "The tagged dancer lives in Norway 🇳🇴",
+    "Profile picture, cropped tightly",
     "A training video (not a show, not edited)",
     "At least 2 people in it",
     "Link copied",
-    "Picture cropped to just them",
+    "Video screenshot, cropped to just them",
     "Added to Video Vault",
   ],
 
   stepTitles: [
-    "Go to the tagged videos", "Check: Norway-based?", "Pick a training video",
-    "Copy the link", "Screenshot and crop", "Add it to Video Vault",
+    "Go to the tagged videos", "Check: Norway-based?", "Screenshot the profile picture", "Pick a training video",
+    "Copy the link", "Screenshot the video", "Add it to Video Vault",
   ],
 
   captions: {
@@ -84,12 +87,14 @@ export const FINDER = {
     fail1: "Check: do they live in Norway?",
     fail2: "Not in Norway? Go back, try another",
     ok: "Norway-based: keep going",
+    avatar: "Screenshot the profile picture, crop tightly",
     browse: "Find a training video with 2+ people",
     share: "Share → Copy link",
-    shot: "Screenshot, then crop to just them",
+    shot: "Screenshot the video, crop to just them",
     site: "Name = account name, then paste the link",
-    pic: "Add the cropped picture, then Send",
+    pic: "Add both pictures, then Send",
     recap: "Done! Repeat with the next dancer",
+    time: "About 50 seconds per link, at most",
   },
 
   callouts: {
@@ -97,8 +102,15 @@ export const FINDER = {
     clues: ["📍 A city in Norway", "🇳🇴 Norwegian flag", "Norwegian words in the bio", "Norwegian studios or teams"],
     browse: ["Plain studio, like a class", "At least 2 people", "Not a show, not edited"],
     match: "Crop to the person who owns the account: match the profile picture.",
+    avatarShot: "Take a screenshot of their profile page.",
+    avatarCrop: "Crop as tightly as you can around the profile picture, so it fills the picture.",
     name: "Type the account name exactly as it is:",
   },
 
-  recap: ["Tagged videos", "Norway-based?", "Training video, 2+ people", "Copy link", "Screenshot + crop", "Name, link, picture → Send"],
+  recap: ["Tagged videos", "Norway-based?", "Profile picture, tight crop", "Training video, 2+ people", "Copy link", "Video screenshot + crop", "Name, link, 2 pictures → Send"],
+  timeCard: {
+    big: "≤ 50 s",
+    sub: "per link",
+    text: "From the tagged video to Send, one link typically takes 50 seconds at most. This is the time we pay for.",
+  },
 };

@@ -9,7 +9,7 @@
 | `Scene3` | Step 4: record the actions (Rec, pause at the peak, say it, click the cell, 0.3 s rule, last 2 s) | ~49 s |
 | `Scene4` | Step 5: export audio → text, export the trimmed video | ~20 s |
 | `Scene5` | Step 6: upload both files, press Done + personal code, recap | ~27 s |
-| `FindDancer` | Separate phone tutorial: find a Norway-based dancer via tagged videos, copy the link, crop a screenshot, add it to Video Vault (`npm run render:find`, settings in `src/finder/config.ts`) | ~63 s |
+| `FindDancer` | Separate phone tutorial: find a Norway-based dancer via tagged videos, screenshot + tightly crop the profile picture, copy the link, crop a video screenshot, add both to Video Vault (`npm run render:find`, settings in `src/finder/config.ts`) | ~78 s |
 | `Full` | All scenes back to back (Studio preview) | |
 
 ```bash
