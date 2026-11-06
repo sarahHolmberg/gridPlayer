@@ -8,7 +8,7 @@
 // CHANGE HERE: where the list comes from. If your dev address is different (for example a Codespaces
 // address like https://<name>-8888.app.github.dev), put it in "dev". "mock" is a pretend list inside this page.
 const SERVERS = {
-  main: "https://studiomirrors.netlify.app/.netlify/functions/links-api",
+  main: "https://studio-mirrors.netlify.app/.netlify/functions/links-api",
   dev: "http://localhost:8888/.netlify/functions/links-api",
   mock: null,
 };
