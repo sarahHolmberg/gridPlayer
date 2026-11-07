@@ -3,8 +3,12 @@
 
 // CHANGE HERE with every update: a new WHATS_NEW_VERSION (any new text, the date is easiest) and the list of changes.
 // Everyone who has not seen this version yet gets the window once.
-const WHATS_NEW_VERSION = "2026-11-07b";
+const WHATS_NEW_VERSION = "2026-11-07c";
 const WHATS_NEW = [
+  ["Send also goes to the render inbox", [
+    "📨 Send now does two things at once: the email (as before) and the video link to Studio Mirrors' render inbox.",
+    "It asks for your code once (it is filled in after that). The message says which of the two worked.",
+  ]],
   ["Before Export audio: three checks", [
     "1. The caption: say \"caption\", then what was hard, what you had to think about, and what you liked about this session.",
     "2. The steps.",
