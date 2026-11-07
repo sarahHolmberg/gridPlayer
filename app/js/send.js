@@ -92,15 +92,26 @@ async function sendIt() {
   sentLink = link;
   say((mail.status === "fulfilled" && inbox.status === "fulfilled" ? "✓ Sent to Studio Mirrors: " : "⚠ Partly sent: ") + parts.join(" · "),
       mail.status === "fulfilled" && inbox.status === "fulfilled");
-  askDone(true); // "Are you done with this video?"
+  askDone(true, [ // "Are you done with this video?", with what was sent, so it cannot be missed
+    ["📧 Email to Studio Mirrors", mail.status === "fulfilled", mail.status === "fulfilled" ? "sent" : why(mail, "email service")],
+    ["📥 Render inbox", inbox.status === "fulfilled", inbox.status === "fulfilled" ? `received (no. ${inbox.value})` : why(inbox, "website")],
+  ]);
 }
 
 // ---- After a Send: "Are you done with this video?" Done = the usual Done window (your code); Not yet = stay here ----
-function askDone(on) {
+function askDone(on, sent = []) {
   $("askDone").hidden = !on;
   if (on) {
     const it = links[0];
     $("askDoneWhat").textContent = it ? (it.name ? it.name + " · " : "") + instaLink(it) : "";
+    $("askDoneSent").innerHTML = "";
+    sent.forEach(([what, ok, detail]) => {
+      const li = document.createElement("li");
+      li.className = ok ? "ok" : "bad";
+      li.textContent = `${ok ? "✓" : "✗"} ${what}: ${detail}`;
+      $("askDoneSent").append(li);
+    });
+    $("askDoneHead").textContent = sent.every(([, ok]) => ok) ? "✓ Sent. Are you done with this video?" : "⚠ Partly sent. Are you done with this video?";
     $("askDoneYes").disabled = !it;
     $("askDoneYes").focus();
   } else reclaim();

@@ -223,8 +223,9 @@
 <!-- After Send (send.js): "Are you done with this video?" Done = the usual Done window (asks for your code) -->
 <div id="askDone" hidden>
   <div id="askDoneBox">
-    <div id="askDoneTitle"><span>✓ Sent. Are you done with this video?</span></div>
+    <div id="askDoneTitle"><span id="askDoneHead">✓ Sent. Are you done with this video?</span></div>
     <div id="askDoneWhat"></div>
+    <ul id="askDoneSent"></ul> <!-- what was sent: email ✓/✗, inbox ✓/✗ (send.js) -->
     <div class="row"><button id="askDoneYes" class="primary">✔ Done</button><button id="askDoneNo" class="quiet">Not yet</button></div>
   </div>
 </div>
