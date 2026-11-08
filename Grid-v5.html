@@ -63,7 +63,7 @@
       <!-- Playback: needed in both steps -->
       <section class="card needs-video">
         <div class="row between">
-          <span class="timeRow"><span class="lcd" id="time" title="Time from the In point">0.000 s</span><button id="skipBtn" title="Skip forward 0.85 s">+0.85 s ▸</button></span>
+          <span class="timeRow"><span class="lcd" id="time" title="Time from the In point">0.000 s</span><button id="skipBtn" title="Click: skip forward · click and hold: change how far">+0.85 s ▸</button></span>
           <div id="speeds" class="seg" title="Speed (A slower, D faster)"></div>
         </div>
       </section>
@@ -236,6 +236,18 @@
     <div id="newTitle"><span>✨ What's new in Grid Player</span><button class="icon" id="newClose" title="Close">✕</button></div>
     <div id="newBody"></div>
     <div class="row" id="newBtns"><button id="newOk" class="primary">OK, got it</button><button id="newUpd" title="Look for a newer version on GitHub">⟳ Check for updates</button></div>
+  </div>
+</div>
+
+<!-- How far the button beside the clock skips (trim.js): opened by clicking and holding that button -->
+<div id="skipDlg" hidden>
+  <div id="skipBox">
+    <div id="skipTitle"><span>Skip button</span><button class="icon" id="skipClose" title="Close">✕</button></div>
+    <form id="skipForm">
+      <label>Skip forward by <input type="number" id="skipInput" min="0.05" max="10" step="0.05"> seconds</label>
+      <div class="row" id="skipQuick"></div>
+      <div class="row"><button type="submit" class="primary">Save</button><button type="button" id="skipCancel" class="quiet">Cancel</button></div>
+    </form>
   </div>
 </div>
 

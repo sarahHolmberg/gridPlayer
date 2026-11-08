@@ -217,11 +217,11 @@ body.hide-side #side { display: none; }
 #kbBtn[data-st=off] { color: var(--muted); }
 
 /* ---------- Windows: Help, Done, Update ---------- */
-#help, #upd, #doneDlg, #expDlg, #statsDlg, #info, #askDone, #newDlg { position: fixed; inset: 0; z-index: 10; background: rgba(20,20,18,.45); display: flex; align-items: center; justify-content: center; }
-#helpBox, #updBox, #doneBox, #expBox, #statsBox, #infoBox, #askDoneBox, #newBox { width: min(460px, 94vw); max-height: 90vh; display: flex; flex-direction: column; overflow: hidden;
+#help, #upd, #doneDlg, #expDlg, #statsDlg, #info, #askDone, #newDlg, #skipDlg { position: fixed; inset: 0; z-index: 10; background: rgba(20,20,18,.45); display: flex; align-items: center; justify-content: center; }
+#helpBox, #updBox, #doneBox, #expBox, #statsBox, #infoBox, #askDoneBox, #newBox, #skipBox { width: min(460px, 94vw); max-height: 90vh; display: flex; flex-direction: column; overflow: hidden;
                               background: var(--panel); border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,.25); }
-#helpTitle, #doneTitle, #expTitle, #statsTitle, #infoTitle, #askDoneTitle, #newTitle, #updTitle, #extTitle { display: flex; align-items: center; padding: 12px 10px 4px 16px; font-size: 15px; font-weight: 600; }
-#helpTitle span, #doneTitle span, #expTitle span, #statsTitle span, #infoTitle span, #newTitle span, #updTitle span, #extTitle span { flex: 1; }
+#helpTitle, #doneTitle, #expTitle, #statsTitle, #infoTitle, #askDoneTitle, #newTitle, #skipTitle, #updTitle, #extTitle { display: flex; align-items: center; padding: 12px 10px 4px 16px; font-size: 15px; font-weight: 600; }
+#helpTitle span, #doneTitle span, #expTitle span, #statsTitle span, #infoTitle span, #newTitle span, #skipTitle span, #updTitle span, #extTitle span { flex: 1; }
 #flow { overflow-y: auto; padding: 10px 16px 16px; }
 .blk { padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: #fafaf8; text-align: center; }
 .blk.app { background: var(--ok-soft); border-color: #c4e6cf; }
@@ -392,12 +392,12 @@ input:focus, textarea:focus { outline: 1px solid #316ac5; border-color: #316ac5;
 #menu h4 { font: bold 11px Tahoma, sans-serif; letter-spacing: 0; text-transform: none; color: #0046d5; }
 
 /* Windows = XP dialogs: blue title bar, beige face */
-#helpBox, #updBox, #doneBox, #expBox, #statsBox, #infoBox, #askDoneBox, #newBox, #picBox, #extBox {
+#helpBox, #updBox, #doneBox, #expBox, #statsBox, #infoBox, #askDoneBox, #newBox, #skipBox, #picBox, #extBox {
   border: 3px solid #0831d9; border-top: 0; border-radius: 8px 8px 0 0; background: var(--bg); box-shadow: 4px 4px 12px rgba(0,0,0,.4); }
-#helpTitle, #doneTitle, #expTitle, #statsTitle, #infoTitle, #askDoneTitle, #newTitle, #updTitle, #extTitle, #picTitle {
+#helpTitle, #doneTitle, #expTitle, #statsTitle, #infoTitle, #askDoneTitle, #newTitle, #skipTitle, #updTitle, #extTitle, #picTitle {
   margin: 0 -3px; padding: 5px 4px 5px 10px; border-radius: 7px 7px 0 0; background: var(--xp-blue);
   color: #fff; font: bold 13px "Trebuchet MS", Tahoma, sans-serif; text-shadow: 1px 1px #0f1089; }
-#helpTitle .icon, #doneTitle .icon, #expTitle .icon, #statsTitle .icon, #infoTitle .icon, #newTitle .icon, #updTitle .icon, #picTitle .icon {
+#helpTitle .icon, #doneTitle .icon, #expTitle .icon, #statsTitle .icon, #infoTitle .icon, #newTitle .icon, #skipTitle .icon, #updTitle .icon, #picTitle .icon {
   width: 21px; min-height: 21px; height: 21px; border: 1px solid #fff; border-radius: 3px; color: #fff; font: bold 11px Tahoma;
   background: radial-gradient(circle at 30% 25%, #f0987a, #d2401a 70%); }
 #picBox { padding: 0 6px 6px; }
@@ -429,3 +429,7 @@ input:focus, textarea:focus { outline: 1px solid #316ac5; border-color: #316ac5;
 /* The +0.85 s button just right of the clock (trim.js) */
 .timeRow { display: inline-flex; align-items: center; gap: 4px; }
 #skipBtn { min-height: 22px; padding: 1px 6px; font-size: 11px; white-space: nowrap; }
+#skipBox { width: min(340px, 94vw); }
+#skipForm { display: flex; flex-direction: column; gap: 10px; padding: 10px 16px 16px; }
+#skipForm label { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+#skipInput { width: 70px; }

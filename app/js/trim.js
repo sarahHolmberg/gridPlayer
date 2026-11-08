@@ -67,12 +67,53 @@ function nudge(ms) {
   v.currentTime = Math.min(hi(), Math.max(lo(), v.currentTime + ms / 1000));
 }
 
-// ---- The small button beside the clock: skip forward a little, keep playing (or paused), never past the trim range ----
-const SKIP_S = 0.85; // CHANGE HERE: how far the button beside the clock skips (seconds)
+// ---- The small button beside the clock: click = skip forward a little (keeps playing or paused, never past the trim range);
+//      click and hold = a window to change how far. The choice is remembered in this browser. ----
+const SKIP_DEFAULT = 0.85; // CHANGE HERE: how far it skips until someone changes it (seconds)
+const SKIP_QUICK = [0.5, 0.75, 0.85, 0.95, 1, 1.5]; // CHANGE HERE: the quick choices in the window
+const HOLD_MS = 550; // CHANGE HERE: how long to hold the button before the window opens
+let skipS = SKIP_DEFAULT;
+try { skipS = +localStorage.getItem("skipSeconds") || SKIP_DEFAULT; } catch {}
+const skipLabel = () => ($("skipBtn").textContent = `+${+skipS.toFixed(2)} s ▸`);
+skipLabel();
+
+let holdTimer = null, held = false;
+$("skipBtn").addEventListener("pointerdown", () => { held = false; holdTimer = setTimeout(() => { held = true; skipAsk(true); }, HOLD_MS); });
+["pointerup", "pointerleave", "pointercancel"].forEach((t) => $("skipBtn").addEventListener(t, () => clearTimeout(holdTimer)));
+$("skipBtn").addEventListener("contextmenu", (e) => e.preventDefault()); // a long press on a touch screen opens the window, not a menu
 $("skipBtn").onclick = () => {
-  v.currentTime = Math.min(hi(), v.currentTime + SKIP_S);
-  console.log(`[skip] +${SKIP_S} s -> ${v.currentTime.toFixed(3)}`);
+  if (held) return (held = false); // that was a hold: the window is open, no skip
+  v.currentTime = Math.min(hi(), v.currentTime + skipS);
+  console.log(`[skip] +${skipS} s -> ${v.currentTime.toFixed(3)}`);
 };
+
+function skipAsk(on) {
+  $("skipDlg").hidden = !on;
+  if (on) {
+    $("skipInput").value = +skipS.toFixed(2);
+    $("skipQuick").innerHTML = "";
+    SKIP_QUICK.forEach((q) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.textContent = q + " s"; b.classList.toggle("on", q === skipS);
+      b.onclick = () => { $("skipInput").value = q; skipSave(); };
+      $("skipQuick").append(b);
+    });
+    $("skipInput").select();
+  } else reclaim();
+}
+function skipSave() {
+  const s = Math.round(+$("skipInput").value * 100) / 100;
+  if (!(s >= 0.05 && s <= 10)) { $("skipInput").focus(); return; }
+  skipS = s;
+  try { localStorage.setItem("skipSeconds", String(s)); } catch {}
+  skipLabel();
+  skipAsk(false);
+  console.log(`[skip] now ${s} s`);
+}
+$("skipForm").onsubmit = (e) => { e.preventDefault(); skipSave(); };
+$("skipClose").onclick = $("skipCancel").onclick = () => skipAsk(false);
+$("skipDlg").onclick = (e) => { if (e.target === $("skipDlg")) skipAsk(false); };
+addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("skipDlg").hidden) skipAsk(false); });
 
 // ---- Export trim video: cuts the loaded file between In and Out WITHOUT re-encoding (like a native trimmer): the picture and sound data are copied as they are. ----
 // Runs inside this page with grid-trim.js (app/grid-trim.js): no server, no internet.
