@@ -3,8 +3,11 @@
 
 // CHANGE HERE with every update: a new WHATS_NEW_VERSION (any new text, the date is easiest) and the list of changes.
 // Everyone who has not seen this version yet gets the window once.
-const WHATS_NEW_VERSION = "2026-11-07d";
+const WHATS_NEW_VERSION = "2026-11-08";
 const WHATS_NEW = [
+  ["+0.85 s button", [
+    "A small button right of the clock skips the video forward 0.85 seconds.",
+  ]],
   ["Send also goes to the render inbox", [
     "📨 Send now does two things at once: the email (as before) and the video link to Studio Mirrors' render inbox.",
     "It asks for your code once (it is filled in after that).",

@@ -67,6 +67,13 @@ function nudge(ms) {
   v.currentTime = Math.min(hi(), Math.max(lo(), v.currentTime + ms / 1000));
 }
 
+// ---- The small button beside the clock: skip forward a little, keep playing (or paused), never past the trim range ----
+const SKIP_S = 0.85; // CHANGE HERE: how far the button beside the clock skips (seconds)
+$("skipBtn").onclick = () => {
+  v.currentTime = Math.min(hi(), v.currentTime + SKIP_S);
+  console.log(`[skip] +${SKIP_S} s -> ${v.currentTime.toFixed(3)}`);
+};
+
 // ---- Export trim video: cuts the loaded file between In and Out WITHOUT re-encoding (like a native trimmer): the picture and sound data are copied as they are. ----
 // Runs inside this page with grid-trim.js (app/grid-trim.js): no server, no internet.
 // mp4 / mov / m4v only; the container of the original is kept. The cut starts at the key frame before In and the extra frames are hidden, so playback starts at In.

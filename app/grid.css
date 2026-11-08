@@ -425,3 +425,7 @@ input:focus, textarea:focus { outline: 1px solid #316ac5; border-color: #316ac5;
 .deadline i { font-style: normal; font-weight: bold; font-size: 12px; }
 #nextItem .deleted .deadline { margin-top: 8px; }
 @keyframes deadlinePulse { 50% { box-shadow: 0 0 0 6px #ffb3b3; } }
+
+/* The +0.85 s button just right of the clock (trim.js) */
+.timeRow { display: inline-flex; align-items: center; gap: 4px; }
+#skipBtn { min-height: 22px; padding: 1px 6px; font-size: 11px; white-space: nowrap; }
