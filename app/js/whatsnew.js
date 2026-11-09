@@ -3,8 +3,13 @@
 
 // CHANGE HERE with every update: a new WHATS_NEW_VERSION (any new text, the date is easiest) and the list of changes.
 // Everyone who has not seen this version yet gets the window once.
-const WHATS_NEW_VERSION = "2026-11-09";
+const WHATS_NEW_VERSION = "2026-11-09b";
 const WHATS_NEW = [
+  ["Check the video before you send it", [
+    "After ⬇ Export trim video, a window asks you to find the file in Downloads: it must end in .mp4, and you must watch it.",
+    "The first time, the box cannot be ticked: go and check the video first. Then the button says \"☐ I checked the video\": open it again, tick the box, and continue to Export audio.",
+    "Export audio waits until the video is checked.",
+  ]],
   ["A and F are said right", [
     "The letter A now sounds like \"ay\" (it said \"eye\"), and F like \"ef\" (it said \"E-F-F\").",
   ]],

@@ -251,6 +251,26 @@
   </div>
 </div>
 
+<!-- After Export trim video (videocheck.js): go and check the file (.mp4, plays) before it is sent -->
+<div id="vidDlg" hidden>
+  <div id="vidBox">
+    <div id="vidTitle"><span>Check the video you exported</span><button class="icon" id="vidClose" title="Close">✕</button></div>
+    <div id="vidBody">
+      <ol>
+        <li>Open your <b>Downloads</b> folder and find <b id="vidName">the trimmed video</b>.</li>
+        <li>The name must end in <b>.mp4</b>. <span id="vidExtWarn" hidden></span></li>
+        <li><b>Double-click it and watch it</b>, all the way through, before you send it with FileFlap.</li>
+      </ol>
+      <label id="vidTick"><input type="checkbox" id="vidOk"> I checked it: it ends in <b>.mp4</b> and it plays</label>
+      <p id="vidGo">⏸ <b>Go and check it now.</b> Close this window, check the video, then come back: the box can be ticked the next time you open this.</p>
+      <div class="row">
+        <button id="vidNext" class="primary" disabled>Export audio ▸</button>
+        <button id="vidAgain" class="quiet" title="Cut and download the video again">⬇ Export the video again</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Export audio reminder: both boxes ticked -> the export runs (recording.js) -->
 <div id="expDlg" hidden>
   <div id="expBox">
@@ -306,6 +326,7 @@
 <script src="app/js/voice-clips.js"></script> <!-- the spoken words for announce.js -->
 <script src="app/js/recording.js"></script>
 <script src="app/js/trim.js"></script>
+<script src="app/js/videocheck.js"></script> <!-- go and check the exported video before Export audio -->
 <script src="app/js/help.js"></script>
 <script src="app/js/links.js"></script>
 <script src="app/js/stats.js"></script>

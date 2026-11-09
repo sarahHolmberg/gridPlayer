@@ -136,7 +136,9 @@ async function exportVideo() {
   try {
     setStatus("Cutting…");
     const { blob, ext } = await window.GridTrim.trim(currentFile, start, end, (p) => setStatus(`Cutting… ${Math.round(p * 100)}%`));
-    download(blob, `${currentFile.name.replace(/\.[^.]+$/, "")}-trimmed.${ext}`);
+    const name = `${currentFile.name.replace(/\.[^.]+$/, "")}-trimmed.${ext}`;
+    download(blob, name);
+    videoExported(name, ext); // "go and check it" (videocheck.js)
     setStatus(`Export done: ${start.toFixed(3)} → ${end.toFixed(3)} s, ${(blob.size / 1e6).toFixed(1)} MB, not re-encoded`);
   } catch (err) {
     console.error("[export] cut failed:", err);

@@ -87,7 +87,7 @@ function expAsk(on) {
   if (on) { $("expForm").querySelectorAll("input[type=checkbox]").forEach((c) => (c.checked = false)); $("expOk").disabled = true; }
   console.log(`[export] reminder ${on ? "open" : "closed"}`);
 }
-$("audioBtn").onclick = () => { if (mr) expAsk(true); };
+// Export audio's click is set in videocheck.js: the exported video is checked first
 $("expForm").onchange = () => ($("expOk").disabled = ![...$("expForm").querySelectorAll("input[type=checkbox]")].every((c) => c.checked)); // all ticked
 $("expForm").onsubmit = (e) => { e.preventDefault(); if ($("expOk").disabled) return; expAsk(false); exportAudio(); };
 $("expClose").onclick = $("expCancel").onclick = () => expAsk(false);
