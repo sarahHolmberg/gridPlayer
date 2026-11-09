@@ -3,8 +3,11 @@
 
 // CHANGE HERE with every update: a new WHATS_NEW_VERSION (any new text, the date is easiest) and the list of changes.
 // Everyone who has not seen this version yet gets the window once.
-const WHATS_NEW_VERSION = "2026-11-08b";
+const WHATS_NEW_VERSION = "2026-11-09";
 const WHATS_NEW = [
+  ["A and F are said right", [
+    "The letter A now sounds like \"ay\" (it said \"eye\"), and F like \"ef\" (it said \"E-F-F\").",
+  ]],
   ["+0.85 s button", [
     "A small button right of the clock skips the video forward 0.85 seconds.",
     "Click and hold it to change how far it skips (for example 0.75 or 0.95 seconds).",
