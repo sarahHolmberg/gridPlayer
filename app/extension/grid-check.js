@@ -1,5 +1,5 @@
 // Runs on the Grid Player page (Grid*.html / grid*.html opened from your disk) and tells it this extension is installed:
-// it leaves the version in <html data-grid-ext="1.4">, which the page checks every time it opens.
+// it leaves the version in <html data-grid-ext="1.5">, which the page checks every time it opens.
 // Chrome only runs this on file:// pages if "Allow access to file URLs" is ON (chrome://extensions -> this extension -> Details).
 document.documentElement.dataset.gridExt = chrome.runtime.getManifest().version;
 console.log(`[grid-ext] extension v${document.documentElement.dataset.gridExt} is installed`);
@@ -18,5 +18,13 @@ window.addEventListener("message", (e) => {
   chrome.runtime.sendMessage({ type: "openIncognito", url: e.data.url }, (r) => {
     const answer = r || { ok: false, reason: chrome.runtime.lastError?.message || "no answer" };
     window.postMessage({ from: "grid-ext", type: "openIncognitoResult", id: e.data.id, ...answer }, "*");
+  });
+});
+
+// After Update from GitHub the page asks the extension to reload itself (background.js), so the new files are used
+window.addEventListener("message", (e) => {
+  if (e.source !== window || e.data?.from !== "grid-player" || e.data.type !== "reloadExtension") return;
+  chrome.runtime.sendMessage({ type: "reloadExtension" }, (r) => {
+    window.postMessage({ from: "grid-ext", type: "reloadExtensionResult", ok: !!r?.ok }, "*");
   });
 });

@@ -86,3 +86,12 @@ chrome.runtime.onMessage.addListener((msg, sender, reply) => {
   });
   return true; // the answer comes later
 });
+
+// ---- After Update from GitHub: the Grid Player asks the extension to reload itself, so Chrome reads the new files from
+//      disk (an unpacked extension keeps running the old files until it is reloaded). The page then reloads too. ----
+chrome.runtime.onMessage.addListener((msg, sender, reply) => {
+  if (msg.type !== "reloadExtension") return;
+  console.log("[update] reloading the extension to use the new files");
+  reply({ ok: true, version: chrome.runtime.getManifest().version });
+  setTimeout(() => chrome.runtime.reload(), 200);
+});

@@ -145,8 +145,13 @@ async function updInstall() {
     const ext = got.some((f) => f.path.startsWith("app/extension/"));
     updFiles = []; updDone = true; renderUpd();
     $("updGo").textContent = "↻ Reload Grid Player";
+    // New extension files: Chrome only uses them once the extension is reloaded. A 1.5+ extension does that itself, then the app restarts.
+    if (ext && extReloadAndRestart()) {
+      updLog(`Updated ${got.length} file${got.length === 1 ? "" : "s"}. The extension is reloading itself with its new files, then the Grid Player restarts…`);
+      return;
+    }
     updLog(`Updated ${got.length} file${got.length === 1 ? "" : "s"} (old versions in _backup). Reload to use the new version.` +
-      (ext ? " The extension changed too: click its reload arrow in chrome://extensions." : ""));
+      (ext ? " The extension changed too: open chrome://extensions and click the reload arrow ⟳ on Grid FastDL auto-download (needed once: newer versions do it by themselves)." : ""));
   } catch (err) { updError(err); }
   finally { updBusy(false); }
 }

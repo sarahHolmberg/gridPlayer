@@ -461,3 +461,9 @@ input:focus, textarea:focus { outline: 1px solid #316ac5; border-color: #316ac5;
 #transMsg { font-size: 12px; }
 #transMsg.bad { color: #b00000; }
 #transMsg button { margin-top: 6px; }
+
+/* The extension gate: Update from GitHub sits above it; the buttons side by side */
+#upd { z-index: 25; }
+#extBtns { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+#extBody .warn { margin: 8px 0 0; padding: 8px 10px; background: #fff1f1; border: 1px solid #e0a0a0; color: #7a0000; }
+#extBody .warn code { word-break: break-all; }

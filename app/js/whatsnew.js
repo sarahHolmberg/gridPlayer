@@ -3,13 +3,14 @@
 
 // CHANGE HERE with every update: a new WHATS_NEW_VERSION (any new text, the date is easiest) and the two newest changes.
 // Everyone who has not seen this version yet gets the window once.
-const WHATS_NEW_VERSION = "2026-11-18c";
+const WHATS_NEW_VERSION = "2026-11-18d";
 const WHATS_NEW = [ // CHANGE HERE: only the TWO newest changes (put the new one first, remove the oldest)
-  ["Send the transcribed text", [
-    "After you choose the website you used last, a window asks you to transcribe the video like last time and send the transcribed text instead of the recording; its button opens the other website in incognito.",
+  ["The extension updates with the app", [
+    "After Update from GitHub, the extension now reloads itself with its new files, and the Grid Player restarts. (This one time, reload it by hand in chrome://extensions.)",
+    "If the app ever says the extension is old, the screen has ⟳ Update from GitHub and ↻ Reload the extension buttons, and says which folder to load if Chrome uses another copy.",
   ]],
-  ["The next 6 videos", [
-    "The Next link list shows the next 6 videos at a time.",
+  ["Send the transcribed text", [
+    "After you choose the website you used last, a window asks you to transcribe the video like last time and send the transcribed text instead of the recording.",
   ]],
 ];
 

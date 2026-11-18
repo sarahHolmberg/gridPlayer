@@ -335,6 +335,9 @@
     <div id="extBody">
       <div id="extWait">Checking for the FastDL extension…</div>
       <div id="extHelp" hidden>
+        <p id="extReloadGone" class="warn" hidden><b>The extension was just asked to reload itself and has not come back.</b>
+          Open <code>chrome://extensions</code>: check that <b>Grid FastDL auto-download</b> is switched on (blue switch) and click
+          its <b>reload arrow ⟳</b>, then click <b>Check again</b> here.</p>
         <b>The FastDL extension was not found.</b> Install it once:
         <ol>
           <li>Open a new tab and paste <code>chrome://extensions</code> <span id="extCopy"></span><br>(a page is not allowed to open it for you)</li>
@@ -347,12 +350,16 @@
       </div>
       <!-- The extension is there but older: it cannot answer the incognito question -->
       <div id="extOld" hidden>
-        <b>The extension is an older version (<span id="extOldV"></span>).</b> Update it once:
+        <b>The extension is an older version (<span id="extOldV"></span>).</b>
         <ol>
-          <li>Open a new tab and paste <code>chrome://extensions</code> <span class="extCopy2"></span></li>
-          <li>On the card <b>Grid FastDL auto-download</b>, click the <b>reload arrow ⟳</b>.</li>
+          <li>Click <b>⟳ Update from GitHub</b> below (it gets the newest files, the extension's too).</li>
+          <li>Then reload the extension: click <b>↻ Reload the extension</b> below if you see it, or open a new tab, paste
+            <code>chrome://extensions</code> <span class="extCopy2"></span> and click the <b>reload arrow ⟳</b> on <b>Grid FastDL auto-download</b>.</li>
           <li>Come back here and click <b>Check again</b>.</li>
         </ol>
+        <p id="extOtherFolder" class="warn" hidden><b>It was reloaded and is still old:</b> Chrome loads it from a <b>different folder</b>
+          than this Grid Player. In chrome://extensions, click <b>Remove</b> on Grid FastDL auto-download, then <b>Load unpacked</b> and pick
+          this folder: <code class="extPath2"></code></p>
       </div>
       <!-- The extension is there but may not open incognito windows (needed to open the transcription site) -->
       <div id="extIncog" hidden>
@@ -366,7 +373,11 @@
         </ol>
       </div>
     </div>
-    <div id="extBtns"><button id="extRetry" class="primary" hidden title="Reload the app and look for the extension again">↻ Check again</button></div>
+    <div id="extBtns">
+      <button id="extUpdate" hidden title="Get the newest Grid Player files from GitHub (the extension's too)">⟳ Update from GitHub</button>
+      <button id="extSelfReload" hidden title="The extension reloads itself, so Chrome uses its new files">↻ Reload the extension</button>
+      <button id="extRetry" class="primary" hidden title="Reload the app and look for the extension again">↻ Check again</button>
+    </div>
   </div>
 </div>
 
