@@ -3,6 +3,12 @@
 // Chrome only runs this on file:// pages if "Allow access to file URLs" is ON (chrome://extensions -> this extension -> Details).
 document.documentElement.dataset.gridExt = chrome.runtime.getManifest().version;
 console.log(`[grid-ext] extension v${document.documentElement.dataset.gridExt} is installed`);
+// And whether this extension may open incognito windows (only the background script may ask Chrome): the page waits for
+// <html data-grid-incognito="yes|no"> and does not open until it is "yes" (app/js/extension-check.js).
+chrome.runtime.sendMessage({ type: "incognitoAllowed" }, (r) => {
+  document.documentElement.dataset.gridIncognito = r?.allowed ? "yes" : "no";
+  console.log(`[grid-ext] allowed in incognito: ${document.documentElement.dataset.gridIncognito}`);
+});
 
 // The Grid Player asks the extension to open a transcription site in an INCOGNITO window (a web page cannot do that
 // itself). The page posts { from: "grid-player", type: "openIncognito", id, url }; background.js opens it (only the

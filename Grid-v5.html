@@ -235,7 +235,10 @@
   <div id="newBox">
     <div id="newTitle"><span>✨ What's new in Grid Player</span><button class="icon" id="newClose" title="Close">✕</button></div>
     <div id="newBody"></div>
-    <div class="row" id="newBtns"><button id="newOk" class="primary">OK, got it</button><button id="newUpd" title="Look for a newer version on GitHub">⟳ Check for updates</button></div>
+    <div id="newBtns">
+      <button id="newUpd" title="Look for a newer version on GitHub">⟳ Check for updates<small>there may be something even newer</small></button>
+      <button id="newOk" class="quiet">OK, got it</button>
+    </div>
   </div>
 </div>
 
@@ -315,7 +318,7 @@
 <!-- Extension check: shown from the start, hidden once the FastDL extension says it is installed (app/extension/grid-check.js) -->
 <div id="extGate">
   <div id="extBox">
-    <div id="extTitle"><span>Grid Player needs its extension</span></div>
+    <div id="extTitle"><span id="extHead">Grid Player needs its extension</span></div>
     <div id="extBody">
       <div id="extWait">Checking for the FastDL extension…</div>
       <div id="extHelp" hidden>
@@ -328,6 +331,26 @@
           <li>Come back here and click <b>Check again</b>.</li>
         </ol>
         Already installed? Click its reload arrow ⟳ on chrome://extensions (older copies cannot talk to the app), and check step 4.
+      </div>
+      <!-- The extension is there but older: it cannot answer the incognito question -->
+      <div id="extOld" hidden>
+        <b>The extension is an older version (<span id="extOldV"></span>).</b> Update it once:
+        <ol>
+          <li>Open a new tab and paste <code>chrome://extensions</code> <span class="extCopy2"></span></li>
+          <li>On the card <b>Grid FastDL auto-download</b>, click the <b>reload arrow ⟳</b>.</li>
+          <li>Come back here and click <b>Check again</b>.</li>
+        </ol>
+      </div>
+      <!-- The extension is there but may not open incognito windows (needed to open the transcription site) -->
+      <div id="extIncog" hidden>
+        <b>The extension is not allowed in incognito yet.</b> The Grid Player opens the transcription website in an incognito
+        window, so it needs this. Switch it on once:
+        <ol>
+          <li>Open a new tab and paste <code>chrome://extensions</code> <span class="extCopy2"></span></li>
+          <li>On the card <b>Grid FastDL auto-download</b>, click <b>Details</b>.</li>
+          <li>Turn on <b>Allow in Incognito</b> (in Edge: <b>Allow in InPrivate</b>).</li>
+          <li>Come back here and click <b>Check again</b>.</li>
+        </ol>
       </div>
     </div>
     <div id="extBtns"><button id="extRetry" class="primary" hidden title="Reload the app and look for the extension again">↻ Check again</button></div>

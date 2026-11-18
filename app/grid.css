@@ -447,3 +447,10 @@ input:focus, textarea:focus { outline: 1px solid #316ac5; border-color: #316ac5;
 #scribeMsg { font-size: 12px; }
 #scribeMsg.bad { color: #b00000; }
 #scribeMsg button { margin-top: 6px; }
+
+/* What's new: the update button is big and can't be missed */
+#newBtns { display: flex; flex-direction: column; gap: 6px; padding: 12px 16px 16px; }
+#newBtns #newUpd { flex-direction: column; gap: 2px; min-height: 52px; font-size: 16px; font-weight: bold; color: #fff;
+                   border-color: #1d5b12; background: linear-gradient(#5ec84e, #3c9a2e 60%, #2a7d1e); box-shadow: 0 0 0 3px #c8f5c0; }
+#newBtns #newUpd:hover { background: linear-gradient(#6fd85f, #46aa38 60%, #2f8a22); box-shadow: 0 0 0 3px #fcb83c; }
+#newBtns #newUpd small { font-size: 11px; font-weight: normal; opacity: .9; }

@@ -64,6 +64,12 @@ chrome.runtime.onStartup.addListener(paint);
 // ---- The Grid Player's Export audio: open the transcription site the person did NOT use last, in an incognito window ----
 // Only these sites (CHANGE HERE to add one). Needs "Allow in Incognito" ON for this extension (chrome://extensions -> Details).
 const INCOGNITO_SITES = ["https://turboscribe.ai/", "https://www.uniscribe.co/"];
+// The Grid Player checks this every time it opens (through grid-check.js), and stays closed until it is allowed
+chrome.runtime.onMessage.addListener((msg, sender, reply) => {
+  if (msg.type !== "incognitoAllowed") return;
+  chrome.extension.isAllowedIncognitoAccess((allowed) => reply({ allowed }));
+  return true;
+});
 chrome.runtime.onMessage.addListener((msg, sender, reply) => {
   if (msg.type !== "openIncognito") return;
   if (!INCOGNITO_SITES.includes(msg.url)) { reply({ ok: false, reason: "not-allowed-site" }); return; }
