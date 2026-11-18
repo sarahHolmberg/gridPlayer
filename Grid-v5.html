@@ -271,6 +271,20 @@
   </div>
 </div>
 
+<!-- After Export audio (scribe.js): which transcription site was used last? The OTHER one opens in incognito (extension) -->
+<div id="scribeDlg" hidden>
+  <div id="scribeBox">
+    <div id="scribeTitle"><span>Transcribe the recording</span><button class="icon" id="scribeClose" title="Close">✕</button></div>
+    <div id="scribeBody">
+      <p><b>Which website did you use LAST to transcribe?</b><br><small>The other one opens in an incognito window.</small></p>
+      <div class="row" id="scribeChoices"></div>
+      <p id="scribeHint" class="small"></p>
+      <div id="scribeMsg" role="status"></div>
+      <div class="row"><button id="scribeSkip" class="quiet">Skip</button></div>
+    </div>
+  </div>
+</div>
+
 <!-- Export audio reminder: both boxes ticked -> the export runs (recording.js) -->
 <div id="expDlg" hidden>
   <div id="expBox">
@@ -325,6 +339,7 @@
 <script src="app/js/core.js"></script>
 <script src="app/js/voice-clips.js"></script> <!-- the spoken words for announce.js -->
 <script src="app/js/recording.js"></script>
+<script src="app/js/scribe.js"></script> <!-- after Export audio: the transcription site, in incognito -->
 <script src="app/js/trim.js"></script>
 <script src="app/js/videocheck.js"></script> <!-- go and check the exported video before Export audio -->
 <script src="app/js/help.js"></script>

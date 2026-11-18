@@ -70,16 +70,17 @@ function recSave(after) {
 $("recBtn").onclick = recToggle;
 $("saveBtn").onclick = () => recSave(); // not recSave itself: it would get the click as "after"
 
-// ---- Export audio: stop + download the recording, then open FileFlap to upload it (with the trimmed video) ----
+// ---- Export audio: stop + download the recording, then ask which transcription site to open (scribe.js), then FileFlap ----
 // The #grid-player ending tells the extension (app/extension/fileflap.js) to show its "drag the files here" pop-up.
 const FLAP_URL = "https://fileflap.net/#grid-player"; // CHANGE HERE: where the files are uploaded
 function exportAudio() {
   if (!mr) return;
-  recSave(() => {
-    const w = window.open(FLAP_URL, "_blank");
-    console.log(`[export] opened ${FLAP_URL} -> ${w ? "ok" : "blocked"}`);
-    if (!w) setStatus("Popup blocked: allow popups for this page, or open " + FLAP_URL);
-  });
+  recSave(() => scribeAsk(openFlap)); // FileFlap opens once the transcription site is chosen (or skipped)
+}
+function openFlap() {
+  const w = window.open(FLAP_URL, "_blank");
+  console.log(`[export] opened ${FLAP_URL} -> ${w ? "ok" : "blocked"}`);
+  if (!w) setStatus("Popup blocked: allow popups for this page, or open " + FLAP_URL);
 }
 // Reminder first: two questions, and only when both are ticked does the export run
 function expAsk(on) {

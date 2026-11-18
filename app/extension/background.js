@@ -60,3 +60,23 @@ chrome.action.onClicked.addListener(async () => {
 });
 chrome.runtime.onInstalled.addListener(paint);
 chrome.runtime.onStartup.addListener(paint);
+
+// ---- The Grid Player's Export audio: open the transcription site the person did NOT use last, in an incognito window ----
+// Only these sites (CHANGE HERE to add one). Needs "Allow in Incognito" ON for this extension (chrome://extensions -> Details).
+const INCOGNITO_SITES = ["https://turboscribe.ai/", "https://www.uniscribe.co/"];
+chrome.runtime.onMessage.addListener((msg, sender, reply) => {
+  if (msg.type !== "openIncognito") return;
+  if (!INCOGNITO_SITES.includes(msg.url)) { reply({ ok: false, reason: "not-allowed-site" }); return; }
+  chrome.extension.isAllowedIncognitoAccess(async (allowed) => {
+    if (!allowed) return reply({ ok: false, reason: "incognito-off" });
+    try {
+      await chrome.windows.create({ url: msg.url, incognito: true, focused: true });
+      console.log(`[scribe] opened ${msg.url} in incognito`);
+      reply({ ok: true });
+    } catch (err) {
+      console.error("[scribe] could not open incognito:", err);
+      reply({ ok: false, reason: err.message });
+    }
+  });
+  return true; // the answer comes later
+});
