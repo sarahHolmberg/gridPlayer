@@ -47,7 +47,8 @@ async function getLinks(server) {
   if (server === "mock") { await mock.wait(); return mock.load(); }
   // Your code goes only to a website that has asked for it (an older one refuses a request that carries it)
   const url = SERVERS[server], code = myCode.get(), asked = codeAsked.has(url);
-  const res = await netFetch(url, { cache: "no-store", headers: code && asked ? { "X-Code": code } : {} });
+  // Only the next SHOW_LINKS: the website sends just those (less to read and to download)
+  const res = await netFetch(`${url}?limit=${SHOW_LINKS}`, { cache: "no-store", headers: code && asked ? { "X-Code": code } : {} });
   const data = await res.json().catch(() => ({}));
   console.log(`[links] status ${res.status}`);
   if (!res.ok) throw new Error(data.error || "Request failed.");
@@ -90,6 +91,8 @@ $("picImg").onerror = () => { $("picImg").hidden = true; $("picErr").hidden = fa
 const picClose = () => { $("picDlg").hidden = true; $("picImg").removeAttribute("src"); reclaim(); };
 $("picDlg").onclick = picClose;
 addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("picDlg").hidden) picClose(); });
+// CHANGE HERE: how many upcoming videos the Grid Player shows (and asks the website for)
+const SHOW_LINKS = 6;
 // Oldest first: by createdAt when the server sends it, then by id (a newer link gets a bigger id)
 const byAge = (list) => [...list].sort((a, b) => (Date.parse(a.createdAt) || 0) - (Date.parse(b.createdAt) || 0) || a.id - b.id);
 
@@ -182,7 +185,7 @@ async function fetchLinks() {
   try {
     const list = await getLinks(server);
     if (server !== linksServer) return; // the toggle was switched meanwhile: that answer is not wanted any more
-    links = byAge(list); linksNote = list.note || ""; linksAskCode = !!list.askCode;
+    links = byAge(list).slice(0, SHOW_LINKS); linksNote = list.note || ""; linksAskCode = !!list.askCode;
     renderLinks();
   } catch (err) {
     console.error("[links] FAILED:", err);
@@ -259,7 +262,7 @@ async function doneAnimation(server, deadline) {
   const [list] = await Promise.all([next, pause(deadline ? DEADLINE_MS : DONE_MS.deleted)]);
   if (server !== linksServer) return; // the toggle was switched meanwhile
   if (list instanceof Error) return fetchLinks(); // shows why the list could not load
-  links = byAge(list); linksNote = list.note || ""; linksAskCode = !!list.askCode;
+  links = byAge(list).slice(0, SHOW_LINKS); linksNote = list.note || ""; linksAskCode = !!list.askCode;
   renderLinks(true);
 }
 

@@ -288,6 +288,19 @@
   </div>
 </div>
 
+<!-- After choosing the site (scribe.js): transcribe like last time and send the TEXT; the button opens the other site -->
+<div id="transDlg" hidden>
+  <div id="transBox">
+    <div id="transTitle"><span>Now transcribe the recording</span><button class="icon" id="transClose" title="Close">✕</button></div>
+    <div id="transBody">
+      <p class="big">We now need you to <b>transcribe the video like you were doing last time</b>, and send the
+        <b>transcribed text</b> instead of the recording.</p>
+      <button id="transGo" class="primary"></button>
+      <div id="transMsg" role="status"></div>
+    </div>
+  </div>
+</div>
+
 <!-- Export audio reminder: both boxes ticked -> the export runs (recording.js) -->
 <div id="expDlg" hidden>
   <div id="expBox">

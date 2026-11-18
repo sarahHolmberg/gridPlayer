@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Grid FastDL auto-download",
-  "version": "1.3",
+  "version": "1.4",
   "description": "On fastdl.app: wait for the download button, click it, close the tab once the file is saved. On fileflap.net (opened from the Grid Player): a short \"drag the files here\" pop-up. Opens the transcription site for Export audio in an incognito window. Also tells the Grid Player page that it is installed.",
   "permissions": [
     "downloads",

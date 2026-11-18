@@ -1,5 +1,5 @@
-// app/js/scribe.js: after Export audio, "Which website did you use LAST to transcribe?" The other one opens in an INCOGNITO
-// window. A web page cannot open incognito itself, so it asks the extension (app/extension/grid-check.js -> background.js).
+// app/js/scribe.js: after Export audio, "Which website did you use LAST to transcribe?" That window closes, the next one
+// says to transcribe like last time and send the TEXT, and its button opens the other site in an INCOGNITO window. A web page cannot open incognito itself, so it asks the extension (app/extension/grid-check.js -> background.js).
 // If the extension may not open incognito ("Allow in Incognito" off), the window says how to switch it on and offers
 // to open the site normally. Then FileFlap opens, as before.
 // Part of Grid Player, loaded by Grid-v5.html with a plain <script> (no modules, so it also works opened from disk).
@@ -30,26 +30,38 @@ function scribeAsk(then) {
   console.log("[scribe] asking which site was used last");
 }
 
-// The person used `used` last: open the other one in incognito (through the extension)
+// The person used `used` last: this window closes, and the next one asks for the transcription; its button opens the
+// other site in incognito (through the extension)
 function scribeChoose(used) {
   const other = SCRIBE_SITES.find((s) => s !== used);
   try { localStorage.setItem("scribeOpened", other.url); } catch {}
+  $("scribeDlg").hidden = true;
+  $("transGo").textContent = `Open ${other.name} (incognito) ▸`;
+  $("transGo").disabled = false;
+  $("transGo").onclick = () => transOpen(other);
+  $("transMsg").textContent = ""; $("transMsg").className = "";
+  $("transDlg").hidden = false;
+  $("transGo").focus();
+}
+
+function transOpen(other) {
   const id = ++scribeAsked;
-  $("scribeMsg").textContent = `Opening ${other.name} in incognito…`; $("scribeMsg").className = "";
+  $("transGo").disabled = true;
+  $("transMsg").textContent = `Opening ${other.name} in incognito…`; $("transMsg").className = "";
   const timer = setTimeout(() => answer({ ok: false, reason: "no-extension" }), 2000); // no answer: an old or missing extension
   function answer(r) {
     removeEventListener("message", onMessage); clearTimeout(timer);
     if (r.ok) { console.log(`[scribe] ${other.name} opened in incognito`); return scribeDone(); }
     console.warn("[scribe] incognito failed:", r.reason);
     // Could not open incognito: say why, and offer the site normally (a click, so the browser allows the new tab)
-    $("scribeMsg").className = "bad";
-    $("scribeMsg").textContent = r.reason === "incognito-off"
+    $("transMsg").className = "bad";
+    $("transMsg").textContent = r.reason === "incognito-off"
       ? "The extension may not open incognito windows yet. Switch it on once: chrome://extensions → Grid FastDL auto-download → Details → Allow in Incognito."
       : "The extension did not answer (reload it in chrome://extensions, then reload this page).";
     const open = document.createElement("button");
     open.textContent = `Open ${other.name} normally`;
     open.onclick = () => { window.open(other.url, "_blank"); scribeDone(); };
-    $("scribeMsg").append(document.createElement("br"), open);
+    $("transMsg").append(document.createElement("br"), open);
   }
   function onMessage(e) {
     if (e.source === window && e.data?.from === "grid-ext" && e.data.type === "openIncognitoResult" && e.data.id === id) answer(e.data);
@@ -59,10 +71,10 @@ function scribeChoose(used) {
 }
 
 function scribeDone() {
-  $("scribeDlg").hidden = true;
+  $("scribeDlg").hidden = $("transDlg").hidden = true;
   reclaim();
   const then = scribeThen; scribeThen = null;
   then?.(); // FileFlap
 }
-$("scribeSkip").onclick = $("scribeClose").onclick = scribeDone;
-addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("scribeDlg").hidden) scribeDone(); });
+$("scribeSkip").onclick = $("scribeClose").onclick = $("transClose").onclick = scribeDone;
+addEventListener("keydown", (e) => { if (e.key === "Escape" && !($("scribeDlg").hidden && $("transDlg").hidden)) scribeDone(); });

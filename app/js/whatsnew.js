@@ -3,13 +3,13 @@
 
 // CHANGE HERE with every update: a new WHATS_NEW_VERSION (any new text, the date is easiest) and the two newest changes.
 // Everyone who has not seen this version yet gets the window once.
-const WHATS_NEW_VERSION = "2026-11-18b";
+const WHATS_NEW_VERSION = "2026-11-18c";
 const WHATS_NEW = [ // CHANGE HERE: only the TWO newest changes (put the new one first, remove the oldest)
-  ["The extension must be allowed in incognito", [
-    "When the Grid Player opens, it checks that the extension may open incognito windows. If not, it shows how to switch it on, and opens once that is done.",
+  ["Send the transcribed text", [
+    "After you choose the website you used last, a window asks you to transcribe the video like last time and send the transcribed text instead of the recording; its button opens the other website in incognito.",
   ]],
-  ["Transcribe in incognito", [
-    "After ⬇ Export audio, the app asks which website you used LAST to transcribe (TurboScribe or UniScribe); the other one opens in an incognito window, then FileFlap.",
+  ["The next 6 videos", [
+    "The Next link list shows the next 6 videos at a time.",
   ]],
 ];
 

@@ -1,5 +1,5 @@
 // Runs on fileflap.net. When the Grid Player opened the page (its link ends in #grid-player), shows a small pop-up for
-// 3 seconds: drag the recording and the trimmed video here. ✕ closes it sooner. Opened any other way: nothing happens.
+// 3 seconds: drag the transcribed text and the trimmed video here. ✕ closes it sooner. Opened any other way: nothing happens.
 // Open the tab's DevTools console and filter on [fileflap] to follow it.
 
 const SHOW_MS = 3000; // CHANGE HERE: how long the pop-up stays
@@ -33,7 +33,7 @@ if (location.hash === "#grid-player") {
       <div class="body">
         Drag these two files onto this page:
         <ol>
-          <li><b>The recording</b> you just exported (in Downloads)</li>
+          <li><b>The transcribed text</b> (from TurboScribe / UniScribe), not the recording</li>
           <li><b>The trimmed video</b>: not exported yet? Click <b>⬇ Export trim video</b> in the Grid Player first</li>
         </ol>
         Then copy the FileFlap link and paste it in the Grid Player's <b>Send</b> step.
