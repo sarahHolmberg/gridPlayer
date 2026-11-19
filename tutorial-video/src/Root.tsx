@@ -6,6 +6,7 @@ import {Scene3, SCENE3_FRAMES} from "./scene3/Scene3";
 import {Scene4, SCENE4_FRAMES} from "./scene4/Scene4";
 import {Scene5, SCENE5_FRAMES} from "./scene5/Scene5";
 import {FinderScene, FINDER_FRAMES} from "./finder/FinderScene";
+import {ParrotScene, PARROT_FRAMES} from "./parrot/ParrotScene";
 import {CONFIG} from "./config";
 
 const S1 = Math.round(CONFIG.durationSec * CONFIG.fps);
@@ -44,6 +45,7 @@ export const Root = () => (
     <Composition id="Scene4" component={Scene4} durationInFrames={SCENE4_FRAMES} fps={CONFIG.fps} width={CONFIG.width} height={CONFIG.height} />
     <Composition id="Scene5" component={Scene5} durationInFrames={SCENE5_FRAMES} fps={CONFIG.fps} width={CONFIG.width} height={CONFIG.height} />
     <Composition id="FindDancer" component={FinderScene} durationInFrames={FINDER_FRAMES} fps={CONFIG.fps} width={CONFIG.width} height={CONFIG.height} />
+    <Composition id="Parrot" component={ParrotScene} durationInFrames={PARROT_FRAMES} fps={CONFIG.fps} width={CONFIG.width} height={CONFIG.height} />
     <Composition id="Full" component={Full} durationInFrames={S1 + SCENE2_FRAMES + SCENE3_FRAMES + SCENE4_FRAMES + SCENE5_FRAMES} fps={CONFIG.fps} width={CONFIG.width} height={CONFIG.height} />
   </>
 );

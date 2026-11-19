@@ -10,6 +10,7 @@
 | `Scene4` | Step 5: export audio → text, export the trimmed video | ~20 s |
 | `Scene5` | Step 6: upload both files, press Done + personal code, recap | ~27 s |
 | `FindDancer` | Separate phone tutorial: find a Norway-based dancer via tagged videos, screenshot + tightly crop the profile picture, copy the link, crop a video screenshot, add both to Video Vault (`npm run render:find`, settings in `src/finder/config.ts`) | ~78 s |
+| `Parrot` | Phone tutorial for Parrot: copy for AI, open ChatGPT, paste and send, copy answer, paste the answer; the fix loop; tips (`npm run render:parrot`, script and timings in `src/parrot/config.ts`, voice lines shown as subtitles) | ~96 s |
 | `Full` | All scenes back to back (Studio preview) | |
 
 ```bash
