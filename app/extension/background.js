@@ -61,9 +61,12 @@ chrome.action.onClicked.addListener(async () => {
 chrome.runtime.onInstalled.addListener(paint);
 chrome.runtime.onStartup.addListener(paint);
 
-// ---- The Grid Player's Export audio: open the transcription site the person did NOT use last, in an incognito window ----
-// Only these sites (CHANGE HERE to add one). Needs "Allow in Incognito" ON for this extension (chrome://extensions -> Details).
+// ---- The Grid Player's Export audio: open the transcription site the person did NOT use last AND FileFlap, as two tabs in
+//      one incognito window. Only these sites (CHANGE HERE to add one; any page of fileflap.net). Needs "Allow in
+//      Incognito" ON for this extension (chrome://extensions -> Details). ----
 const INCOGNITO_SITES = ["https://turboscribe.ai/", "https://www.uniscribe.co/"];
+const INCOGNITO_ORIGINS = ["https://fileflap.net"];
+const incognitoOk = (u) => { try { return INCOGNITO_SITES.includes(u) || INCOGNITO_ORIGINS.includes(new URL(u).origin); } catch { return false; } };
 // The Grid Player checks this every time it opens (through grid-check.js), and stays closed until it is allowed
 chrome.runtime.onMessage.addListener((msg, sender, reply) => {
   if (msg.type !== "incognitoAllowed") return;
@@ -72,13 +75,14 @@ chrome.runtime.onMessage.addListener((msg, sender, reply) => {
 });
 chrome.runtime.onMessage.addListener((msg, sender, reply) => {
   if (msg.type !== "openIncognito") return;
-  if (!INCOGNITO_SITES.includes(msg.url)) { reply({ ok: false, reason: "not-allowed-site" }); return; }
+  const urls = Array.isArray(msg.urls) ? msg.urls : [msg.url]; // urls = several tabs in one window (1.6+); url = one (older pages)
+  if (!urls.length || !urls.every(incognitoOk)) { reply({ ok: false, reason: "not-allowed-site" }); return; }
   chrome.extension.isAllowedIncognitoAccess(async (allowed) => {
     if (!allowed) return reply({ ok: false, reason: "incognito-off" });
     try {
-      await chrome.windows.create({ url: msg.url, incognito: true, focused: true });
-      console.log(`[scribe] opened ${msg.url} in incognito`);
-      reply({ ok: true });
+      await chrome.windows.create({ url: urls, incognito: true, focused: true });
+      console.log(`[scribe] opened ${urls.join(" + ")} in one incognito window`);
+      reply({ ok: true, opened: urls.length }); // opened: how many tabs (an older extension does not say)
     } catch (err) {
       console.error("[scribe] could not open incognito:", err);
       reply({ ok: false, reason: err.message });
