@@ -30,7 +30,7 @@ function announceWords(cell, t) {
 let announcing = false, announceNo = 0;
 function announce(cell, t) {
   const words = announceWords(cell, t);
-  if (words.some((w) => !clipBufs.has(w))) { setStatus(`No voice clip for ${words.find((w) => !clipBufs.has(w))} (the clips cover A1–T20)`); return false; }
+  if (words.some((w) => !clipBufs.has(w))) { setStatus(`No voice clip for ${words.find((w) => !clipBufs.has(w))} (the clips cover A1–Z26)`); return false; }
   say(words);
   return true;
 }
