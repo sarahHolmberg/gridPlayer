@@ -1,4 +1,4 @@
-// app/js/recording.js: Audio recording (Rec / Pause / Resume / Save) and Export audio (then opens FileFlap).
+// app/js/recording.js: Audio recording (Rec / Pause / Resume / Save) and Export audio (then the transcription website).
 // Part of Grid Player, loaded by Grid-v5.html with a plain <script> (no modules, so it also works opened from disk).
 
 // ---- The mixer: what gets recorded is the microphone PLUS the cell announcements (announce.js), mixed inside the page ----
@@ -61,7 +61,7 @@ function recSave(after) {
     stream.getTracks().forEach((t) => t.stop()); // release the mic
     mr = stream = micNode = null; chunks = []; acc = 0;
     updateRec();
-    after?.(); // e.g. open FileFlap once the file is downloaded
+    after?.(); // e.g. ask for the transcription website once the file is downloaded
   };
   if (rec.state === "recording") acc += performance.now() - t0;
   rec.stop();
@@ -70,17 +70,11 @@ function recSave(after) {
 $("recBtn").onclick = recToggle;
 $("saveBtn").onclick = () => recSave(); // not recSave itself: it would get the click as "after"
 
-// ---- Export audio: stop + download the recording, then ask which transcription site to open (scribe.js), then FileFlap ----
-// The #grid-player ending tells the extension (app/extension/fileflap.js) to show its "drag the files here" pop-up.
-const FLAP_URL = "https://fileflap.net/#grid-player"; // CHANGE HERE: where the files are uploaded
+// ---- Export audio: stop + download the recording, then ask which transcription site to open (scribe.js) ----
+// The transcript then goes to Studio Mirrors with the video in step 4 (send.js); nothing is uploaded by hand any more.
 function exportAudio() {
   if (!mr) return;
-  recSave(() => scribeAsk(openFlap)); // FileFlap opens once the transcription site is chosen (or skipped)
-}
-function openFlap() {
-  const w = window.open(FLAP_URL, "_blank");
-  console.log(`[export] opened ${FLAP_URL} -> ${w ? "ok" : "blocked"}`);
-  if (!w) setStatus("Popup blocked: allow popups for this page, or open " + FLAP_URL);
+  recSave(() => scribeAsk());
 }
 // Reminder first: two questions, and only when both are ticked does the export run
 function expAsk(on) {

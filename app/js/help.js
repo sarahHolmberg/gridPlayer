@@ -15,7 +15,7 @@ $("infoBtn").onclick = toggleCue;
 const LINKS = {
   fetch: "https://studio-mirrors.netlify.app/",
   download: "https://fastdl.app/en5IW#google_vignette",
-  send: "https://fileflap.net/",
+  send: null,
   del: "https://studio-mirrors.netlify.app/",
 };
 const FLOW = [
@@ -55,7 +55,7 @@ const INFO = {
   },
   send: {
     title: "4 · Send to Studio Mirrors",
-    text: "Upload the recording and the trimmed video on FileFlap and copy the link. Paste it here and click Send: Studio Mirrors gets an email with the link, the name and the Instagram link. Then it asks if you are done: click Done and type your code.",
+    text: "Paste the transcript (the text from TurboScribe / UniScribe) and click Send: the trimmed video and the transcript go to Studio Mirrors together. Then it asks if you are done: click Done and type your code.",
     videos: [{ label: "Upload, then Done", src: "app/info/5-upload-done.mp4" }],
   },
   actions: {

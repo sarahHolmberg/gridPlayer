@@ -279,7 +279,7 @@ $("doneForm").onsubmit = async (e) => {
   try {
     const deadline = await removeLink(server, doneItem, code, stored);
     console.log(`[done] removed ${doneItem.link}`);
-    sentLink = ""; $("sendLink").value = ""; // that video is finished: the next one gets its own link
+    sentLink = ""; // that video is finished
     myCode.set(code.trim()); // the code worked: keep it, so the list and the next Done know you
     await doneAnimation(server, deadline);
     doneItem = null;

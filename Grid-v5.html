@@ -90,7 +90,7 @@
           <button id="saveBtn" disabled title="Stop and save as one file">💾 Save</button>
         </div>
         <button id="nameBtn" class="wide" title="Says &quot;name bubble&quot;, then spells the Next link's name letter by letter, into the recording (M)">🔤 Say name <kbd>M</kbd></button>
-        <button id="audioBtn" class="primary wide" disabled title="Download the recording, then open FileFlap to upload it">⬇ Export audio</button>
+        <button id="audioBtn" class="primary wide" disabled title="Download the recording, then open the transcription website">⬇ Export audio</button>
         <button id="exportBtn" class="wide" disabled title="Cut the video at In/Out without re-encoding: same quality, works offline (mp4 / mov)">⬇ Export trim video</button>
         <div class="row">
           <label class="chip"><input type="checkbox" id="show" checked> Grid <kbd>G</kbd></label>
@@ -100,15 +100,20 @@
         <button id="toSendBtn" class="wide" title="Step 4: send it all to Studio Mirrors">Next: Send ▸</button>
       </section>
 
-      <!-- Step 4: send (send.js): the FileFlap link with the recording + trimmed video, the name and link, by email to Studio Mirrors -->
+      <!-- Step 4: send (send.js): the trimmed video + the transcript, through the website, to the comic server -->
       <section class="card needs-video send-only" id="sendCard">
         <h3>Send to Studio Mirrors</h3>
         <div id="sendWhat"></div>
-        <a id="flapBtn" class="btn wide" href="https://fileflap.net/#grid-player" target="_blank" rel="noopener noreferrer" title="Upload the recording and the trimmed video, then copy the link">⬆ 1. Upload both files on FileFlap</a>
-        <label class="fld">2. FileFlap transfer link <input type="text" id="sendLink" placeholder="https://fileflap.net/…" autocomplete="off"></label>
+        <div class="fld">1. The video <span id="sendVideo">…</span></div>
+        <label class="fld">2. The transcript <small>Paste the text from TurboScribe / UniScribe, as it came out: with the name, the
+          username (e.g. "username lena underscore xr") and "Caption, …" if there is one.</small>
+          <textarea id="sendText" rows="6" maxlength="50000" placeholder="Paste the transcribed text here"></textarea></label>
+        <div class="row between"><button id="sendTxtBtn" type="button" title="Use a .txt file instead of pasting">📄 Load .txt</button><span id="sendCount"></span></div>
+        <input type="file" id="sendTxtFile" accept=".txt,text/plain" hidden>
         <label class="fld">Your code <input type="password" id="sendCode" autocomplete="off"></label>
         <div id="sendMsg" role="status"></div>
-        <button id="sendBtn" class="primary wide" title="Email it to Studio Mirrors and send the link to the render inbox">📨 3. Send to Studio Mirrors</button>
+        <button id="sendBtn" class="primary wide" title="Send the video and the transcript to Studio Mirrors">📨 3. Send to Studio Mirrors</button>
+        <button id="sendRetry" class="wide" hidden title="Try again now instead of waiting">↻ Try again now</button>
         <button id="sendBack" class="quiet" title="Back to recording">◂ Back to record</button>
       </section>
 
@@ -169,7 +174,7 @@
     <div id="doneTitle"><span>Done with this link?</span><button class="icon" id="doneClose" title="Close">✕</button></div>
     <form id="doneForm">
       <div id="doneWhat"></div>
-      <label>Link to the stored video (optional) <input type="text" id="doneStored" placeholder="https://fileflap.net/…" autocomplete="off"></label>
+      <label>Link to the stored video (optional) <input type="text" id="doneStored" placeholder="https://…" autocomplete="off"></label>
       <label>Personal code <input type="password" id="doneCode" autocomplete="off"></label>
       <div id="doneMsg" role="status"></div>
       <div class="row"><button type="submit" id="doneOk" class="primary">✔ Done, remove it</button><button type="button" id="doneCancel" class="quiet">Cancel</button></div>
@@ -262,7 +267,7 @@
       <ol>
         <li>Open your <b>Downloads</b> folder and find <b id="vidName">the trimmed video</b>.</li>
         <li>The name must end in <b>.mp4</b>. <span id="vidExtWarn" hidden></span></li>
-        <li><b>Double-click it and watch it</b>, all the way through, before you send it with FileFlap.</li>
+        <li><b>Double-click it and watch it</b>, all the way through, before you send it.</li>
       </ol>
       <label id="vidTick"><input type="checkbox" id="vidOk"> I checked it: it ends in <b>.mp4</b> and it plays</label>
       <p id="vidGo">⏸ <b>Go and check it now.</b> Close this window, check the video, then come back: the box can be ticked the next time you open this.</p>
@@ -296,7 +301,7 @@
       <p class="big">We now need you to <b>transcribe the video like you were doing last time</b>, and send the
         <b>transcribed text</b> instead of the recording.</p>
       <button id="transGo" class="primary"></button>
-      <small>It opens with FileFlap, in the same incognito window.</small>
+      <small>It opens in an incognito window. Then paste the text in step 4 (Send).</small>
       <div id="transMsg" role="status"></div>
     </div>
   </div>

@@ -467,3 +467,12 @@ input:focus, textarea:focus { outline: 1px solid #316ac5; border-color: #316ac5;
 #extBtns { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
 #extBody .warn { margin: 8px 0 0; padding: 8px 10px; background: #fff1f1; border: 1px solid #e0a0a0; color: #7a0000; }
 #extBody .warn code { word-break: break-all; }
+
+/* Step 4: the video line and the transcript box (send.js) */
+#sendVideo { font-weight: bold; }
+#sendVideo.ok { color: var(--ok); }
+#sendVideo.bad { color: #b00000; }
+#sendCard textarea#sendText { width: 100%; min-height: 110px; }
+#sendCard small { color: var(--muted); font-size: 11px; }
+#sendCount { font-size: 11px; color: var(--muted); }
+#sendMsg.bad { color: #b00000; }

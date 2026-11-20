@@ -3,13 +3,14 @@
 
 // CHANGE HERE with every update: a new WHATS_NEW_VERSION (any new text, the date is easiest) and the two newest changes.
 // Everyone who has not seen this version yet gets the window once.
-const WHATS_NEW_VERSION = "2026-11-19";
+const WHATS_NEW_VERSION = "2026-11-20";
 const WHATS_NEW = [ // CHANGE HERE: only the TWO newest changes (put the new one first, remove the oldest)
-  ["FileFlap opens in incognito too", [
-    "The transcription website and FileFlap now open together, as two tabs in the same incognito window.",
+  ["Send goes straight to Studio Mirrors", [
+    "No more FileFlap or email: in step 4, paste the transcript (or load a .txt) and click Send. The app uploads the trimmed video itself and sends it with the transcript.",
+    "If the server is busy, it tries again by itself while the Grid Player is open.",
   ]],
-  ["The extension updates with the app", [
-    "After Update from GitHub, the extension reloads itself with its new files, and the Grid Player restarts. If the app ever says the extension is old, its screen has ⟳ Update from GitHub and ↻ Reload the extension.",
+  ["A 26 × 26 grid", [
+    "The grid is now 26 × 26 (A1 to Z26), and the voice says rows up to twenty-six.",
   ]],
 ];
 

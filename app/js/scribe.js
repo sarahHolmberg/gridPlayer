@@ -1,8 +1,8 @@
 // app/js/scribe.js: after Export audio, "Which website did you use LAST to transcribe?" That window closes, the next one
-// says to transcribe like last time and send the TEXT, and its button opens the other site AND FileFlap in one INCOGNITO
+// says to transcribe like last time and send the TEXT (in step 4, Send), and its button opens the other site in an INCOGNITO
 // window. A web page cannot open incognito itself, so it asks the extension (app/extension/grid-check.js -> background.js).
 // If the extension may not open incognito ("Allow in Incognito" off), the window says how to switch it on and offers
-// to open the site normally. Then FileFlap opens, as before.
+// to open the site normally.
 // Part of Grid Player, loaded by Grid-v5.html with a plain <script> (no modules, so it also works opened from disk).
 
 // CHANGE HERE: the transcription sites (the extension's background.js must allow the same addresses)
@@ -48,14 +48,13 @@ function scribeChoose(used) {
 function transOpen(other) {
   const id = ++scribeAsked;
   $("transGo").disabled = true;
-  $("transMsg").textContent = `Opening ${other.name} and FileFlap in incognito…`; $("transMsg").className = "";
+  $("transMsg").textContent = `Opening ${other.name} in incognito…`; $("transMsg").className = "";
   const timer = setTimeout(() => answer({ ok: false, reason: "no-extension" }), 2000); // no answer: an old or missing extension
   function answer(r) {
     removeEventListener("message", onMessage); clearTimeout(timer);
     if (r.ok) {
-      console.log(`[scribe] ${other.name}${r.opened === 2 ? " + FileFlap" : ""} opened in incognito`);
-      if (r.opened === 2) scribeThen = null; // FileFlap is already open, in the same incognito window
-      return scribeDone(); // an older extension opened only the site: FileFlap then opens normally, as before
+      console.log(`[scribe] ${other.name} opened in incognito`);
+      return scribeDone();
     }
     console.warn("[scribe] incognito failed:", r.reason);
     // Could not open incognito: say why, and offer the site normally (a click, so the browser allows the new tab)
@@ -72,15 +71,14 @@ function transOpen(other) {
     if (e.source === window && e.data?.from === "grid-ext" && e.data.type === "openIncognitoResult" && e.data.id === id) answer(e.data);
   }
   addEventListener("message", onMessage);
-  // Both at once, as two tabs in one incognito window: the transcription site and FileFlap (with its "drag the files" note)
-  window.postMessage({ from: "grid-player", type: "openIncognito", id, url: other.url, urls: [other.url, FLAP_URL] }, "*");
+  window.postMessage({ from: "grid-player", type: "openIncognito", id, url: other.url, urls: [other.url] }, "*");
 }
 
 function scribeDone() {
   $("scribeDlg").hidden = $("transDlg").hidden = true;
   reclaim();
   const then = scribeThen; scribeThen = null;
-  then?.(); // FileFlap
+  then?.();
 }
 $("scribeSkip").onclick = $("scribeClose").onclick = $("transClose").onclick = scribeDone;
 addEventListener("keydown", (e) => { if (e.key === "Escape" && !($("scribeDlg").hidden && $("transDlg").hidden)) scribeDone(); });
