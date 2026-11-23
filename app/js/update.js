@@ -74,12 +74,19 @@ async function getFolder(pickAgain) {
 function updError(err) {
   console.error("[update] FAILED:", err);
   if (err.name === "AbortError") updLog("No folder chosen. Nothing was changed.");
-  else if (err instanceof TypeError) updLog("Cannot reach GitHub: you seem to be offline. Nothing was changed; the app keeps working as it is.");
+  else if (err instanceof TypeError) updLog("Cannot reach GitHub: you seem to be offline. Connect to the internet and click Check again.");
   else updLog(err.message);
+  // GitHub's own hourly limit (not the person's fault): at start-up they may go on without the check, this once
+  if (err.rateLimit && updGate) {
+    const go = document.createElement("button");
+    go.textContent = "Continue without checking (GitHub's limit)";
+    go.onclick = () => updPassed("GitHub's limit");
+    $("updMsg").append(document.createElement("br"), go);
+  }
 }
 async function github(url) {
   const res = await netFetch(url, { cache: "no-store" });
-  if (res.status === 403 || res.status === 429) throw new Error("GitHub allows about 30 checks an hour without an account. Try again later.");
+  if (res.status === 403 || res.status === 429) throw Object.assign(new Error("GitHub allows about 30 checks an hour without an account. Try again later."), { rateLimit: true });
   if (!res.ok) throw new Error(`GitHub answered ${res.status} for ${url}. Is the repo public and the branch "${REPO.branch}"?`);
   return res.json();
 }
@@ -115,6 +122,7 @@ async function updCheck(pickAgain) {
     updLog(updFiles.length
       ? `${updFiles.length} file${updFiles.length === 1 ? "" : "s"} in "${updDir.name}" differ from GitHub. Click Install update.`
       : `Up to date: "${updDir.name}" matches GitHub.`);
+    if (!updFiles.length) setTimeout(() => updPassed("up to date"), 900); // the start-up check (extension-check.js): open the app
   } catch (err) { updError(err); }
   finally { updBusy(false); }
 }

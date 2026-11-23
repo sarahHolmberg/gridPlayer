@@ -82,22 +82,15 @@
 
       <!-- Step 2: record -->
       <section class="card needs-video grid-only" id="recCard">
-        <h3>Record</h3>
+        <div class="cardHead"><h3>Record</h3><button id="backBtn" class="link" title="Back to trimming (T)">✂ Back to trim</button></div>
         <div class="row">
           <button id="recBtn" data-st="idle" title="Record / Pause / Resume (R)"></button>
           <span id="recLbl">Rec</span>
           <span class="lcd sm" id="recTime">0:00.0</span>
-          <button id="saveBtn" disabled title="Stop and save as one file">💾 Save</button>
         </div>
         <button id="nameBtn" class="wide" title="Says &quot;name bubble&quot;, then spells the Next link's name letter by letter, into the recording (M)">🔤 Say name <kbd>M</kbd></button>
-        <button id="audioBtn" class="primary wide" disabled title="Download the recording, then open the transcription website">⬇ Export audio</button>
-        <button id="exportBtn" class="wide" disabled title="Cut the video at In/Out without re-encoding: same quality, works offline (mp4 / mov)">⬇ Export trim video</button>
-        <div class="row">
-          <label class="chip"><input type="checkbox" id="show" checked> Grid <kbd>G</kbd></label>
-          <label class="chip"><input type="checkbox" id="lbl" checked> Names <kbd>N</kbd></label>
-          <button id="backBtn" class="quiet" title="Back to trimming">✂ Back to trim <kbd>T</kbd></button>
-        </div>
-        <button id="toSendBtn" class="wide" title="Step 4: send it all to Studio Mirrors">Next: Send ▸</button>
+        <button id="audioBtn" class="primary wide" disabled title="Save the recording, open the transcription website, then go to Send">⬇ Export audio</button>
+        <button id="toSendBtn" class="link" title="Go to Send without exporting the audio again">Skip to Send ▸</button>
       </section>
 
       <!-- Step 4: send (send.js): the trimmed video + the transcript, through the website, to the comic server -->
@@ -105,16 +98,19 @@
         <h3>Send to Studio Mirrors</h3>
         <div id="sendWhat"></div>
         <div class="fld">1. The video <span id="sendVideo">…</span></div>
+        <div class="row"><button id="watchBtn" type="button" disabled title="Play exactly what will be sent">▶ Watch it</button>
+          <label class="chip" id="watchTick" title="Watch it to the end first"><input type="checkbox" id="watchOk" disabled> I watched it: it plays and it is the right part</label></div>
         <label class="fld">2. The transcript <small>Paste the text from TurboScribe / UniScribe, as it came out: with the name, the
           username (e.g. "username lena underscore xr") and "Caption, …" if there is one.</small>
           <textarea id="sendText" rows="6" maxlength="50000" placeholder="Paste the transcribed text here"></textarea></label>
         <div class="row between"><button id="sendTxtBtn" type="button" title="Use a .txt file instead of pasting">📄 Load .txt</button><span id="sendCount"></span></div>
         <input type="file" id="sendTxtFile" accept=".txt,text/plain" hidden>
-        <label class="fld">Your code <input type="password" id="sendCode" autocomplete="off"></label>
+        <label class="fld" id="sendCodeRow">Your code <input type="password" id="sendCode" autocomplete="off"></label>
+        <div class="small" id="sendCodeSaved" hidden>Your code is saved · <button type="button" id="sendCodeChange" class="link">change</button></div>
         <div id="sendMsg" role="status"></div>
         <button id="sendBtn" class="primary wide" title="Send the video and the transcript to Studio Mirrors">📨 3. Send to Studio Mirrors</button>
         <button id="sendRetry" class="wide" hidden title="Try again now instead of waiting">↻ Try again now</button>
-        <button id="sendBack" class="quiet" title="Back to recording">◂ Back to record</button>
+        <button id="sendBack" class="link" title="Back to recording">◂ Back to record</button>
       </section>
 
       <div id="status">
@@ -137,6 +133,8 @@
   <label class="set">Grid opacity <input type="range" id="op" min="0.1" max="1" step="0.1" value="0.6"></label>
   <label class="set" title="Time moved per ←/→ press (Shift = 1 s)">Step (ms) <input type="number" id="step" value="40" min="1" max="5000" step="10"></label>
   <label class="set">Loop the video <span><input type="checkbox" id="loop"> <kbd>L</kbd></span></label>
+  <label class="set">Show the grid <span><input type="checkbox" id="show" checked> <kbd>G</kbd></span></label>
+  <label class="set">Cell names <span><input type="checkbox" id="lbl" checked> <kbd>N</kbd></span></label>
 
   <h4>Links from</h4>
   <div id="serverToggle" class="seg" role="group" aria-label="Server">
@@ -259,26 +257,6 @@
   </div>
 </div>
 
-<!-- After Export trim video (videocheck.js): go and check the file (.mp4, plays) before it is sent -->
-<div id="vidDlg" hidden>
-  <div id="vidBox">
-    <div id="vidTitle"><span>Check the video you exported</span><button class="icon" id="vidClose" title="Close">✕</button></div>
-    <div id="vidBody">
-      <ol>
-        <li>Open your <b>Downloads</b> folder and find <b id="vidName">the trimmed video</b>.</li>
-        <li>The name must end in <b>.mp4</b>. <span id="vidExtWarn" hidden></span></li>
-        <li><b>Double-click it and watch it</b>, all the way through, before you send it.</li>
-      </ol>
-      <label id="vidTick"><input type="checkbox" id="vidOk"> I checked it: it ends in <b>.mp4</b> and it plays</label>
-      <p id="vidGo">⏸ <b>Go and check it now.</b> Close this window, check the video, then come back: the box can be ticked the next time you open this.</p>
-      <div class="row">
-        <button id="vidNext" class="primary" disabled>Export audio ▸</button>
-        <button id="vidAgain" class="quiet" title="Cut and download the video again">⬇ Export the video again</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- After Export audio (scribe.js): which transcription site was used last? The OTHER one opens in incognito (extension) -->
 <div id="scribeDlg" hidden>
   <div id="scribeBox">
@@ -303,6 +281,18 @@
       <button id="transGo" class="primary"></button>
       <small>It opens in an incognito window. Then paste the text in step 4 (Send).</small>
       <div id="transMsg" role="status"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ▶ Watch it (send.js): exactly the cut that will be sent; watched to the end = the tick can be ticked -->
+<div id="watchDlg" hidden>
+  <div id="watchBox">
+    <div id="watchTitle"><span>The video that will be sent</span><button class="icon" id="watchClose" title="Close">✕</button></div>
+    <div id="watchBody">
+      <video id="watchVid" controls playsinline></video>
+      <p class="small">Watch it to the end: does it play, and is it the right part? Then tick the box.</p>
+      <div class="row"><button id="watchSave" class="quiet" title="Also keep a copy of this file on your computer (not needed to send)">⬇ Save a copy</button></div>
     </div>
   </div>
 </div>
@@ -354,6 +344,11 @@
         </ol>
         Already installed? Click its reload arrow ⟳ on chrome://extensions (older copies cannot talk to the app), and check step 4.
       </div>
+      <!-- Every start: check for updates first (by hand: it uses the internet), then the app opens -->
+      <div id="extUpd" hidden>
+        <p>Before you start, check that you have the newest Grid Player. It goes online only when you click.</p>
+        <button id="extCheckUpd" class="bigUpd">⟳ Check for updates<small>needed every time you open the Grid Player</small></button>
+      </div>
       <!-- The extension is there but older: it cannot answer the incognito question -->
       <div id="extOld" hidden>
         <b>The extension is an older version (<span id="extOldV"></span>).</b>
@@ -394,7 +389,6 @@
 <script src="app/js/recording.js"></script>
 <script src="app/js/scribe.js"></script> <!-- after Export audio: the transcription site, in incognito -->
 <script src="app/js/trim.js"></script>
-<script src="app/js/videocheck.js"></script> <!-- go and check the exported video before Export audio -->
 <script src="app/js/help.js"></script>
 <script src="app/js/links.js"></script>
 <script src="app/js/stats.js"></script>

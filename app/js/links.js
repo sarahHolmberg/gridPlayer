@@ -264,6 +264,7 @@ async function doneAnimation(server, deadline) {
   if (list instanceof Error) return fetchLinks(); // shows why the list could not load
   links = byAge(list).slice(0, SHOW_LINKS); linksNote = list.note || ""; linksAskCode = !!list.askCode;
   renderLinks(true);
+  unloadVideo(); // that video is finished: nothing left under the grid, back to "Open a video" (main.js)
 }
 
 $("doneForm").onsubmit = async (e) => {

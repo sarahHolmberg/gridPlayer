@@ -10,6 +10,7 @@ const PART = 3 * 1024 * 1024;      // CHANGE HERE (and in task.mjs): the size of
 const RETRY_AFTER = [30, 120, 600, 1800]; // seconds: 30 s, 2 min, 10 min, then every 30 min (up to 24 h), as the server asks
 let sentLink = ""; // (links.js) no stored-video link any more: Done leaves that field empty
 let sendVideoBlob = null, sendVideoKey = "", sendBusy = false, retryTimer = null, retryCount = 0, retryStart = 0;
+let watchedKey = "", codeEditing = false; // the cut that was watched to the end; the code field opened by "change"
 
 // ---- What is kept per video (this browser): taskId, send state, last message; and the transcript draft ----
 const sendKey = () => (links[0] ? links[0].link : `file:${currentFile?.name || "video"}`);
@@ -38,6 +39,7 @@ function sendMode(on) {
       $("sendWhat").append(b, document.createTextNode(instaLink(it)));
     } else $("sendWhat").textContent = "No Next link.";
     $("sendCode").value ||= myCode.get(); // your code, if typed before (links.js)
+    showCode();
     let draft = ""; try { draft = localStorage.getItem("sendText:" + sendKey()) || ""; } catch {}
     if (!$("sendText").value) $("sendText").value = draft;
     countText();
@@ -75,7 +77,44 @@ function showVideo() {
   const problem = b.ext !== "mp4" ? `it is .${b.ext}, the server takes only .mp4` : b.size > VIDEO_MAX ? `${mb} MB is over the 13 MB limit: trim it shorter` : "";
   $("sendVideo").textContent = problem ? `✗ ${problem}` : `✓ trimmed MP4, ${mb} MB`;
   $("sendVideo").className = problem ? "bad" : "ok";
+  $("watchBtn").disabled = !!problem;
+  showWatched();
 }
+// The tick can only be ticked once this exact cut was watched to the end (a new trim = watch it again)
+function showWatched() {
+  const watched = !!sendVideoBlob && watchedKey === sendVideoKey;
+  $("watchOk").disabled = !watched;
+  if (!watched) $("watchOk").checked = false;
+  $("watchTick").title = watched ? "" : "Watch it to the end first (▶ Watch it)";
+}
+
+// ---- ▶ Watch it: exactly the cut that will be sent ----
+let watchUrl = null;
+$("watchBtn").onclick = () => {
+  if (!sendVideoBlob) return;
+  watchUrl = URL.createObjectURL(sendVideoBlob);
+  $("watchVid").src = watchUrl;
+  $("watchDlg").hidden = false;
+  $("watchVid").play().catch(() => {});
+};
+$("watchVid").onended = () => { watchedKey = sendVideoKey; showWatched(); console.log("[send] the cut was watched to the end"); };
+function watchClose() {
+  $("watchVid").pause(); $("watchVid").removeAttribute("src"); $("watchVid").load();
+  if (watchUrl) URL.revokeObjectURL(watchUrl);
+  $("watchDlg").hidden = true; reclaim();
+  if (!$("watchOk").disabled) $("watchOk").focus();
+}
+$("watchClose").onclick = watchClose;
+$("watchDlg").onclick = (e) => { if (e.target === $("watchDlg")) watchClose(); };
+addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("watchDlg").hidden) watchClose(); });
+$("watchSave").onclick = () => sendVideoBlob && download(sendVideoBlob, `${(currentFile?.name || "video").replace(/\.[^.]+$/, "")}-trimmed.${sendVideoBlob.ext}`);
+
+// ---- The code: once it is saved, only "Your code is saved · change" (one field less) ----
+function showCode() {
+  const saved = !!myCode.get() && !codeEditing;
+  $("sendCodeRow").hidden = saved; $("sendCodeSaved").hidden = !saved;
+}
+$("sendCodeChange").onclick = () => { codeEditing = true; showCode(); $("sendCode").select(); };
 
 // ---- 2. The transcript: paste it, or load a .txt (kept as a draft per video) ----
 function countText() {
@@ -130,6 +169,7 @@ async function sendIt(isRetry) {
   const text = $("sendText").value, code = $("sendCode").value.trim();
   if (!sendVideoBlob) return sendSay("The video is not ready yet (see 1.).", "bad");
   if (sendVideoBlob.ext !== "mp4" || sendVideoBlob.size > VIDEO_MAX) return sendSay("The video cannot be sent: see 1.", "bad");
+  if (!$("watchOk").checked) { sendSay($("watchOk").disabled ? "Watch the video to the end first (▶ Watch it)." : "Tick “I watched it” first.", "bad"); return; }
   if (!text.trim()) { sendSay("Paste the transcript first (2.).", "bad"); return $("sendText").focus(); }
   if (!code) { sendSay("Type your code.", "bad"); return $("sendCode").focus(); }
   clearTimeout(retryTimer); $("sendRetry").hidden = true;
@@ -155,7 +195,7 @@ async function sendIt(isRetry) {
     const [state, text2] = ANSWERS[r.code] || ["config", "✗ Unexpected answer. Tell Studio Mirrors:"];
     const msg = state === "sent" ? text2 : `${text2}${r.message && !text2.includes(r.message) ? " " + r.message : ""}`;
     if (r.code !== "WRONG_CODE") sendStore.set({ state, message: msg });
-    if (r.ok) myCode.set(code); // the code worked: keep it
+    if (r.ok) { myCode.set(code); codeEditing = false; showCode(); } // the code worked: keep it
     sendSay(msg, state === "sent" ? "ok" : state === "waiting" ? "" : "bad");
     if (state === "waiting") $("sendRetry").hidden = false;
     if (r.ok) askDone(true, [["📨 Comic server", true, r.code === "DUPLICATE" ? "already had it" : "received"]]);

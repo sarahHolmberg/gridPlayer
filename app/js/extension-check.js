@@ -24,7 +24,8 @@ const extIncognito = () => document.documentElement.dataset.gridIncognito; // "y
 // Keeps the app covered and shows one of the fixes: "help" (install), "old" (reload it), "incog" (allow in incognito)
 function extBlock(which, head) {
   $("extWait").hidden = true; $("extRetry").hidden = false; $("extUpdate").hidden = false;
-  [["help", "extHelp"], ["old", "extOld"], ["incog", "extIncog"]].forEach(([k, id]) => ($(id).hidden = k !== which));
+  [["help", "extHelp"], ["old", "extOld"], ["incog", "extIncog"], ["upd", "extUpd"]].forEach(([k, id]) => ($(id).hidden = k !== which));
+  if (which === "upd") $("extRetry").hidden = $("extUpdate").hidden = $("extSelfReload").hidden = true; // one button: Check for updates
   $("extHead").textContent = head;
   console.warn(`[ext] blocked: ${which}`);
 }
@@ -53,9 +54,11 @@ function extCheck() {
       return extBlock("incog", "Allow the extension in incognito");
     }
     if (extIncognito() !== "yes") return extBlock("incog", "Allow the extension in incognito");
-    $("extGate").hidden = true;
     console.log(`[ext] FastDL extension v${extFound()} found, allowed in incognito (${Math.round(waited)} ms)`);
-    return reclaim();
+    // Every time the app opens: check for updates first. Only when they click (it uses the internet: their choice)
+    updGate = true;
+    extBlock("upd", "Check for updates");
+    $("extCheckUpd").focus();
   })();
 }
 // The extension folder (app/extension, next to the page), written the way the folder picker shows it (no leading "/" before C: on Windows)
@@ -63,6 +66,16 @@ $("extPath").textContent = decodeURIComponent(location.pathname.replace(/[^/]*$/
 $("extCopy").append(copyBtn("chrome://extensions", "Copy"));
 document.querySelectorAll(".extCopy2").forEach((el) => el.append(copyBtn("chrome://extensions", "Copy")));
 $("extRetry").onclick = () => location.reload(); // the extension only reaches a page when it loads, so check again = reload
+// The start-up update check: the Update window opens over this screen; "Up to date" opens the app (update.js -> updPassed)
+let updGate = false;
+$("extCheckUpd").onclick = () => updToggle(true);
+function updPassed(why) {
+  if (!updGate) return;
+  updGate = false;
+  $("upd").hidden = true; $("extGate").hidden = true;
+  console.log(`[ext] update check passed (${why}): the app opens`);
+  reclaim();
+}
 $("extUpdate").onclick = () => updToggle(true); // Update from GitHub works from here too (the window sits above this one)
 $("extSelfReload").onclick = () => { if (!extReloadAndRestart()) setStatus("This extension cannot reload itself yet: use the steps above."); };
 document.querySelectorAll(".extPath2").forEach((el) => (el.textContent = $("extPath").textContent));

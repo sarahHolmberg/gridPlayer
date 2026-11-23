@@ -3,14 +3,14 @@
 
 // CHANGE HERE with every update: a new WHATS_NEW_VERSION (any new text, the date is easiest) and the two newest changes.
 // Everyone who has not seen this version yet gets the window once.
-const WHATS_NEW_VERSION = "2026-11-20";
+const WHATS_NEW_VERSION = "2026-11-23";
 const WHATS_NEW = [ // CHANGE HERE: only the TWO newest changes (put the new one first, remove the oldest)
-  ["Send goes straight to Studio Mirrors", [
-    "No more FileFlap or email: in step 4, paste the transcript (or load a .txt) and click Send. The app uploads the trimmed video itself and sends it with the transcript.",
-    "If the server is busy, it tries again by itself while the Grid Player is open.",
+  ["Check for updates every time", [
+    "The Grid Player opens after ⟳ Check for updates. It goes online only when you click.",
   ]],
-  ["A 26 × 26 grid", [
-    "The grid is now 26 × 26 (A1 to Z26), and the voice says rows up to twenty-six.",
+  ["Less to click", [
+    "After Done, the video is cleared and you start again from Open a video. After Export audio the app goes to Send by itself.",
+    "In Send, ▶ Watch it plays exactly what will be sent; tick “I watched it” to send. Grid and Names switches are in the ⋯ menu.",
   ]],
 ];
 

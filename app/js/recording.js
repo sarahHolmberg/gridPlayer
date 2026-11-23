@@ -19,7 +19,6 @@ function updateRec() {
   const st = mr ? mr.state : "idle";
   $("recBtn").dataset.st = st;
   $("recLbl").textContent = st === "recording" ? "Pause" : st === "paused" ? "Resume" : "Rec";
-  $("saveBtn").disabled = !mr;
   $("audioBtn").disabled = !mr;
   console.log(`[rec] ${st} ${recElapsed().toFixed(1)}s`);
 }
@@ -68,13 +67,12 @@ function recSave(after) {
 }
 
 $("recBtn").onclick = recToggle;
-$("saveBtn").onclick = () => recSave(); // not recSave itself: it would get the click as "after"
 
 // ---- Export audio: stop + download the recording, then ask which transcription site to open (scribe.js) ----
 // The transcript then goes to Studio Mirrors with the video in step 4 (send.js); nothing is uploaded by hand any more.
 function exportAudio() {
   if (!mr) return;
-  recSave(() => scribeAsk());
+  recSave(() => scribeAsk(() => sendMode(true))); // after the transcription window: straight to Send (no extra click)
 }
 // Reminder first: two questions, and only when both are ticked does the export run
 function expAsk(on) {
@@ -82,7 +80,7 @@ function expAsk(on) {
   if (on) { $("expForm").querySelectorAll("input[type=checkbox]").forEach((c) => (c.checked = false)); $("expOk").disabled = true; }
   console.log(`[export] reminder ${on ? "open" : "closed"}`);
 }
-// Export audio's click is set in videocheck.js: the exported video is checked first
+$("audioBtn").onclick = () => { if (mr) expAsk(true); };
 $("expForm").onchange = () => ($("expOk").disabled = ![...$("expForm").querySelectorAll("input[type=checkbox]")].every((c) => c.checked)); // all ticked
 $("expForm").onsubmit = (e) => { e.preventDefault(); if ($("expOk").disabled) return; expAsk(false); exportAudio(); };
 $("expClose").onclick = $("expCancel").onclick = () => expAsk(false);

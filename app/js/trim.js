@@ -130,7 +130,7 @@ async function exportVideo() {
   if (exporting || !v.duration) return;
   if (!currentFile) { setStatus("Load the video with the file picker or by dragging it in, so it can be cut."); return; }
   if (!window.GridTrim) { setStatus("app/grid-trim.js was not found. Put the app folder back next to this page and reload."); console.error("[export] window.GridTrim is missing"); return; }
-  exporting = true; $("exportBtn").disabled = true;
+  exporting = true;
   const start = tIn, end = rangeEnd();
   console.log(`[export] cutting ${currentFile.name} ${start.toFixed(3)}..${end.toFixed(3)} without re-encoding`);
   try {
@@ -138,13 +138,12 @@ async function exportVideo() {
     const { blob, ext } = await window.GridTrim.trim(currentFile, start, end, (p) => setStatus(`Cutting… ${Math.round(p * 100)}%`));
     const name = `${currentFile.name.replace(/\.[^.]+$/, "")}-trimmed.${ext}`;
     download(blob, name);
-    videoExported(name, ext); // "go and check it" (videocheck.js)
     setStatus(`Export done: ${start.toFixed(3)} → ${end.toFixed(3)} s, ${(blob.size / 1e6).toFixed(1)} MB, not re-encoded`);
   } catch (err) {
     console.error("[export] cut failed:", err);
     setStatus("Cut failed: " + (err && err.message ? err.message : err));
   } finally {
-    exporting = false; $("exportBtn").disabled = false;
+    exporting = false;
   }
 }
-$("exportBtn").onclick = exportVideo;
+// (Export trim video is no longer a button: Send cuts the video itself; ▶ Watch → "Save a copy" keeps a file if wanted)

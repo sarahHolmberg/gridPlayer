@@ -23,11 +23,23 @@ $("file").onchange = (e) => loadFile(e.target.files[0]);
 addEventListener("dragover", (e) => e.preventDefault());
 addEventListener("drop", (e) => { e.preventDefault(); if ($("extGate").hidden && !isBusy()) loadFile(e.dataTransfer.files[0]); }); // no video while the extension check covers the app or a Done is running
 
+// ---- After a Done: the finished video leaves the screen and the app goes back to the start ("Open a video"),
+//      so the next link's picture never sits on top of the old video ----
+function unloadVideo() {
+  v.pause(); v.removeAttribute("src"); v.load();
+  currentFile = null; $("file").value = ""; // the same file can be opened again
+  document.body.classList.remove("has-video", "send-mode");
+  clearTrim(); setMode(true);
+  $("goBtn").disabled = true;
+  $("title").textContent = "Grid Player";
+  updateStatus();
+  console.log("[file] video cleared after Done");
+}
+
 v.addEventListener("loadedmetadata", () => {
   document.body.classList.add("has-video"); // shows the playback / trim / record cards (grid.css)
   clearTrim(); // new video -> reset trim
   $("goBtn").disabled = false;
-  $("exportBtn").disabled = false;
   setMode(true); // every new video starts at the trim stage
   fit();
   updateStatus();
