@@ -7,6 +7,9 @@ import {Scene4, SCENE4_FRAMES} from "./scene4/Scene4";
 import {Scene5, SCENE5_FRAMES} from "./scene5/Scene5";
 import {FinderScene, FINDER_FRAMES} from "./finder/FinderScene";
 import {ParrotScene, PARROT_FRAMES} from "./parrot/ParrotScene";
+import {TrimScene, TRIM_FRAMES} from "./gp4/TrimScene";
+import {RecordScene, RECORD_FRAMES} from "./gp4/RecordScene";
+import {SendScene, SEND_FRAMES} from "./gp4/SendScene";
 import {CONFIG} from "./config";
 
 const S1 = Math.round(CONFIG.durationSec * CONFIG.fps);
@@ -46,6 +49,9 @@ export const Root = () => (
     <Composition id="Scene5" component={Scene5} durationInFrames={SCENE5_FRAMES} fps={CONFIG.fps} width={CONFIG.width} height={CONFIG.height} />
     <Composition id="FindDancer" component={FinderScene} durationInFrames={FINDER_FRAMES} fps={CONFIG.fps} width={CONFIG.width} height={CONFIG.height} />
     <Composition id="Parrot" component={ParrotScene} durationInFrames={PARROT_FRAMES} fps={CONFIG.fps} width={CONFIG.width} height={CONFIG.height} />
+    <Composition id="Trim2" component={TrimScene} durationInFrames={TRIM_FRAMES} fps={CONFIG.fps} width={CONFIG.width} height={CONFIG.height} />
+    <Composition id="Record2" component={RecordScene} durationInFrames={RECORD_FRAMES} fps={CONFIG.fps} width={CONFIG.width} height={CONFIG.height} />
+    <Composition id="Send2" component={SendScene} durationInFrames={SEND_FRAMES} fps={CONFIG.fps} width={CONFIG.width} height={CONFIG.height} />
     <Composition id="Full" component={Full} durationInFrames={S1 + SCENE2_FRAMES + SCENE3_FRAMES + SCENE4_FRAMES + SCENE5_FRAMES} fps={CONFIG.fps} width={CONFIG.width} height={CONFIG.height} />
   </>
 );

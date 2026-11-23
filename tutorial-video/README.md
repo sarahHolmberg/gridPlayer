@@ -11,6 +11,7 @@
 | `Scene5` | Step 6: upload both files, press Done + personal code, recap | ~27 s |
 | `FindDancer` | Separate phone tutorial: find a Norway-based dancer via tagged videos, screenshot + tightly crop the profile picture, copy the link, crop a video screenshot, add both to Video Vault (`npm run render:find`, settings in `src/finder/config.ts`) | ~78 s |
 | `Parrot` | Phone tutorial for Parrot: copy for AI, open ChatGPT, paste and send, copy answer, paste the answer; the fix loop; tips (`npm run render:parrot`, script and timings in `src/parrot/config.ts`, voice lines shown as subtitles) | ~96 s |
+| `Trim2`, `Record2`, `Send2` | The current workflow (2026-11): K on beat 1, tap B, cut at Bar 5 · Beat 3 · Rec, Say name, face, skip, "Action, …", "Caption, …" · Export audio, transcribe, paste, Send, Done (`src/gp4/`, times and captions at the top of each scene file) | 31 / 47 / 33 s |
 | `Full` | All scenes back to back (Studio preview) | |
 
 ```bash

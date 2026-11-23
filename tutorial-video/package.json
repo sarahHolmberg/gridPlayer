@@ -12,7 +12,10 @@
     "render:scene5": "remotion render Scene5 out/scene5.mp4",
     "full": "bash scripts/join.sh",
     "render:find": "remotion render FindDancer out/find-dancer.mp4",
-    "render:parrot": "remotion render Parrot out/parrot.mp4"
+    "render:parrot": "remotion render Parrot out/parrot.mp4",
+    "render:trim2": "remotion render Trim2 out/new-trim.mp4",
+    "render:record2": "remotion render Record2 out/new-record.mp4",
+    "render:send2": "remotion render Send2 out/new-send.mp4"
   },
   "dependencies": {
     "@remotion/cli": "^4.0.538",
