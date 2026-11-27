@@ -28,7 +28,7 @@ addEventListener("drop", (e) => { e.preventDefault(); if ($("extGate").hidden &&
 function unloadVideo() {
   v.pause(); v.removeAttribute("src"); v.load();
   currentFile = null; $("file").value = ""; // the same file can be opened again
-  document.body.classList.remove("has-video", "send-mode");
+  document.body.classList.remove("has-video", "send-mode", "pre-trimmed");
   clearTrim(); setMode(true);
   $("goBtn").disabled = true;
   $("title").textContent = "Grid Player";
@@ -40,7 +40,12 @@ v.addEventListener("loadedmetadata", () => {
   document.body.classList.add("has-video"); // shows the playback / trim / record cards (grid.css)
   clearTrim(); // new video -> reset trim
   $("goBtn").disabled = false;
-  setMode(true); // every new video starts at the trim stage
+  // Already trimmed on the phone (the Next link has trimEnd): it starts at the beginning, ends there, and goes straight to Record.
+  // A link without trimEnd (the pretend list, an older website) still gets the trim step.
+  const end = Number(links[0]?.trimEnd);
+  document.body.classList.toggle("pre-trimmed", end > 0);
+  if (end > 0) { tIn = 0; tOut = end < v.duration - 0.01 ? end : null; updateTrim(); setMode(false); }
+  else setMode(true); // every new video starts at the trim stage
   fit();
   updateStatus();
   console.log(`[video] ${v.videoWidth}x${v.videoHeight}, ${v.duration.toFixed(3)}s`);
