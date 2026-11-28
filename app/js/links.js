@@ -27,7 +27,7 @@ const myCode = { get() { try { return localStorage.getItem("myCode") || ""; } ca
 // ---- Mock server: a pretend list kept in this browser (localStorage), so Done can be tried without touching the real one ----
 const MOCK_LINKS = [ // out of order on purpose: the app must still show MOCK-FIRST first
   { id: "m3", link: "https://www.instagram.com/reel/MOCK-THIRD/", name: "Mock Carla", createdAt: "2026-10-03T09:00:00Z" },
-  { id: "m1", link: "https://www.instagram.com/reel/MOCK-FIRST/", name: "Mock Anna", createdAt: "2026-10-01T09:00:00Z", trimEnd: 6.5 }, // trimmed on the phone
+  { id: "m1", link: "https://www.instagram.com/reel/MOCK-FIRST/", name: "Mock Anna", createdAt: "2026-10-01T09:00:00Z" },
   { id: "m4", link: "https://www.instagram.com/reel/MOCK-FOURTH/", name: "", createdAt: "2026-10-04T09:00:00Z" },
   { id: "m2", link: "https://www.instagram.com/reel/MOCK-SECOND/", name: "Mock Ben", createdAt: "2026-10-02T09:00:00Z" },
 ];

@@ -21,9 +21,9 @@ const LINKS = {
 const FLOW = [
   ["Fetch Instagram links", "fetch"],
   ["Download Instagram video", "download"],
-  ["Open video (already trimmed on the phone)", "(do it in this app)"],
+  ["Open video and trim", "(do it in this app)"],
   ["Talk and describe action, and record", "(do it in this app)"],
-  ["Export recording", "(do it in this app)"],
+  ["Export recording and trim video", "(do it in this app)"],
   ["Send videos and copy link", "send"],
   ["Delete videos from the link list", "del"],
 ];
@@ -50,7 +50,7 @@ const INFO = {
   },
   trim: {
     title: "2 · Trim",
-    text: "Videos are trimmed on the phone now: opening one goes straight to Record. Only an untrimmed video (e.g. the pretend list) still shows this step: press I where the dance starts, O where it ends, then Enter.",
+    text: "Play to where the dance starts and press I, then where it ends and press O. Check it, then press Enter (Trim & continue).",
     videos: [{ label: "Trim on the beat", src: "app/info/2-trim.mp4" }],
   },
   send: {

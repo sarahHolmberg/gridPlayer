@@ -3,14 +3,14 @@
 
 // CHANGE HERE with every update: a new WHATS_NEW_VERSION (any new text, the date is easiest) and the two newest changes.
 // Everyone who has not seen this version yet gets the window once.
-const WHATS_NEW_VERSION = "2026-11-27";
+const WHATS_NEW_VERSION = "2026-11-23";
 const WHATS_NEW = [ // CHANGE HERE: only the TWO newest changes (put the new one first, remove the oldest)
-  ["No more trimming", [
-    "Every video is now trimmed on the phone first. Open the video and you go straight to Record: the cut is already set.",
-    "Only videos that are already trimmed show up in Next link.",
-  ]],
   ["Check for updates every time", [
     "The Grid Player opens after ⟳ Check for updates. It goes online only when you click.",
+  ]],
+  ["Less to click", [
+    "After Done, the video is cleared and you start again from Open a video. After Export audio the app goes to Send by itself.",
+    "In Send, ▶ Watch it plays exactly what will be sent; tick “I watched it” to send. Grid and Names switches are in the ⋯ menu.",
   ]],
 ];
 

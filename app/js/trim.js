@@ -40,7 +40,7 @@ function setMode(trim) {
   console.log(`[mode] ${trim ? "trim" : "grid"} range=${tIn.toFixed(3)}..${rangeEnd().toFixed(3)}`);
 }
 const goGrid = () => { if (v.duration) setMode(false); };
-const goTrim = () => { if (!document.body.classList.contains("pre-trimmed")) setMode(true); }; // trimmed on the phone: no trim step
+const goTrim = () => setMode(true);
 $("goBtn").onclick = goGrid;
 $("backBtn").onclick = goTrim;
 

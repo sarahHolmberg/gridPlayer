@@ -485,7 +485,6 @@ input:focus, textarea:focus { outline: 1px solid #316ac5; border-color: #316ac5;
 /* Record box: back to trim as a small link in its header; Skip to Send as a small link */
 #recCard .cardHead .link, #sendCard .link { font-size: 11px; }
 #toSendBtn { align-self: flex-end; }
-body.pre-trimmed #backBtn { display: none; } /* trimmed on the phone: there is no trim step to go back to */
 /* Send: ▶ Watch it + the tick; the saved-code line */
 #watchTick { white-space: normal; }
 #watchTick input:disabled + * , #watchTick:has(input:disabled) { color: var(--muted); }
